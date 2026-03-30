@@ -1,0 +1,173 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- AUTH & ROLES ---
+enum Role {
+  STUDENT
+  TEACHER
+  TUTOR
+  COORDINATOR
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+}
+
+// --- INSTITUTIONAL LAYER ---
+model Institution {
+  id           String         @id @default(uuid())
+  name         String
+  academicYears AcademicYear[]
+}
+
+model AcademicYear {
+  id            String          @id @default(uuid())
+  year          String          // e.g., "2025-2026"
+  institutionId String
+  institution   Institution     @relation(fields: [institutionId], references: [id])
+  groups        AcademicGroup[]
+  projects      Project[]
+}
+
+model AcademicGroup {
+  id             String           @id @default(uuid())
+  name           String           // e.g., "1º CFGS Diseño y Amueblamiento"
+  academicYearId String
+  academicYear   AcademicYear     @relation(fields: [academicYearId], references: [id])
+  students       StudentProfile[]
+  sessions       SessionInstance[]
+  schedule       WeeklyScheduleTemplate?
+}
+
+model StudentProfile {
+  id        String        @id @default(uuid())
+  userId    String        @unique
+  user      User          @relation(fields: [userId], references: [id])
+  groupId   String
+  group     AcademicGroup @relation(fields: [groupId], references: [id])
+  evidences Evidence[]
+}
+
+model TeacherProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+// --- CURRICULAR LAYER ---
+model Module {
+  id             String           @id @default(uuid())
+  name           String
+  code           String
+  learningOutcomes LearningOutcome[]
+  sessions       SessionInstance[]
+  projects       Project[]
+}
+
+model LearningOutcome { // RA
+  id          String   @id @default(uuid())
+  code        String   // e.g., "RA1"
+  description String
+  moduleId    String
+  module      Module   @relation(fields: [moduleId], references: [id])
+  criteria    EvaluationCriterion[]
+  projects    Project[]
+}
+
+model EvaluationCriterion { // CE
+  id                String          @id @default(uuid())
+  code              String          // e.g., "CE1.a"
+  description       String
+  learningOutcomeId String
+  learningOutcome   LearningOutcome @relation(fields: [learningOutcomeId], references: [id])
+  projects          Project[]
+}
+
+// --- PROJECT MODULE (ABP) ---
+model Project { // Proyecto por Evaluación (e.g., Taburete, Silla, Taquilla)
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  trimester   Int      // 1, 2, 3 (Evaluación)
+  
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  
+  modules          Module[]
+  learningOutcomes LearningOutcome[]
+  evaluationCriteria EvaluationCriterion[]
+  
+  tasks Task[]
+}
+
+// --- TEMPORAL LAYER ---
+model WeeklyScheduleTemplate {
+  id      String @id @default(uuid())
+  groupId String @unique
+  group   AcademicGroup @relation(fields: [groupId], references: [id])
+  slots   WeeklyScheduleSlot[]
+}
+
+model WeeklyScheduleSlot {
+  id         String @id @default(uuid())
+  dayOfWeek  Int    // 1-7 (Mon-Sun)
+  startTime  String // e.g., "08:00"
+  endTime    String // e.g., "09:00"
+  templateId String
+  template   WeeklyScheduleTemplate @relation(fields: [templateId], references: [id])
+}
+
+model SessionInstance {
+  id        String   @id @default(uuid())
+  date      DateTime
+  moduleId  String
+  module    Module   @relation(fields: [moduleId], references: [id])
+  groupId   String
+  group     AcademicGroup @relation(fields: [groupId], references: [id])
+  
+  tasks     Task[]
+}
+
+// --- OPERATIONAL LAYER ---
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id])
+  
+  sessionId   String?
+  session     SessionInstance? @relation(fields: [sessionId], references: [id])
+  
+  evidences   Evidence[]
+}
+
+model Evidence {
+  id        String         @id @default(uuid())
+  url       String
+  type      String         // e.g., "DOCUMENT", "IMAGE"
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id])
+  taskId    String?
+  task      Task?          @relation(fields: [taskId], references: [id])
+}
