@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 // En modo static export (GitHub Pages) el middleware no puede redirigir
 // server-side. La protección de rutas se hace client-side en cada página.
-export function middleware(request: NextRequest) {
+export function middleware(_request: NextRequest) {
   return NextResponse.next();
 }
 
