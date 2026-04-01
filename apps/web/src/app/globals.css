@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light Wood Mode */
+  --background: #FDFBF7;
+  --foreground: #2B1D0E;
+  --card-bg: #FFFFFF;
+  --card-fg: #2B1D0E;
+  --accent: #455A64; /* Steel */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Deep Walnut Mode */
+    --background: #110D0A;
+    --foreground: #E8D9C5;
+    --card-bg: #1D1612;
+    --card-fg: #E8D9C5;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  * {
+    @apply border-brand-oak/20;
+  }
+  body {
+    @apply min-h-screen selection:bg-brand-oak selection:text-white;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 dark:bg-black/40 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-premium rounded-xl;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 bg-brand-walnut text-brand-maple rounded-lg font-medium transition-all hover:bg-brand-mahogany active:scale-95 shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-brand-maple border border-brand-oak/30 text-brand-walnut rounded-lg font-medium transition-all hover:bg-brand-oak/10 active:scale-95 shadow-sm;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-brand-oak/10;
+  }
+
+  .nav-link.active {
+    @apply bg-brand-walnut text-brand-maple shadow-md;
+  }
+}
