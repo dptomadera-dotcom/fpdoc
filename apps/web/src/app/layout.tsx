@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport = {
-  themeColor: '#3b82f6',
+  themeColor: '#4f46e5',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -25,7 +25,7 @@ export const viewport = {
 export const metadata: Metadata = {
   title: "Transversal FP - Gestión Académica Industrial",
   description: "Plataforma de gestión académica avanzada para la Formación Profesional.",
-  manifest: "/TRANSVERSAL-FP/manifest.webmanifest",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

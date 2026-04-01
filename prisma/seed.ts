@@ -36,17 +36,17 @@ async function main() {
     },
   });
 
-  // 4. Cycle
+  // 4. Cycle (MAM201 - Instalación y Amueblamiento - Grado Medio)
   const cycle = await prisma.cycle.upsert({
-    where: { code: 'MAM301' },
+    where: { code: 'MAM201' },
     update: {},
     create: {
-      name: 'Diseño y Amueblamiento',
-      code: 'MAM301',
-      grade: 'SUPERIOR',
+      name: 'Instalación y Amueblamiento',
+      code: 'MAM201',
+      grade: 'MEDIO',
       hours: 2000,
       familyId: family.id,
-      bocRef: 'Real Decreto 1579/2011',
+      bocRef: 'Real Decreto 1146/2011',
     },
   });
 
@@ -68,64 +68,80 @@ async function main() {
   // 6. Group
   const group1A = await prisma.group.create({
     data: {
-      name: '1º Diseño A',
+      name: '1º Instalación A',
       courseId: course1.id,
     },
   });
 
-  // 7. Modules
-  const module1 = await prisma.module.upsert({
-    where: { code: '0401' },
+  // 7. Modules (Real Grado Medio Woodwork)
+  const moduleMecanizado = await prisma.module.upsert({
+    where: { code: '0432' },
     update: {},
     create: {
-      name: 'Materiales en carpintería y mueble',
-      code: '0401',
-      hours: 160,
+      name: 'Mecanizado de madera y derivados',
+      code: '0432',
+      hours: 230,
       year: 1,
       cycleId: cycle.id,
     },
   });
 
-  const module2 = await prisma.module.upsert({
-    where: { code: '0403' },
+  const moduleMontaje = await prisma.module.upsert({
+    where: { code: '0434' },
     update: {},
     create: {
-      name: 'Diseño de productos de carpintería y mueble',
-      code: '0403',
-      hours: 190,
+      name: 'Montaje de muebles y elementos de carpintería',
+      code: '0434',
+      hours: 210,
+      year: 1,
+      cycleId: cycle.id,
+    },
+  });
+
+  const moduleAcabados = await prisma.module.upsert({
+    where: { code: '0436' },
+    update: {},
+    create: {
+      name: 'Acabados en madera',
+      code: '0436',
+      hours: 140,
       year: 1,
       cycleId: cycle.id,
     },
   });
 
   // 8. Learning Outcomes (RA) & Evaluation Criteria (CE)
-  const ra1 = await prisma.learningOutcome.create({
+  
+  // RA for Mecanizado
+  const raMecanizado1 = await prisma.learningOutcome.create({
     data: {
       code: 'RA1',
-      description: 'Identifica los materiales de madera y sus derivados, analizando sus propiedades y aplicaciones.',
-      moduleId: module1.id,
+      description: 'Prepara máquinas y equipos de mecanizado, identificando sus componentes y funciones.',
+      moduleId: moduleMecanizado.id,
     },
   });
 
   await prisma.evaluationCriterion.createMany({
     data: [
-      { code: 'CE1.a', description: 'Ha identificado las especies de madera más utilizadas.', learningOutcomeId: ra1.id },
-      { code: 'CE1.b', description: 'Ha analizado las propiedades físico-mecánicas de la madera.', learningOutcomeId: ra1.id },
+      { code: 'CE1.a', description: 'Se han identificado los órganos de mando y control de las máquinas.', learningOutcomeId: raMecanizado1.id },
+      { code: 'CE1.b', description: 'Se han seleccionado las herramientas adecuadas al proceso.', learningOutcomeId: raMecanizado1.id },
+      { code: 'CE1.c', description: 'Se han realizado las operaciones de puesta a punto.', learningOutcomeId: raMecanizado1.id },
     ],
   });
 
-  const ra2 = await prisma.learningOutcome.create({
+  // RA for Montaje
+  const raMontaje1 = await prisma.learningOutcome.create({
     data: {
       code: 'RA1',
-      description: 'Define la documentación técnica de productos de mobiliario.',
-      moduleId: module2.id,
+      description: 'Prepara el montaje de muebles, interpretando planos y seleccionando materiales.',
+      moduleId: moduleMontaje.id,
     },
   });
 
   await prisma.evaluationCriterion.createMany({
     data: [
-      { code: 'CE1.a', description: 'Ha elaborado planos de conjunto y despiece.', learningOutcomeId: ra2.id },
-      { code: 'CE1.b', description: 'Ha definido las especificaciones de materiales.', learningOutcomeId: ra2.id },
+      { code: 'CE1.a', description: 'Ha interpretado correctamente los planos de montaje.', learningOutcomeId: raMontaje1.id },
+      { code: 'CE1.b', description: 'Ha identificado las piezas y herrajes necesarios.', learningOutcomeId: raMontaje1.id },
     ],
   });
 
@@ -176,28 +192,35 @@ async function main() {
       estimatedHours: 40,
       projectModules: {
         create: [
-          { moduleId: module1.id },
-          { moduleId: module2.id },
+          { moduleId: moduleMecanizado.id },
+          { moduleId: moduleMontaje.id },
         ],
       },
       phases: {
         create: [
           {
-            name: 'Fase 1: Investigación y Diseño',
-            description: 'Selección de materiales y creación de planos.',
+            name: 'Fase 1: Preparación y Mecanizado',
+            description: 'Puesta a punto de máquinas y primer despiece.',
             order: 1,
             tasks: {
               create: [
                 {
-                  title: 'Selección de maderas',
-                  description: 'Investigar y elegir la madera adecuada según el diseño.',
+                  title: 'Ajuste de escuadradora',
+                  description: 'Preparar la máquina para el corte de tableros.',
                   status: TaskStatus.EN_CURSO,
                   assignedToId: professor.id,
-                  toolLevel: ToolLevel.MANUAL,
+                  toolLevel: ToolLevel.TALLER,
+                  curriculumLinks: {
+                    create: [
+                      {
+                        learningOutcomeId: raMecanizado1.id,
+                      }
+                    ]
+                  }
                 },
                 {
-                  title: 'Dibujo de planos',
-                  description: 'Realizar despiece completo en CAD.',
+                  title: 'Corte de piezas base',
+                  description: 'Realizar el corte de las piezas según el plano.',
                   status: TaskStatus.PENDIENTE,
                   assignedToId: professor.id,
                 }
@@ -205,8 +228,8 @@ async function main() {
             }
           },
           {
-            name: 'Fase 2: Prototipado',
-            description: 'Construcción del primer prototipo a escala.',
+            name: 'Fase 2: Montaje y Ajuste',
+            description: 'Encolado y montaje de la estructura.',
             order: 2,
           }
         ]

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, BookOpen, Layers, Users, Plus, Check, Loader2 } from 'lucide-react';
 import { academicService, Cycle, Module, Group } from '@/services/academic.service';
+import { projectsService } from '@/services/projects.service';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onCreated: (project: any) => void;
 }
 
-export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, onClose, onSuccess }) => {
+export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, onClose, onCreated }) => {
   const [loading, setLoading] = useState(false);
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
@@ -39,8 +40,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
     e.preventDefault();
     setLoading(true);
     try {
-      await academicService.createProject(formData);
-      onSuccess();
+      const newProject = await projectsService.createProject(formData);
+      onCreated(newProject);
       onClose();
     } catch (error) {
       console.error('Error creating project:', error);

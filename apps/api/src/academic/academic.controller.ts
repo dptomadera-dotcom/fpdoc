@@ -10,11 +10,6 @@ import { UserRole } from '@prisma/client';
 export class AcademicController {
   constructor(private readonly academicService: AcademicService) {}
 
-  @Get('projects')
-  @Roles(UserRole.ADMIN, UserRole.JEFATURA, UserRole.PROFESOR, UserRole.ALUMNO)
-  getProjects() {
-    return this.academicService.getProjects();
-  }
 
   @Get('modules')
   @Roles(UserRole.ADMIN, UserRole.JEFATURA, UserRole.PROFESOR)
@@ -34,9 +29,4 @@ export class AcademicController {
     return this.academicService.getGroups();
   }
 
-  @Post('projects')
-  @Roles(UserRole.ADMIN, UserRole.JEFATURA, UserRole.PROFESOR)
-  createProject(@Body() data: any) {
-    return this.academicService.createProject(data);
-  }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { academicService, Project } from '@/services/academic.service';
+import { projectsService, Project } from '@/services/projects.service';
 import { authService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import { Briefcase, Plus, Clock, Search, Filter, ChevronRight } from 'lucide-react';
@@ -30,7 +30,7 @@ export default function ProjectsPage() {
     if (!currentUser) { router.push('/login'); return; }
     setUser(currentUser);
 
-    academicService.getProjects()
+    projectsService.getProjects()
       .then((data) => { setProjects(data); setFiltered(data); })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -175,6 +175,7 @@ export default function ProjectsPage() {
 
       {showModal && (
         <CreateProjectModal
+          isOpen={showModal}
           onClose={() => setShowModal(false)}
           onCreated={(newProject) => {
             setProjects((prev) => [newProject, ...prev]);

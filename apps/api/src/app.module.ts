@@ -5,8 +5,26 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { AcademicModule } from './academic/academic.module';
 
+import { CurriculumModule } from './curriculum/curriculum.module';
+
+import { ProjectsModule } from './projects/projects.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
+import { PlanningModule } from './planning/planning.module';
+import { AiModule } from './ai/ai.module';
+import { ReportsModule } from './reports/reports.module';
+
 @Module({
-  imports: [PrismaModule, AuthModule, AcademicModule],
+  imports: [
+    PrismaModule, 
+    AuthModule, 
+    AcademicModule, 
+    CurriculumModule, 
+    ProjectsModule,
+    MonitoringModule,
+    PlanningModule,
+    AiModule,
+    ReportsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
