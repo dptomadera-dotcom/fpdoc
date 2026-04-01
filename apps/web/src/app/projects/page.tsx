@@ -5,7 +5,7 @@ import { academicService, Project } from '@/services/academic.service';
 import { authService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import { Briefcase, Plus, Clock, Search, Filter, ChevronRight } from 'lucide-react';
-import CreateProjectModal from '@/components/CreateProjectModal';
+import { CreateProjectModal } from '@/components/CreateProjectModal';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   ACTIVO:    { label: 'Activo',    color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },

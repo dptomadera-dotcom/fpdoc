@@ -25,6 +25,7 @@ export const viewport = {
 export const metadata: Metadata = {
   title: "Transversal FP - Gestión Académica Industrial",
   description: "Plataforma de gestión académica avanzada para la Formación Profesional.",
+  manifest: "/TRANSVERSAL-FP/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
