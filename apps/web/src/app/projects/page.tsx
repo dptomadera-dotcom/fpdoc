@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { projectsService, Project } from '@/services/projects.service';
 import { authService } from '@/services/auth.service';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -15,7 +15,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   ARCHIVADO: { label: 'Archivado', color: 'text-gray-400 bg-gray-500/10 border-gray-500/20' },
 };
 
-export default function ProjectsPage() {
+function ProjectsPageContent() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filtered, setFiltered] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -192,5 +192,17 @@ export default function ProjectsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    }>
+      <ProjectsPageContent />
+    </Suspense>
   );
 }
