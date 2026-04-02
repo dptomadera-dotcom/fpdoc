@@ -1,9 +1,9 @@
 import ProjectDetailPage from './ProjectDetailClient';
 
 export async function generateStaticParams() {
-  // Para exportación estática en GitHub Pages, si no conocemos los IDs,
-  // devolvemos una lista vacía. Next.js permitirá la compilación.
-  return [];
+  // Para exportación estática en GitHub Pages, devolvemos un ID por defecto
+  // para que Next.js pueda generar al menos una versión estática de la página.
+  return [{ id: 'default' }];
 }
 
 export const dynamicParams = false; // No permitir parámetros dinámicos en tiempo de ejecución (requerido por export)
