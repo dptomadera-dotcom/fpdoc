@@ -1,0 +1,94 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { authService } from '@/services/auth.service';
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      await authService.forgotPassword(email);
+      setMessage('Se ha enviado un enlace de recuperación a tu correo electrónico.');
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message || 
+        'Error al procesar la solicitud. Verifica tu conexión.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white p-4">
+      <div className="w-full max-w-md bg-[#161616] rounded-2xl border border-white/10 p-8 shadow-2xl backdrop-blur-xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent italic">
+            RECUPERAR ACCESO
+          </h1>
+          <p className="text-gray-400 mt-2">Introduce tu email para enviarte instrucciones.</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center">
+            {error}
+          </div>
+        )}
+
+        {message && (
+          <div className="mb-6 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded-lg text-center">
+            {message}
+          </div>
+        )}
+
+        {!message ? (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Correo Electrónico</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-[#1e1e1e] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                placeholder="tu@email.com"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            >
+              {loading ? 'Enviando...' : 'Enviar instrucciones'}
+            </button>
+          </form>
+        ) : (
+          <Link
+            href="/login"
+            className="w-full block bg-white/5 hover:bg-white/10 text-white font-semibold py-3 rounded-xl text-center transition-all border border-white/10"
+          >
+            Volver al inicio de sesión
+          </Link>
+        )}
+
+        <div className="mt-8 text-center text-sm text-gray-500">
+          ¿Recordaste tu contraseña?{' '}
+          <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+            Inicia sesión
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

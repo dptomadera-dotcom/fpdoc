@@ -24,4 +24,10 @@ export class AuthController {
   getProfile(@Request() req: any) {
     return this.authService.getProfile(req.user.userId);
   }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
 }

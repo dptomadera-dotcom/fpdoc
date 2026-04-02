@@ -71,6 +71,23 @@ export class AuthService {
     return user;
   }
 
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Siempre devolvemos éxito para evitar enumeración de usuarios
+    if (user) {
+      console.log(`[AUTH] Solicitud de recuperación de contraseña para: ${email}`);
+      // Aquí iría el envío de email con token. 
+      // Por ahora simulamos el éxito.
+    }
+
+    return {
+      message: 'Si el correo existe en nuestro sistema, recibirás instrucciones brevemente.',
+    };
+  }
+
   private async generateToken(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
     return {

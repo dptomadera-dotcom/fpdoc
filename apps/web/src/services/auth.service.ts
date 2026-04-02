@@ -54,10 +54,15 @@ export const authService = {
     return null;
   },
 
+ 
   getToken: () => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('token') || Cookies.get('token');
     }
     return Cookies.get('token');
+  },
+
+  forgotPassword: async (email: string) => {
+    return await api.post('/auth/forgot-password', { email });
   }
 };
