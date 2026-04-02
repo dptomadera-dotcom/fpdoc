@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { authService } from '@/services/auth.service';
-import { academicService, Project } from '@/services/academic.service';
+import { projectsService, Project } from '@/services/projects.service';
 import { LayoutDashboard, FileText, Cpu, ExternalLink, ChevronRight, Briefcase, Plus, Clock, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import PWAInstallButton from '@/components/PWAInstallButton';
@@ -17,7 +17,7 @@ export default function Home() {
     setUser(currentUser);
 
     if (currentUser) {
-      academicService.getProjects()
+      projectsService.getProjects()
         .then(data => {
           setProjects(data);
           setLoading(false);
@@ -83,8 +83,8 @@ export default function Home() {
                         </h4>
                         <p className="text-gray-500 text-sm line-clamp-1 mt-1 font-medium">{project.description}</p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${project.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                          project.status === 'COMPLETED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${project.status === 'ACTIVO' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                          project.status === 'COMPLETADO' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                             'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
                         }`}>
                         {project.status}
@@ -94,7 +94,7 @@ export default function Home() {
                       <div className="flex items-center gap-4">
                         <span className="text-gray-400 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
-                          {new Date(project.startDate).toLocaleDateString()}
+                          {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Sin fecha'}
                         </span>
                         <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-blue-600 rounded-full" style={{ width: `${project.progress || 0}%` }} />
@@ -115,9 +115,9 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2 font-mono tracking-tighter">SIN PROYECTOS ACTIVOS</h3>
                 <p className="text-gray-500 text-sm mb-6 max-w-xs mx-auto">Comienza tu viaje académico creando tu primer proyecto transversal hoy mismo.</p>
-                <button className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl transition-all active:scale-95 text-xs tracking-widest uppercase shadow-lg shadow-blue-600/20">
+                <Link href="/projects?create=true" className="inline-block px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl transition-all active:scale-95 text-xs tracking-widest uppercase shadow-lg shadow-blue-600/20">
                   CREAR MI PRIMER PROYECTO
-                </button>
+                </Link>
               </div>
             )}
           </div>
@@ -147,9 +147,9 @@ export default function Home() {
                 <AlertCircle className="w-10 h-10 text-white mb-4 group-hover:rotate-12 transition-transform" />
                 <h3 className="text-lg font-bold text-white mb-2">Soporte Transversal</h3>
                 <p className="text-gray-400 text-xs leading-relaxed mb-4">¿Necesitas ayuda con la configuración de tu ciclo o grupo? Contacta con administración.</p>
-                <button className="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-white transition-colors flex items-center gap-1">
+                <Link href="mailto:soporte@transversalfp.com" className="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-white transition-colors flex items-center gap-1">
                   Abrir Ticket <ChevronRight className="w-3 h-3" />
-                </button>
+                </Link>
               </div>
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
             </div>
@@ -161,10 +161,10 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tighter">Eficiencia Industrial</h2>
             <p className="text-blue-300/80 max-w-lg font-medium">Todo tu flujo de trabajo centralizado en una sola interfaz industrial potente. Tu productividad, nuestra prioridad.</p>
           </div>
-          <button className="relative z-10 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-xl shadow-blue-600/30 transition-all flex items-center gap-2 active:scale-95 group tracking-widest uppercase text-xs">
+          <Link href="/projects?create=true" className="relative z-10 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-xl shadow-blue-600/30 transition-all flex items-center gap-2 active:scale-95 group tracking-widest uppercase text-xs">
             Nueva COORDINACIÓN
             <LayoutDashboard className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-          </button>
+          </Link>
           <div className="absolute -top-12 -right-12 w-48 h-48 bg-blue-500/10 blur-[100px] rounded-full animate-pulse" />
         </section>
       </div>

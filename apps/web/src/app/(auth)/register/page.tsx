@@ -6,15 +6,26 @@ import Link from 'next/link';
 import { authService } from '@/services/auth.service';
 import PWAInstallButton from '@/components/PWAInstallButton';
 
+// Helper: NestJS puede devolver `message` como string o como array de strings
+function extractErrorMessage(err: any): string {
+  const data = err?.response?.data;
+  if (!data) return 'Error de conexión. Comprueba que el servidor está activo.';
+  const msg = data?.message;
+  if (Array.isArray(msg)) return msg.join('. ');
+  if (typeof msg === 'string') return msg;
+  return data?.error || 'Error al crear la cuenta. Inténtalo de nuevo.';
+}
+
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     nombre: '',
     apellido: '',
-    role: 'ALUMNO', // Default role
+    role: 'ALUMNO',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -22,22 +33,20 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       await authService.register(formData);
-      router.push('/');
+      setSuccess(true);
+      setTimeout(() => router.push('/'), 1200);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al crear la cuenta. Inténtalo de nuevo.');
+      setError(extractErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
@@ -51,8 +60,14 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center">
-            {error}
+          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg text-center">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-6 p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm rounded-lg text-center">
+            ✅ Cuenta creada correctamente. Redirigiendo...
           </div>
         )}
 
@@ -98,7 +113,10 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Contraseña</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Contraseña{' '}
+              <span className="text-gray-500 font-normal">(mínimo 6 caracteres)</span>
+            </label>
             <input
               name="password"
               type="password"
@@ -106,6 +124,7 @@ export default function RegisterPage() {
               onChange={handleChange}
               className="w-full bg-[#1e1e1e] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               placeholder="••••••••"
+              minLength={6}
               required
             />
           </div>
@@ -126,10 +145,10 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-900/20 transition-all mt-4 active:scale-[0.98] disabled:opacity-50"
+            disabled={loading || success}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-900/20 transition-all mt-4 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creando cuenta...' : 'Registrarse'}
+            {loading ? 'Creando cuenta...' : success ? '¡Cuenta creada!' : 'Registrarse'}
           </button>
         </form>
 
@@ -140,7 +159,6 @@ export default function RegisterPage() {
           </Link>
         </div>
 
-        {/* PWA Install Button */}
         <div className="pt-4 border-t border-white/5 mt-4">
           <PWAInstallButton />
         </div>

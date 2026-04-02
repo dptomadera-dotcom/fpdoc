@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { projectsService, Project } from '@/services/projects.service';
 import { authService } from '@/services/auth.service';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Briefcase, Plus, Clock, Search, Filter, ChevronRight } from 'lucide-react';
 import { CreateProjectModal } from '@/components/CreateProjectModal';
 
@@ -24,6 +24,8 @@ export default function ProjectsPage() {
   const [showModal, setShowModal] = useState(false);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const createMode = searchParams.get('create') === 'true';
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -35,6 +37,12 @@ export default function ProjectsPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [router]);
+
+  useEffect(() => {
+    if (createMode && user && ['ADMIN', 'JEFATURA', 'PROFESOR'].includes(user.role)) {
+      setShowModal(true);
+    }
+  }, [createMode, user]);
 
   useEffect(() => {
     let result = projects;

@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { authService } from '@/services/auth.service';
-import { academicService, Project } from '@/services/academic.service';
+import { academicService, Group, Cycle, Module } from '@/services/academic.service';
+import { projectsService, Project } from '@/services/projects.service';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -22,7 +23,7 @@ export default function DashboardPage() {
     if (!currentUser) { router.push('/login'); return; }
     setUser(currentUser);
 
-    academicService.getProjects()
+    projectsService.getProjects()
       .then(setProjects)
       .catch(console.error)
       .finally(() => setLoading(false));

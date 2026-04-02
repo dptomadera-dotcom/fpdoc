@@ -5,7 +5,7 @@ import {
   Res, 
   UseGuards 
 } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';

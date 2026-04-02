@@ -6,6 +6,15 @@ import Link from 'next/link';
 import { authService } from '@/services/auth.service';
 import PWAInstallButton from '@/components/PWAInstallButton';
 
+function extractErrorMessage(err: any): string {
+  const data = err?.response?.data;
+  if (!data) return 'Error de conexión. Comprueba que el servidor está activo.';
+  const msg = data?.message;
+  if (Array.isArray(msg)) return msg.join('. ');
+  if (typeof msg === 'string') return msg;
+  return 'Email o contraseña incorrectos.';
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,12 +26,12 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       await authService.login({ email, password });
       router.push('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+      setError(extractErrorMessage(err));
     } finally {
       setLoading(false);
     }
