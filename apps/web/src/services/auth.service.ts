@@ -64,5 +64,18 @@ export const authService = {
 
   forgotPassword: async (email: string) => {
     return await api.post('/auth/forgot-password', { email });
+  },
+
+  socialLogin: async (data: { email: string; firstName?: string; lastName?: string }): Promise<AuthResponse> => {
+    const response = await api.post('/auth/social-login', data);
+    const token = response.data.access_token || response.data.token;
+
+    if (token) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      Cookies.set('token', token, { expires: 7 });
+      Cookies.set('user', JSON.stringify(response.data.user), { expires: 7 });
+    }
+    return { ...response.data, token };
   }
 };

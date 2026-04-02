@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/services/auth.service';
 import PWAInstallButton from '@/components/PWAInstallButton';
+import { supabase } from '@/lib/supabase';
+import { useEffect } from 'react';
 
 function extractErrorMessage(err: any): string {
   const data = err?.response?.data;
@@ -36,6 +38,41 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    setError('');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: window.location.origin + window.location.pathname,
+      },
+    });
+    if (error) setError(error.message);
+  };
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setLoading(true);
+        try {
+          await authService.socialLogin({
+            email: session.user.email!,
+            firstName: session.user.user_metadata?.full_name?.split(' ')[0] || '',
+            lastName: session.user.user_metadata?.full_name?.split(' ')[1] || '',
+          });
+          // Limpiar la URL de Supabase fragment/session
+          await supabase.auth.signOut();
+          router.push('/');
+        } catch (err: any) {
+          setError(extractErrorMessage(err));
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    checkSession();
+  }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white p-4">
@@ -108,7 +145,7 @@ export default function LoginPage() {
 
           <div className="mt-6 grid grid-cols-2 gap-4">
             <button
-              onClick={() => {/* Lógica Google */}}
+              onClick={() => handleSocialLogin('google')}
               className="flex w-full items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white font-medium py-2.5 rounded-xl border border-white/10 transition-all active:scale-[0.98]"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -120,7 +157,7 @@ export default function LoginPage() {
               <span>Google</span>
             </button>
             <button
-              onClick={() => {/* Lógica Github */}}
+              onClick={() => handleSocialLogin('github')}
               className="flex w-full items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white font-medium py-2.5 rounded-xl border border-white/10 transition-all active:scale-[0.98]"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

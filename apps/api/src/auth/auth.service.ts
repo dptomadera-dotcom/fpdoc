@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { UserRole } from '@prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -69,6 +70,26 @@ export class AuthService {
     });
     if (!user) throw new UnauthorizedException('Usuario no encontrado');
     return user;
+  }
+
+  async loginSocial(email: string, firstName?: string, lastName?: string) {
+    let user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          passwordHash: await bcrypt.hash(Math.random().toString(36), 10),
+          firstName: firstName || email.split('@')[0],
+          lastName: lastName || '',
+          role: UserRole.ALUMNO,
+        },
+      });
+    }
+
+    return this.generateToken(user.id, user.email, user.role);
   }
 
   async forgotPassword(email: string) {

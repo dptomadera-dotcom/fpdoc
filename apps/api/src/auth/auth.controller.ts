@@ -19,6 +19,12 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Post('social-login')
+  @HttpCode(HttpStatus.OK)
+  async socialLogin(@Body() data: { email: string; firstName?: string; lastName?: string }) {
+    return this.authService.loginSocial(data.email, data.firstName, data.lastName);
+  }
+
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   getProfile(@Request() req: any) {
