@@ -9,7 +9,6 @@ import {
   Clock, 
   ArrowRight,
   Target,
-  Target,
   BarChart3,
   FileDown
 } from 'lucide-react';
