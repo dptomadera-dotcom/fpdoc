@@ -1,6 +1,6 @@
 import ProjectDetailPage from './ProjectDetailClient';
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   // Para exportación estática en GitHub Pages, si no conocemos los IDs,
   // devolvemos una lista vacía. Next.js permitirá la compilación.
   return [];
