@@ -9,12 +9,16 @@ import { supabase } from '@/lib/supabase';
 import { useEffect } from 'react';
 
 function extractErrorMessage(err: any): string {
+  // Errores de Supabase
+  if (err?.message) return err.message;
+  // Errores de Axios (backend antiguo)
   const data = err?.response?.data;
-  if (!data) return 'Error de conexión. Comprueba que el servidor está activo.';
-  const msg = data?.message;
-  if (Array.isArray(msg)) return msg.join('. ');
-  if (typeof msg === 'string') return msg;
-  return 'Email o contraseña incorrectos.';
+  if (data?.message) {
+    const msg = data.message;
+    if (Array.isArray(msg)) return msg.join('. ');
+    return msg;
+  }
+  return 'Error al conectar con el servicio de autenticación.';
 }
 
 export default function LoginPage() {
@@ -58,11 +62,9 @@ export default function LoginPage() {
         try {
           await authService.socialLogin({
             email: session.user.email!,
-            firstName: session.user.user_metadata?.full_name?.split(' ')[0] || '',
-            lastName: session.user.user_metadata?.full_name?.split(' ')[1] || '',
+            firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name?.split(' ')[0] || '',
+            lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.full_name?.split(' ')[1] || '',
           });
-          // Limpiar la URL de Supabase fragment/session
-          await supabase.auth.signOut();
           router.push('/');
         } catch (err: any) {
           setError(extractErrorMessage(err));

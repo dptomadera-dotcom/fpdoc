@@ -10,12 +10,16 @@ import { useEffect } from 'react';
 
 // Helper: NestJS puede devolver `message` como string o como array de strings
 function extractErrorMessage(err: any): string {
+  // Errores de Supabase
+  if (err?.message) return err.message;
+  // Errores de Axios (backend antiguo)
   const data = err?.response?.data;
-  if (!data) return 'Error de conexión. Comprueba que el servidor está activo.';
-  const msg = data?.message;
-  if (Array.isArray(msg)) return msg.join('. ');
-  if (typeof msg === 'string') return msg;
-  return data?.error || 'Error al crear la cuenta. Inténtalo de nuevo.';
+  if (data?.message) {
+    const msg = data.message;
+    if (Array.isArray(msg)) return msg.join('. ');
+    return msg;
+  }
+  return 'Error al crear la cuenta. Inténtalo de nuevo.';
 }
 
 export default function RegisterPage() {
@@ -66,10 +70,9 @@ export default function RegisterPage() {
         try {
           await authService.socialLogin({
             email: session.user.email!,
-            firstName: session.user.user_metadata?.full_name?.split(' ')[0] || '',
-            lastName: session.user.user_metadata?.full_name?.split(' ')[1] || '',
+            firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name?.split(' ')[0] || '',
+            lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.full_name?.split(' ')[1] || '',
           });
-          await supabase.auth.signOut();
           router.push('/');
         } catch (err: any) {
           setError(extractErrorMessage(err));

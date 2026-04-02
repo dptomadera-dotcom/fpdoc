@@ -1,4 +1,4 @@
-import api from '../lib/api-client';
+import { supabase } from '@/lib/supabase';
 
 export enum ProjectStatus {
   BORRADOR = 'BORRADOR',
@@ -71,27 +71,65 @@ export interface Project {
 
 export const projectsService = {
   getProjects: async (): Promise<Project[]> => {
-    const response = await api.get('/projects');
-    return response.data;
+    const { data, error } = await supabase
+      .from('Project')
+      .select(`
+        *,
+        course:Course(*, cycle:Cycle(*)),
+        projectModules:ProjectModule(*, module:Module(*))
+      `)
+      .order('createdAt', { ascending: false });
+
+    if (error) throw error;
+    return data as any;
   },
 
   getProject: async (id: string): Promise<Project> => {
-    const response = await api.get(`/projects/${id}`);
-    return response.data;
+    const { data, error } = await supabase
+      .from('Project')
+      .select(`
+        *,
+        course:Course(*, cycle:Cycle(*)),
+        projectModules:ProjectModule(*, module:Module(*)),
+        phases:ProjectPhase(*, tasks:Task(*, curriculumLinks:TaskCurriculumLink(*, learningOutcome:LearningOutcome(*), evaluationCriterion:EvaluationCriterion(*))))
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data as any;
   },
 
   createProject: async (data: any): Promise<Project> => {
-    const response = await api.post('/projects', data);
-    return response.data;
+    const { data: project, error } = await supabase
+      .from('Project')
+      .insert(data)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return project as any;
   },
 
   addPhase: async (projectId: string, data: { name: string; description?: string; order: number }): Promise<Phase> => {
-    const response = await api.post(`/projects/${projectId}/phases`, data);
-    return response.data;
+    const { data: phase, error } = await supabase
+      .from('ProjectPhase')
+      .insert({ ...data, projectId })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return phase as any;
   },
 
   addTask: async (phaseId: string, data: any): Promise<Task> => {
-    const response = await api.post(`/projects/phases/${phaseId}/tasks`, data);
-    return response.data;
+    const { data: task, error } = await supabase
+      .from('Task')
+      .insert({ ...data, phaseId })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return task as any;
   },
 };
