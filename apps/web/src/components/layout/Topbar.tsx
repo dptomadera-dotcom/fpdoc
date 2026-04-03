@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const ROLE_META: Record<string, { label: string; color: string; bg: string; border: string; Icon: any }> = {
   ALUMNO:    { label: 'Alumnado',      color: '#0d9488', bg: 'rgba(13,148,136,0.12)',  border: 'rgba(13,148,136,0.3)',  Icon: GraduationCap },
   PROFESOR:  { label: 'Docente',       color: '#7c3aed', bg: 'rgba(124,58,237,0.12)', border: 'rgba(124,58,237,0.3)',  Icon: BookOpen },
-  JEFATURA:  { label: 'Jefe de Dpto.', color: '#d97706', bg: 'rgba(217,119,6,0.12)',  border: 'rgba(217,119,6,0.3)',   Icon: ShieldCheck },
+  JEFATURA:  { label: 'Departamento', color: '#d97706', bg: 'rgba(217,119,6,0.12)',  border: 'rgba(217,119,6,0.3)',   Icon: ShieldCheck },
   ADMIN:     { label: 'Admin',         color: '#e11d48', bg: 'rgba(225,29,72,0.12)',   border: 'rgba(225,29,72,0.3)',   Icon: ShieldCheck },
 };
 
