@@ -77,6 +77,12 @@ export default function LoginPage() {
     return r?.redirect || '/dashboard';
   };
 
+  // Si el usuario no ha completado el onboarding, siempre va ahí primero
+  const getSmartRedirect = (user: { role: string; onboardingCompleted?: boolean }) => {
+    if (!user.onboardingCompleted) return '/onboarding';
+    return getRedirectForRole(user.role);
+  };
+
   const handleGoogleLogin = async (roleValue: 'PROFESOR' | 'ALUMNO' | 'JEFATURA') => {
     setLoading(true);
     try {
@@ -84,22 +90,14 @@ export default function LoginPage() {
       // Forzamos el role que el usuario ha solicitado al pulsar el botón
       const mockUser = {
         id: '1',
-        email: 'departamento.madera@gmail.com', // Forzado para desarrollo
+        email: 'dev@fpdoc.local',
         role: roleValue,
         firstName: 'Usuario',
-        lastName: 'Demo'
+        lastName: 'Demo',
+        onboardingCompleted: true, // dev: saltar onboarding
       };
-      
       authService.setUser(mockUser);
-      
-      // 🧭 REDIRECCIÓN SEGÚN ROL
-      if (roleValue === 'JEFATURA') {
-        router.push('/dashboard');
-      } else if (roleValue === 'PROFESOR') {
-        router.push('/dashboard/programaciones');
-      } else {
-        router.push('/onboarding');
-      }
+      router.push(getRedirectForRole(roleValue));
     } finally {
       setLoading(false);
     }
@@ -111,8 +109,7 @@ export default function LoginPage() {
     setError('');
     try {
       const { user } = await authService.login({ email, password });
-      const redirect = getRedirectForRole(user.role);
-      router.push(redirect);
+      router.push(getSmartRedirect(user));
     } catch (err: any) {
       setError(extractErrorMessage(err));
     } finally {
@@ -135,6 +132,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     const checkSession = async () => {
+      // 1. Si ya tenemos usuario persistido localmente, no procesamos OAuth de nuevo
+      const localUser = authService.getCurrentUser();
+      if (localUser && !window.location.hash) {
+        router.replace(getSmartRedirect(localUser));
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setLoading(true);
@@ -146,8 +150,11 @@ export default function LoginPage() {
             firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name?.split(' ')[0] || '',
             lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.full_name?.split(' ')[1] || '',
           });
+          
           sessionStorage.removeItem('selectedRole');
-          router.push(getRedirectForRole(user.role));
+          
+          // Usamos replace para limpiar el hash de la URL y evitar re-procesamientos
+          router.replace(getSmartRedirect(user));
         } catch (err: any) {
           setError(extractErrorMessage(err));
         } finally {

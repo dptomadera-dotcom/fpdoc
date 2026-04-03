@@ -9,6 +9,7 @@ export interface AuthResponse {
     firstName?: string;
     lastName?: string;
     departmentId?: string;
+    onboardingCompleted?: boolean;
   };
   token: string;
 }
@@ -32,10 +33,11 @@ export const authService = {
     const userData = {
       id: data.user.id,
       email: data.user.email!,
-      role: profile?.role || 'ALUMNO', // valores válidos: ALUMNO | PROFESOR | JEFATURA | ADMIN
+      role: profile?.role || 'ALUMNO',
       firstName: profile?.firstName,
       lastName: profile?.lastName,
       departmentId: profile?.departmentId,
+      onboardingCompleted: profile?.onboardingCompleted ?? false,
     };
 
     const token = data.session.access_token;
@@ -170,12 +172,20 @@ export const authService = {
       finalRole = 'JEFATURA';
     }
 
+    // Obtener onboardingCompleted del perfil si existe
+    const { data: profile } = await supabase
+      .from('User')
+      .select('onboardingCompleted')
+      .eq('id', session.user.id)
+      .single();
+
     const userData = {
       id: session.user.id,
       email: session.user.email!,
       role: finalRole as any,
       firstName: data.firstName || session.user.user_metadata?.full_name?.split(' ')[0] || '',
       lastName: data.lastName || session.user.user_metadata?.full_name?.split(' ')[1] || '',
+      onboardingCompleted: profile?.onboardingCompleted ?? false,
     };
 
     localStorage.setItem('token', session.access_token);
