@@ -10,6 +10,12 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+export function generateStaticParams() {
+  // Para exportación estática (GitHub Pages), necesitamos definir qué parámetros generar
+  // En un dashboard real, esto genera rutas de ejemplo o se maneja puramente en cliente
+  return [{ id: 'demo-123' }, { id: 'sample-project' }];
+}
+
 export default function ProgramacionDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState<'UT' | 'RA' | 'TRAZABILIDAD'>('UT');
 
