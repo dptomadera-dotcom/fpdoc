@@ -8,7 +8,7 @@ export default function ServiceWorkerRegister() {
       // Determinamos dinámicamente el basePath para el Service Worker
       // En GitHub Pages la ruta es /TRANSVERSAL-FP/sw.js
       const isProd = window.location.hostname !== 'localhost';
-      const swPath = isProd ? '/FPDOC/sw.js' : '/sw.js';
+      const swPath = isProd ? '/fpdoc/sw.js' : '/sw.js';
 
       navigator.serviceWorker
         .register(swPath)

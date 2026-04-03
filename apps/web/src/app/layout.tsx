@@ -11,7 +11,7 @@ export const viewport = {
 };
 
 const isProd = process.env.NODE_ENV === "production";
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isProd ? "/FPDOC" : "");
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isProd ? "/fpdoc" : "");
 
 export const metadata: Metadata = {
   title: "FPdoc - Gestión Curricular",
