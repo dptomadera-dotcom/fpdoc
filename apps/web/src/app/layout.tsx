@@ -1,21 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const viewport = {
-  themeColor: '#4f46e5',
+  themeColor: '#0d6e6e',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -23,17 +11,9 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Transversal FP - Gestión Académica Industrial",
+  title: "FPdoc - Gestión Curricular Colaborativa",
   description: "Plataforma de gestión académica avanzada para la Formación Profesional.",
   manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Transversal FP',
-  },
-  formatDetection: {
-    telephone: false,
-  },
 };
 
 export default function RootLayout({
@@ -43,14 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#0a0a0a] text-white`}
-      >
+      <body className="antialiased min-h-screen">
         <ServiceWorkerRegister />
-        <Navbar />
-        <main className="pt-16">
-          {children}
-        </main>
+        {children}
       </body>
     </html>
   );

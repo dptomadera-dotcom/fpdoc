@@ -1,0 +1,257 @@
+
+<style>
+.tab{padding:6px 14px;font-size:13px;font-weight:500;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.tab:hover{background:var(--color-background-secondary)}
+.tab.on{border-width:1.5px;border-color:#1D9E75;background:#E1F5EE;color:#085041}
+@media(prefers-color-scheme:dark){.tab.on{background:#04342C;color:#9FE1CB;border-color:#0F6E56}}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:10px}
+.mini-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;border:0.5px solid;white-space:nowrap}
+.row{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.row:last-child{border-bottom:none}
+.sec-title{font-size:11px;font-weight:500;letter-spacing:.05em;color:var(--color-text-tertiary);margin:0 0 8px;text-transform:uppercase}
+.stt{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.sl{font-size:12px;color:var(--color-text-secondary)}
+.blq{display:flex;gap:8px;align-items:flex-start;padding:3px 0}
+.blqdot{width:4px;height:4px;border-radius:50%;background:var(--color-text-tertiary);margin-top:5px;flex-shrink:0}
+.blqtxt{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.sep{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:10px 0}
+.prog-bar-bg{background:var(--color-background-secondary);border-radius:4px;height:8px;flex:1}
+.prog-bar-fill{height:8px;border-radius:4px}
+.cell{font-size:11px;text-align:center;padding:5px 4px;border-radius:4px}
+.ok{background:#EAF3DE;color:#27500A}
+.pa{background:#E6F1FB;color:#0C447C}
+.no{background:#FCEBEB;color:#501313}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.grid2{grid-template-columns:1fr}}
+</style>
+
+<div style="padding-top:8px">
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+  <button class="tab on" onclick="show('mapa')">Mapa de cobertura</button>
+  <button class="tab" onclick="show('elem')">Elementos transversales</button>
+  <button class="tab" onclick="show('alertas')">Alertas y vacíos</button>
+  <button class="tab" onclick="show('informe')">Informe del jefe</button>
+</div>
+
+<!-- Mapa de cobertura -->
+<div id="sec-mapa">
+<p class="sec-title">Cobertura transversal por módulo — ciclo 2º CFGS Diseño y Amueblamiento</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">Cada celda muestra si el módulo cubre ese elemento transversal. El sistema lo extrae automáticamente de las UT y criterios definidos por el docente.</p>
+
+<div style="overflow-x:auto">
+<table style="width:100%;border-collapse:separate;border-spacing:4px;font-size:12px">
+  <thead>
+    <tr>
+      <th style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-align:left;padding:4px 6px;min-width:100px">Módulo</th>
+      <th style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-align:center;padding:4px 2px;min-width:52px">PRL</th>
+      <th style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-align:center;padding:4px 2px;min-width:60px">Digital.</th>
+      <th style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-align:center;padding:4px 2px;min-width:60px">Sostenib.</th>
+      <th style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-align:center;padding:4px 2px;min-width:52px">Igualdad</th>
+      <th style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-align:center;padding:4px 2px;min-width:52px">Empren.</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="font-size:12px;color:var(--color-text-primary);padding:4px 6px;font-weight:500">ATZ</td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell pa">~</div></td>
+      <td><div class="cell no">✗</div></td>
+      <td><div class="cell ok">✓</div></td>
+    </tr>
+    <tr>
+      <td style="font-size:12px;color:var(--color-text-primary);padding:4px 6px;font-weight:500">GNE</td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell pa">~</div></td>
+      <td><div class="cell ok">✓</div></td>
+    </tr>
+    <tr>
+      <td style="font-size:12px;color:var(--color-text-primary);padding:4px 6px;font-weight:500">IYO</td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell pa">~</div></td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell no">✗</div></td>
+    </tr>
+    <tr>
+      <td style="font-size:12px;color:var(--color-text-primary);padding:4px 6px;font-weight:500">DDR</td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell pa">~</div></td>
+      <td><div class="cell no">✗</div></td>
+      <td><div class="cell ok">✓</div></td>
+    </tr>
+    <tr>
+      <td style="font-size:12px;color:var(--color-text-primary);padding:4px 6px;font-weight:500">DJK</td>
+      <td><div class="cell no">✗</div></td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell ok">✓</div></td>
+      <td><div class="cell pa">~</div></td>
+      <td><div class="cell ok">✓</div></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+  <div style="display:flex;align-items:center;gap:6px"><div class="cell ok" style="width:20px;height:20px;display:flex;align-items:center;justify-content:center">✓</div><span style="font-size:12px;color:var(--color-text-secondary)">Cobertura completa</span></div>
+  <div style="display:flex;align-items:center;gap:6px"><div class="cell pa" style="width:20px;height:20px;display:flex;align-items:center;justify-content:center">~</div><span style="font-size:12px;color:var(--color-text-secondary)">Cobertura parcial</span></div>
+  <div style="display:flex;align-items:center;gap:6px"><div class="cell no" style="width:20px;height:20px;display:flex;align-items:center;justify-content:center">✗</div><span style="font-size:12px;color:var(--color-text-secondary)">Sin cobertura — alerta activa</span></div>
+</div>
+</div>
+
+<!-- Elementos transversales -->
+<div id="sec-elem" style="display:none">
+<p class="sec-title">Los 5 elementos transversales del ciclo</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">Establecidos por la normativa LOMLOE/LOOIFP. El sistema verifica que cada uno esté cubierto al menos una vez en el ciclo completo y, preferiblemente, en más de un módulo.</p>
+
+<div class="card">
+  <div class="row">
+    <span class="chip" style="background:#FCEBEB;color:#501313;border-color:#F09595;min-width:28px;justify-content:center">⚠</span>
+    <div style="flex:1">
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">Prevención de riesgos laborales (PRL)</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary)">Obligatoria en todos los módulos del ciclo según normativa. Módulo DJK sin cobertura registrada.</p>
+    </div>
+    <span class="badge" style="background:#FAEEDA;color:#412402;border:0.5px solid #FAC775">4/5</span>
+  </div>
+  <div class="row">
+    <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97;min-width:28px;justify-content:center">✓</span>
+    <div style="flex:1">
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">Digitalización aplicada al sector</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary)">Cubierta en 4 módulos. Cobertura parcial en IYO — no se ha vinculado ninguna actividad digital explícita.</p>
+    </div>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">5/5</span>
+  </div>
+  <div class="row">
+    <span class="chip" style="background:#FAEEDA;color:#412402;border-color:#FAC775;min-width:28px;justify-content:center">~</span>
+    <div style="flex:1">
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">Sostenibilidad y medio ambiente</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary)">Cobertura parcial en ATZ y DDR. El sistema detecta que no hay actividades de huella ambiental registradas.</p>
+    </div>
+    <span class="badge" style="background:#FAEEDA;color:#412402;border:0.5px solid #FAC775">Parcial</span>
+  </div>
+  <div class="row">
+    <span class="chip" style="background:#FCEBEB;color:#501313;border-color:#F09595;min-width:28px;justify-content:center">⚠</span>
+    <div style="flex:1">
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">Igualdad, diversidad e inclusión</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary)">Sin cobertura en ATZ y DDR. Solo un módulo (IYO) la trabaja de forma explícita. Requiere atención del jefe.</p>
+    </div>
+    <span class="badge" style="background:#FCEBEB;color:#501313;border:0.5px solid #F09595">2/5</span>
+  </div>
+  <div class="row">
+    <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97;min-width:28px;justify-content:center">✓</span>
+    <div style="flex:1">
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">Emprendimiento e iniciativa</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary)">Cubierta en todos los módulos excepto IYO. Trabaja proyecto intermodular y módulo Empresa.</p>
+    </div>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">4/5</span>
+  </div>
+</div>
+</div>
+
+<!-- Alertas -->
+<div id="sec-alertas" style="display:none">
+<p class="sec-title">Alertas activas y vacíos de cobertura</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">El sistema detecta automáticamente los vacíos y los clasifica por severidad. El jefe de departamento los ve en su panel y puede asignarlos al docente correspondiente.</p>
+
+<div class="card" style="border-color:#F09595">
+  <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">
+    <span class="badge" style="background:#FCEBEB;color:#A32D2D;border:0.5px solid #F09595;flex-shrink:0">Alta</span>
+    <div>
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">Igualdad sin cobertura en ATZ y DDR</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary);margin-top:3px">La normativa exige tratamiento transversal de la igualdad en todos los módulos. Ninguna UT de ATZ ni DDR lo recoge. El jefe debe notificar a ambos docentes.</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <span class="chip" style="background:#FCEBEB;color:#501313;border-color:#F09595">Módulos: ATZ · DDR</span>
+    <span class="chip" style="background:#F1EFE8;color:#444441;border-color:#D3D1C7">Notificación: pendiente</span>
+  </div>
+</div>
+
+<div class="card" style="border-color:#FAC775">
+  <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">
+    <span class="badge" style="background:#FAEEDA;color:#633806;border:0.5px solid #FAC775;flex-shrink:0">Media</span>
+    <div>
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">PRL sin cobertura en DJK (Digitalización)</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary);margin-top:3px">El módulo transversal de Digitalización aplicada no ha registrado ninguna actividad de PRL. Aunque es un módulo de nueva implantación, la normativa lo exige.</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <span class="chip" style="background:#FAEEDA;color:#412402;border-color:#FAC775">Módulo: DJK</span>
+    <span class="chip" style="background:#F1EFE8;color:#444441;border-color:#D3D1C7">Notificación: pendiente</span>
+  </div>
+</div>
+
+<div class="card" style="border-color:#FAC775">
+  <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">
+    <span class="badge" style="background:#FAEEDA;color:#633806;border:0.5px solid #FAC775;flex-shrink:0">Media</span>
+    <div>
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">Sostenibilidad parcial en ATZ y DDR</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary);margin-top:3px">Se menciona en los bloques de contenidos pero no hay ninguna UT con actividad de impacto ambiental explícita ni instrumento de evaluación vinculado.</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <span class="chip" style="background:#FAEEDA;color:#412402;border-color:#FAC775">Módulos: ATZ · DDR</span>
+    <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">Cobertura parcial registrada</span>
+  </div>
+</div>
+
+<div class="card" style="border-color:#C0DD97">
+  <div style="display:flex;gap:8px;align-items:flex-start">
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;flex-shrink:0">Baja</span>
+    <div>
+      <p style="margin:0;font-size:13px;font-weight:500;color:var(--color-text-primary)">Emprendimiento ausente en IYO</p>
+      <p style="margin:0;font-size:12px;color:var(--color-text-secondary);margin-top:3px">Módulo de Instalaciones sin ninguna referencia a iniciativa emprendedora. Puede resolverse añadiendo una actividad orientada al cliente o al presupuesto.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Informe -->
+<div id="sec-informe" style="display:none">
+<p class="sec-title">Informe de transversalidad — jefe de departamento</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">El jefe accede a este informe consolidado del ciclo completo. Le permite tomar decisiones de coordinación antes de publicar la Programación Didáctica.</p>
+
+<div class="grid2">
+  <div class="mini-card">
+    <p class="sec-title" style="margin-bottom:8px">Resumen del ciclo</p>
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:var(--color-text-secondary)">Módulos analizados</span><span style="font-weight:500;color:var(--color-text-primary)">5 de 5</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:var(--color-text-secondary)">Alertas altas</span><span style="font-weight:500;color:#A32D2D">1</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><span style="color:var(--color-text-secondary)">Alertas medias</span><span style="font-weight:500;color:#854F0B">2</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0"><span style="color:var(--color-text-secondary)">Alertas bajas</span><span style="font-weight:500;color:#3B6D11">1</span></div>
+  </div>
+  <div class="mini-card">
+    <p class="sec-title" style="margin-bottom:8px">Acciones del jefe</p>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Notificar a docentes con alertas activas</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Proponer actividades conjuntas para cubrir vacíos</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Aprobar o rechazar las correcciones propuestas</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Exportar informe a PDF para dirección</span></div>
+  </div>
+</div>
+
+<hr class="sep">
+<p class="sec-title" style="margin-bottom:8px">Propuesta de solución coordinada — igualdad</p>
+<div class="card" style="background:var(--color-background-secondary);border-color:var(--color-border-tertiary)">
+  <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 8px">El jefe puede proponer una <strong style="font-weight:500;color:var(--color-text-primary)">actividad interdepartamental</strong> que cubra el vacío de igualdad en varios módulos a la vez, en lugar de pedir a cada docente que la resuelva de forma independiente.</p>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt">Actividad conjunta ATZ + DDR: análisis de brecha de género en el sector del mueble (UT final, 2 horas)</span></div>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt">Ponente externo o vídeo debate en sesión compartida de ambos grupos</span></div>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt">Registro en ambas programaciones: RA transversal cubierto, instrumento: reflexión escrita</span></div>
+</div>
+<p style="font-size:12px;color:var(--color-text-tertiary);margin:8px 0 0">La sección 11 (Elementos transversales) de la Programación Didáctica se genera automáticamente desde este informe una vez que las alertas estén resueltas.</p>
+</div>
+
+</div>
+
+<script>
+const secs=['mapa','elem','alertas','informe'];
+function show(id){
+secs.forEach(s=>{document.getElementById('sec-'+s).style.display=s===id?'block':'none'});
+document.querySelectorAll('.tab').forEach(b=>{
+b.className='tab'+(b.getAttribute('onclick').includes("'"+id+"'")?' on':'');
+});
+}
+</script>

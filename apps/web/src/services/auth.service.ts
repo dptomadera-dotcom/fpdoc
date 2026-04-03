@@ -8,6 +8,7 @@ export interface AuthResponse {
     role: string;
     firstName?: string;
     lastName?: string;
+    departmentId?: string;
   };
   token: string;
 }
@@ -34,6 +35,7 @@ export const authService = {
       role: profile?.role || 'ALUMNO',
       firstName: profile?.firstName,
       lastName: profile?.lastName,
+      departmentId: profile?.departmentId,
     };
 
     const token = data.session.access_token;
@@ -86,6 +88,7 @@ export const authService = {
       role: userData.role,
       firstName: userData.nombre,
       lastName: userData.apellido,
+      departmentId: userData.departmentId,
     };
 
     const token = data.session?.access_token || '';
@@ -161,6 +164,7 @@ export const authService = {
       role: existingProfile?.role || 'ALUMNO',
       firstName: existingProfile?.firstName || data.firstName,
       lastName: existingProfile?.lastName || data.lastName,
+      departmentId: existingProfile?.departmentId,
     };
 
     localStorage.setItem('token', session.access_token);

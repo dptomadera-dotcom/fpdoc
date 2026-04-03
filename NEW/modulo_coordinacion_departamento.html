@@ -1,0 +1,263 @@
+
+<style>
+.tab{padding:6px 14px;font-size:13px;font-weight:500;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.tab:hover{background:var(--color-background-secondary)}
+.tab.on{border-width:1.5px;border-color:#BA7517;background:#FAEEDA;color:#633806}
+@media(prefers-color-scheme:dark){.tab.on{background:#412402;color:#FAC775;border-color:#854F0B}}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:10px}
+.mini-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;border:0.5px solid;white-space:nowrap}
+.row{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.row:last-child{border-bottom:none}
+.sec-title{font-size:11px;font-weight:500;letter-spacing:.05em;color:var(--color-text-tertiary);margin:0 0 8px;text-transform:uppercase}
+.stt{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.sl{font-size:12px;color:var(--color-text-secondary)}
+.blq{display:flex;gap:8px;align-items:flex-start;padding:3px 0}
+.blqdot{width:4px;height:4px;border-radius:50%;background:var(--color-text-tertiary);margin-top:5px;flex-shrink:0}
+.blqtxt{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.sep{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:10px 0}
+.prog-bar-bg{background:var(--color-background-secondary);border-radius:4px;height:8px;flex:1;min-width:60px}
+.prog-bar-fill{height:8px;border-radius:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:500px){.grid2{grid-template-columns:1fr}.grid4{grid-template-columns:1fr 1fr}}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;text-align:center}
+.metric-n{font-size:24px;font-weight:500;color:var(--color-text-primary);line-height:1.2}
+.metric-l{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.timeline-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.tl-line{width:2px;flex:1;min-height:16px;margin:2px auto}
+.notif{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.notif:last-child{border-bottom:none}
+.nbar{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch;min-height:20px}
+.btn-act{padding:5px 12px;font-size:12px;font-weight:500;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);cursor:pointer;transition:all .15s}
+.btn-act:hover{border-color:var(--color-border-primary)}
+.btn-pub{padding:8px 18px;font-size:13px;font-weight:500;border-radius:var(--border-radius-md);border:1.5px solid #1D9E75;background:#E1F5EE;color:#085041;cursor:pointer;transition:all .15s;width:100%;margin-top:10px}
+.btn-pub:hover{background:#9FE1CB}
+@media(prefers-color-scheme:dark){
+.btn-pub{background:#04342C;color:#9FE1CB;border-color:#0F6E56}
+.btn-pub:hover{background:#085041}
+}
+</style>
+
+<div style="padding-top:8px">
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+  <button class="tab on" onclick="show('panel')">Panel general</button>
+  <button class="tab" onclick="show('prog')">Estado programaciones</button>
+  <button class="tab" onclick="show('inter')">Proyecto intermodular</button>
+  <button class="tab" onclick="show('pub')">Publicación</button>
+</div>
+
+<!-- Panel general -->
+<div id="sec-panel">
+<p class="sec-title">Panel de control — 2º CFGS Diseño y Amueblamiento · 2026-2027</p>
+
+<div class="grid4" style="margin-bottom:12px">
+  <div class="metric"><div class="metric-n">5</div><div class="metric-l">Módulos del ciclo</div></div>
+  <div class="metric"><div class="metric-n" style="color:#639922">3</div><div class="metric-l">Aprobados</div></div>
+  <div class="metric"><div class="metric-n" style="color:#378ADD">1</div><div class="metric-l">En revisión</div></div>
+  <div class="metric"><div class="metric-n" style="color:#A32D2D">1</div><div class="metric-l">Con alertas</div></div>
+</div>
+
+<div class="card">
+  <p class="sec-title" style="margin-bottom:10px">Progreso global del ciclo</p>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:80px">Programaciones</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:60%;background:#639922"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary)">3/5 aprobadas</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:80px">Transversales</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:55%;background:#BA7517"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary)">Alertas pendientes</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:80px">Intermodular</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:80%;background:#7F77DD"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary)">En desarrollo</span>
+  </div>
+</div>
+
+<div class="card" style="padding:12px 16px">
+  <p class="sec-title" style="margin-bottom:8px">Actividad reciente</p>
+  <div class="notif">
+    <div class="nbar" style="background:#7F77DD"></div>
+    <div style="flex:1">
+      <p style="margin:0;font-size:12px;font-weight:500;color:var(--color-text-primary)">ATZ — Docente ha corregido y reenviado la programación</p>
+      <p style="margin:0;font-size:11px;color:var(--color-text-tertiary)">Hace 2 horas · Pendiente de revisión del jefe</p>
+    </div>
+    <button class="btn-act">Revisar</button>
+  </div>
+  <div class="notif">
+    <div class="nbar" style="background:#E24B4A"></div>
+    <div style="flex:1">
+      <p style="margin:0;font-size:12px;font-weight:500;color:var(--color-text-primary)">Alerta transversal: Igualdad sin cobertura en ATZ y DDR</p>
+      <p style="margin:0;font-size:11px;color:var(--color-text-tertiary)">Hace 1 día · Requiere acción del jefe</p>
+    </div>
+    <button class="btn-act">Ver</button>
+  </div>
+  <div class="notif">
+    <div class="nbar" style="background:#639922"></div>
+    <div style="flex:1">
+      <p style="margin:0;font-size:12px;font-weight:500;color:var(--color-text-primary)">GNE — Programación aprobada por el jefe</p>
+      <p style="margin:0;font-size:11px;color:var(--color-text-tertiary)">Hace 3 días</p>
+    </div>
+  </div>
+  <div class="notif">
+    <div class="nbar" style="background:#639922"></div>
+    <div style="flex:1">
+      <p style="margin:0;font-size:12px;font-weight:500;color:var(--color-text-primary)">IYO — Programación aprobada por el jefe</p>
+      <p style="margin:0;font-size:11px;color:var(--color-text-tertiary)">Hace 5 días</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Estado programaciones -->
+<div id="sec-prog" style="display:none">
+<p class="sec-title">Estado de cada programación de módulo</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">El jefe puede revisar, aprobar, devolver o comentar cada programación individualmente. También ve el historial completo de cambios con fecha y autoría.</p>
+
+<div class="card">
+  <div class="row">
+    <div style="flex:1"><span class="stt">ATZ — Automatización</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">Docente: pendiente identificar · 2ª revisión</span></div>
+    <span class="badge" style="background:#E6F1FB;color:#0C447C;border:0.5px solid #B5D4F4;flex-shrink:0">En revisión</span>
+    <button class="btn-act">Revisar</button>
+  </div>
+  <div class="row">
+    <div style="flex:1"><span class="stt">GNE — Gestión de producción</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">Aprobada el 28 mar · Sin cambios</span></div>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;flex-shrink:0">Aprobada</span>
+    <button class="btn-act">Ver</button>
+  </div>
+  <div class="row">
+    <div style="flex:1"><span class="stt">IYO — Instalaciones</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">Aprobada el 25 mar · Alerta baja: emprendimiento</span></div>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;flex-shrink:0">Aprobada</span>
+    <button class="btn-act">Ver</button>
+  </div>
+  <div class="row">
+    <div style="flex:1"><span class="stt">DDR — Diseño de carpintería</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">Aprobada el 22 mar · Alerta alta: igualdad</span></div>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97;flex-shrink:0">Aprobada</span>
+    <button class="btn-act">Ver</button>
+  </div>
+  <div class="row">
+    <div style="flex:1"><span class="stt">DJK — Digitalización</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">Borrador en elaboración · Sin enviar</span></div>
+    <span class="badge" style="background:#F1EFE8;color:#444441;border:0.5px solid #D3D1C7;flex-shrink:0">Borrador</span>
+    <button class="btn-act" style="opacity:.5;cursor:default">Esperar</button>
+  </div>
+</div>
+
+<div class="mini-card">
+  <p class="sec-title" style="margin-bottom:6px">Historial de cambios — ATZ (últimos 3)</p>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt"><strong style="font-weight:500">01 abr</strong> — Docente reenvía tras corrección de criterios sin asignar en RA 1 (criterios e y f)</span></div>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt"><strong style="font-weight:500">29 mar</strong> — Jefe solicita cambios: faltan 2 criterios sin UT asignada y peso del RA 5 no suma 100%</span></div>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt"><strong style="font-weight:500">26 mar</strong> — Docente envía primera versión de la programación</span></div>
+</div>
+</div>
+
+<!-- Proyecto intermodular -->
+<div id="sec-inter" style="display:none">
+<p class="sec-title">Proyecto intermodular — 2º CFGS Diseño y Amueblamiento</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">El proyecto intermodular integra RA de varios módulos en torno a un encargo profesional real. El jefe coordina qué módulos participan, qué RA aporta cada uno y cómo se evalúa de forma conjunta.</p>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+    <div>
+      <p class="stt">Diseño y fabricación de una colección de mobiliario modular</p>
+      <p style="font-size:12px;color:var(--color-text-tertiary);margin:4px 0 0">Encargo simulado para cliente real · Trimestre 2–3 · 80 horas totales</p>
+    </div>
+    <span class="badge" style="background:#EEEDFE;color:#3C3489;border:0.5px solid #CECBF6;flex-shrink:0">En desarrollo</span>
+  </div>
+  <hr class="sep">
+  <p class="sec-title" style="margin-bottom:8px">Módulos participantes y aportación</p>
+  <div class="row">
+    <span class="chip" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;min-width:36px;justify-content:center">ATZ</span>
+    <span style="font-size:12px;color:var(--color-text-secondary);flex:1">Programación CNC de piezas del mobiliario (RA 2 y RA 3)</span>
+    <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">20 h</span>
+  </div>
+  <div class="row">
+    <span class="chip" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;min-width:36px;justify-content:center">GNE</span>
+    <span style="font-size:12px;color:var(--color-text-secondary);flex:1">Planificación y gestión de la producción (RA 1 y RA 2)</span>
+    <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">20 h</span>
+  </div>
+  <div class="row">
+    <span class="chip" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;min-width:36px;justify-content:center">DDR</span>
+    <span style="font-size:12px;color:var(--color-text-secondary);flex:1">Diseño y planos técnicos de la colección (RA 1 y RA 3)</span>
+    <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">24 h</span>
+  </div>
+  <div class="row">
+    <span class="chip" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;min-width:36px;justify-content:center">IYO</span>
+    <span style="font-size:12px;color:var(--color-text-secondary);flex:1">Montaje e instalación en espacio definido (RA 2 y RA 4)</span>
+    <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">16 h</span>
+  </div>
+  <hr class="sep">
+  <p class="sec-title" style="margin-bottom:6px">Evaluación conjunta</p>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt">Rúbrica compartida evaluada por los 4 docentes implicados</span></div>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt">Cada módulo pondera su parte según el peso de los RA que aporta</span></div>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt">Exposición final del proyecto ante el equipo docente</span></div>
+  <div class="blq"><span class="blqdot"></span><span class="blqtxt">El jefe consolida la nota intermodular y la distribuye a cada módulo</span></div>
+</div>
+</div>
+
+<!-- Publicación -->
+<div id="sec-pub" style="display:none">
+<p class="sec-title">Publicación de la Programación Didáctica 2026-2027</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">Solo el jefe puede publicar. El sistema verifica automáticamente que se cumplen todas las condiciones antes de permitir la acción.</p>
+
+<div class="card">
+  <p class="sec-title" style="margin-bottom:10px">Checklist de publicación</p>
+  <div class="row">
+    <span style="font-size:16px">✅</span>
+    <span style="font-size:13px;color:var(--color-text-primary);flex:1">Todos los módulos en estado Aprobado</span>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Pendiente (4/5)</span>
+  </div>
+  <div class="row">
+    <span style="font-size:16px">✅</span>
+    <span style="font-size:13px;color:var(--color-text-primary);flex:1">Sin alertas transversales de severidad Alta</span>
+    <span class="badge" style="background:#FCEBEB;color:#A32D2D;border:0.5px solid #F09595">1 alerta activa</span>
+  </div>
+  <div class="row">
+    <span style="font-size:16px">✅</span>
+    <span style="font-size:13px;color:var(--color-text-primary);flex:1">Proyecto intermodular registrado y aprobado</span>
+    <span class="badge" style="background:#FAEEDA;color:#412402;border:0.5px solid #FAC775">En desarrollo</span>
+  </div>
+  <div class="row">
+    <span style="font-size:16px">✅</span>
+    <span style="font-size:13px;color:var(--color-text-primary);flex:1">Calendario académico completo</span>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Completado</span>
+  </div>
+  <div class="row">
+    <span style="font-size:16px">✅</span>
+    <span style="font-size:13px;color:var(--color-text-primary);flex:1">Marco normativo vinculado</span>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Completado</span>
+  </div>
+  <button class="btn-pub" disabled style="opacity:.5;cursor:not-allowed">Publicar Programación Didáctica 2026-2027 — pendiente de 2 condiciones</button>
+</div>
+
+<div class="grid2">
+  <div class="mini-card">
+    <p class="sec-title" style="margin-bottom:6px">Al publicar se genera</p>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">PDF completo de la Programación Didáctica (17 secciones)</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Acceso al alumnado a sus programaciones de módulo</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Informe de transversalidad para dirección e inspección</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Registro de trazabilidad inicial del curso (punto de partida)</span></div>
+  </div>
+  <div class="mini-card">
+    <p class="sec-title" style="margin-bottom:6px">Tras la publicación</p>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Los docentes pueden registrar cambios justificados durante el curso</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">El jefe aprueba cada cambio y queda en el historial</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Al final del curso se genera la memoria automáticamente</span></div>
+  </div>
+</div>
+</div>
+
+</div>
+
+<script>
+const secs=['panel','prog','inter','pub'];
+function show(id){
+secs.forEach(s=>{document.getElementById('sec-'+s).style.display=s===id?'block':'none'});
+document.querySelectorAll('.tab').forEach(b=>{
+b.className='tab'+(b.getAttribute('onclick').includes("'"+id+"'")?' on':'');
+});
+}
+</script>

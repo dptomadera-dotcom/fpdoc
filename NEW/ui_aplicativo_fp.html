@@ -1,0 +1,507 @@
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--ink:#1a1a24;--ink2:#4a4a5e;--ink3:#9494a8;
+--bg:#f4f3ef;--bg2:#eceae4;--surface:#fff;
+--teal:#0d6e6e;--teal2:#e0f0f0;--teal3:#b2dada;
+--amber:#c47c1a;--amber2:#fef3e2;
+--red:#c0392b;--red2:#fdecea;
+--green:#1a7a4a;--green2:#e3f5ec;
+--blue:#1a3a8a;--blue2:#e5eaf8;
+--purple:#5c3a9a;--purple2:#eee8f8;
+--radius:10px;--radius-sm:6px;
+--shadow:0 2px 12px rgba(0,0,0,.07);
+--font:'DM Sans',sans-serif;
+--serif:'DM Serif Display',serif;
+}
+body{font-family:var(--font);background:transparent;color:var(--ink);font-size:14px}
+
+.app{background:var(--bg);border-radius:14px;overflow:hidden;border:1px solid #dddbd4;min-height:480px}
+
+/* Nav */
+.nav{background:var(--ink);display:flex;align-items:center;padding:0 18px;height:48px;gap:0}
+.nav-logo{font-family:var(--serif);color:#fff;font-size:17px;letter-spacing:-.3px;margin-right:auto}
+.nav-logo span{color:var(--teal3);font-style:italic}
+.nav-roles{display:flex;gap:2px;background:rgba(255,255,255,.08);border-radius:8px;padding:3px}
+.nav-role{padding:4px 12px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);border-radius:6px;cursor:pointer;transition:all .15s;border:none;background:transparent}
+.nav-role.active{background:rgba(255,255,255,.15);color:#fff}
+.nav-actions{display:flex;gap:8px;margin-left:16px}
+.nav-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:432px}
+.sidebar{background:var(--surface);border-right:1px solid #e5e3dc;padding:16px 12px}
+.s-section{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;padding:0 8px;margin:14px 0 4px}
+.s-section:first-child{margin-top:0}
+.s-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--radius-sm);cursor:pointer;color:var(--ink2);font-size:13px;transition:all .12s;border:none;background:transparent;width:100%;text-align:left}
+.s-item:hover{background:var(--bg)}
+.s-item.active{background:var(--teal2);color:var(--teal);font-weight:500}
+.s-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.s-badge{margin-left:auto;background:var(--amber2);color:var(--amber);font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px}
+.s-badge.red{background:var(--red2);color:var(--red)}
+.s-badge.teal{background:var(--teal2);color:var(--teal)}
+
+/* Main */
+.main{padding:20px;overflow:auto;background:var(--bg)}
+
+/* Cards */
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid #e5e3dc;padding:16px}
+.card+.card{margin-top:10px}
+.card-title{font-weight:600;font-size:13px;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.metric{background:var(--bg);border-radius:var(--radius-sm);padding:12px 14px;border:1px solid #e5e3dc}
+.metric-n{font-size:26px;font-weight:600;line-height:1;color:var(--ink)}
+.metric-l{font-size:11px;color:var(--ink3);margin-top:3px}
+.metric-n.teal{color:var(--teal)}
+.metric-n.amber{color:var(--amber)}
+.metric-n.red{color:var(--red)}
+
+/* Page header */
+.page-header{margin-bottom:16px}
+.page-title{font-family:var(--serif);font-size:22px;color:var(--ink);line-height:1.2}
+.page-sub{font-size:13px;color:var(--ink3);margin-top:2px}
+
+/* Table rows */
+.t-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0eee8;font-size:13px}
+.t-row:last-child{border-bottom:none}
+.t-label{flex:1;color:var(--ink)}
+.t-sub{font-size:11px;color:var(--ink3);margin-top:1px}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge.green{background:var(--green2);color:var(--green)}
+.badge.blue{background:var(--blue2);color:var(--blue)}
+.badge.amber{background:var(--amber2);color:var(--amber)}
+.badge.red{background:var(--red2);color:var(--red)}
+.badge.gray{background:var(--bg2);color:var(--ink3)}
+.badge.purple{background:var(--purple2);color:var(--purple)}
+
+/* Action btn */
+.btn{padding:5px 12px;font-size:12px;font-weight:500;border-radius:var(--radius-sm);border:1px solid #dddbd4;background:var(--surface);color:var(--ink2);cursor:pointer;transition:all .12s;font-family:var(--font)}
+.btn:hover{background:var(--bg);border-color:#c0bdb6}
+.btn-primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn-primary:hover{background:#0a5a5a}
+.btn-sm{padding:3px 8px;font-size:11px}
+
+/* Progress */
+.prog-bg{background:#e5e3dc;border-radius:4px;height:6px;flex:1}
+.prog-fill{height:6px;border-radius:4px}
+
+/* Alert strip */
+.alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:8px;font-size:12px}
+.alert.red{background:var(--red2);border:1px solid #f5c6c3}
+.alert.amber{background:var(--amber2);border:1px solid #f5d89a}
+.alert-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* RA list */
+.ra-item{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f0eee8;font-size:12px}
+.ra-item:last-child{border-bottom:none}
+.ra-num{background:var(--ink);color:#fff;font-size:10px;font-weight:600;border-radius:4px;padding:2px 5px;flex-shrink:0;margin-top:1px}
+.ra-num.done{background:var(--green)}
+.ra-num.part{background:var(--amber)}
+
+/* Screen content areas */
+.screen{display:none}
+.screen.active{display:block}
+</style>
+
+<div class="app">
+
+<!-- Navbar -->
+<div class="nav">
+  <div class="nav-logo">FP<span>doc</span></div>
+  <div class="nav-roles">
+    <button class="nav-role active" onclick="setRole('jefe')">Jefe Dpto.</button>
+    <button class="nav-role" onclick="setRole('prof')">Profesorado</button>
+    <button class="nav-role" onclick="setRole('alum')">Alumnado</button>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" title="Notificaciones">🔔</button>
+    <button class="nav-btn" title="Perfil">👤</button>
+  </div>
+</div>
+
+<!-- Layout -->
+<div class="layout">
+
+  <!-- Sidebar Jefe -->
+  <div id="sb-jefe" class="sidebar">
+    <p class="s-section">General</p>
+    <button class="s-item active" onclick="setScreen('j-panel')"><span class="s-icon">📊</span>Panel</button>
+    <button class="s-item" onclick="setScreen('j-prog')"><span class="s-icon">📋</span>Programaciones<span class="s-badge amber">1</span></button>
+    <button class="s-item" onclick="setScreen('j-trans')"><span class="s-icon">🔗</span>Transversalidad<span class="s-badge red">3</span></button>
+    <button class="s-item" onclick="setScreen('j-inter')"><span class="s-icon">🎯</span>Intermodular</button>
+    <p class="s-section">Configuración</p>
+    <button class="s-item" onclick="setScreen('j-grupos')"><span class="s-icon">👥</span>Grupos</button>
+    <button class="s-item"><span class="s-icon">📅</span>Calendario</button>
+    <button class="s-item"><span class="s-icon">📄</span>Normativa</button>
+    <p class="s-section">Publicación</p>
+    <button class="s-item" onclick="setScreen('j-pub')"><span class="s-icon">🚀</span>Publicar curso</button>
+    <button class="s-item"><span class="s-icon">📥</span>Exportar PDF</button>
+  </div>
+
+  <!-- Sidebar Prof -->
+  <div id="sb-prof" class="sidebar" style="display:none">
+    <p class="s-section">Mi módulo</p>
+    <button class="s-item active" onclick="setScreen('p-panel')"><span class="s-icon">📊</span>Panel</button>
+    <button class="s-item" onclick="setScreen('p-ra')"><span class="s-icon">🎓</span>RA y criterios</button>
+    <button class="s-item" onclick="setScreen('p-ut')"><span class="s-icon">📝</span>Unidades de trabajo</button>
+    <button class="s-item" onclick="setScreen('p-eval')"><span class="s-icon">⚖️</span>Evaluación</button>
+    <p class="s-section">Seguimiento</p>
+    <button class="s-item"><span class="s-icon">📈</span>Trazabilidad</button>
+    <button class="s-item"><span class="s-icon">✏️</span>Registrar cambio</button>
+    <p class="s-section">Documento</p>
+    <button class="s-item"><span class="s-icon">👁</span>Vista previa</button>
+    <button class="s-item"><span class="s-icon">📤</span>Enviar a revisión</button>
+  </div>
+
+  <!-- Sidebar Alum -->
+  <div id="sb-alum" class="sidebar" style="display:none">
+    <p class="s-section">Mi curso</p>
+    <button class="s-item active" onclick="setScreen('a-panel')"><span class="s-icon">🏠</span>Inicio</button>
+    <button class="s-item"><span class="s-icon">📚</span>Mis módulos</button>
+    <button class="s-item"><span class="s-icon">🗓</span>Calendario</button>
+    <p class="s-section">Evaluación</p>
+    <button class="s-item"><span class="s-icon">✅</span>Mis RA</button>
+    <button class="s-item"><span class="s-icon">📊</span>Calificaciones</button>
+    <p class="s-section">FCT</p>
+    <button class="s-item"><span class="s-icon">🏭</span>Empresa</button>
+    <button class="s-item"><span class="s-icon">📋</span>Itinerario ITK</button>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+
+    <!-- JEFE: Panel -->
+    <div id="j-panel" class="screen active">
+      <div class="page-header">
+        <div class="page-title">Panel del departamento</div>
+        <div class="page-sub">2º CFGS Diseño y Amueblamiento · IES Fernando Sagaseta · Telde</div>
+      </div>
+      <div class="grid-3">
+        <div class="metric"><div class="metric-n teal">3<span style="font-size:14px;font-weight:400;color:var(--ink3)">/5</span></div><div class="metric-l">Programaciones aprobadas</div></div>
+        <div class="metric"><div class="metric-n amber">3</div><div class="metric-l">Alertas transversales</div></div>
+        <div class="metric"><div class="metric-n" style="color:var(--purple)">80%</div><div class="metric-l">Intermodular completado</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Estado de programaciones <button class="btn btn-sm" onclick="setScreen('j-prog')">Ver todas →</button></div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">ATZ — Automatización</div><div class="t-sub">2ª revisión pendiente · reenviada hace 2h</div></div><span class="badge blue">En revisión</span><button class="btn btn-sm" style="margin-left:8px">Revisar</button></div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">GNE — Gestión producción</div><div class="t-sub">Aprobada el 28 mar</div></div><span class="badge green">Aprobada</span></div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">DDR — Diseño carpintería</div><div class="t-sub">Aprobada · alerta igualdad activa</div></div><span class="badge green">Aprobada</span></div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">IYO — Instalaciones</div><div class="t-sub">Aprobada el 25 mar</div></div><span class="badge green">Aprobada</span></div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">DJK — Digitalización</div><div class="t-sub">Borrador en elaboración</div></div><span class="badge gray">Borrador</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Alertas activas</div>
+        <div class="alert red"><span class="alert-icon">⚠️</span><div><strong>Igualdad sin cobertura</strong> en ATZ y DDR — incumplimiento normativo. Requiere acción antes de publicar.</div></div>
+        <div class="alert amber"><span class="alert-icon">⚡</span><div><strong>PRL no registrada</strong> en módulo DJK — docente debe añadir actividad específica.</div></div>
+        <div class="alert amber"><span class="alert-icon">⚡</span><div><strong>Sostenibilidad parcial</strong> en ATZ y DDR — sin instrumento de evaluación vinculado.</div></div>
+      </div>
+    </div>
+
+    <!-- JEFE: Programaciones -->
+    <div id="j-prog" class="screen">
+      <div class="page-header">
+        <div class="page-title">Programaciones del ciclo</div>
+        <div class="page-sub">Revisa, aprueba o devuelve cada programación de módulo</div>
+      </div>
+      <div class="card" style="padding:12px 16px">
+        <div class="card-title" style="margin-bottom:8px">ATZ — Automatización en Carpintería y Mueble <span class="badge blue">En revisión</span></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--ink3)">2ª revisión · enviada hace 2 horas</span>
+          <div style="display:flex;gap:6px;margin-left:auto">
+            <button class="btn btn-sm" style="color:var(--red);border-color:#f5c6c3">Solicitar cambios</button>
+            <button class="btn btn-sm btn-primary">Aprobar programación</button>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;font-size:12px;color:var(--ink2)">
+          <div style="font-weight:600;margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)">Historial de revisión</div>
+          <div class="t-row"><span style="color:var(--ink3);min-width:54px">01 abr</span><span style="flex:1">Docente reenvía — corregidos criterios e) y f) del RA 1 sin UT asignada</span></div>
+          <div class="t-row"><span style="color:var(--ink3);min-width:54px">29 mar</span><span style="flex:1">Jefe solicita cambios: 2 criterios sin UT y peso RA 5 no suma 100%</span></div>
+          <div class="t-row"><span style="color:var(--ink3);min-width:54px">26 mar</span><span style="flex:1">Docente envía primera versión de la programación</span></div>
+        </div>
+      </div>
+      <div class="card" style="padding:12px 16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div class="card-title" style="margin:0">Secciones revisadas</div>
+        </div>
+        <div class="t-row"><span style="flex:1;font-size:12px">RA y criterios de evaluación</span><span class="badge green">✓ Correcto</span></div>
+        <div class="t-row"><span style="flex:1;font-size:12px">Unidades de trabajo (6 UT · 122 h)</span><span class="badge green">✓ Correcto</span></div>
+        <div class="t-row"><span style="flex:1;font-size:12px">Criterios de calificación</span><span class="badge green">✓ Suma 100%</span></div>
+        <div class="t-row"><span style="flex:1;font-size:12px">Elementos transversales</span><span class="badge red">⚠ Igualdad sin UT</span></div>
+        <div class="t-row"><span style="flex:1;font-size:12px">Metodología e instrumentos</span><span class="badge green">✓ Correcto</span></div>
+      </div>
+    </div>
+
+    <!-- JEFE: Transversalidad -->
+    <div id="j-trans" class="screen">
+      <div class="page-header">
+        <div class="page-title">Mapa de transversalidad</div>
+        <div class="page-sub">Cobertura de elementos transversales en todos los módulos del ciclo</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cobertura por módulo y elemento</div>
+        <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:separate;border-spacing:4px;font-size:12px;min-width:380px">
+          <thead><tr>
+            <th style="text-align:left;padding:4px 6px;font-size:11px;color:var(--ink3);font-weight:500">Módulo</th>
+            <th style="padding:4px;font-size:11px;color:var(--ink3);font-weight:500;text-align:center">PRL</th>
+            <th style="padding:4px;font-size:11px;color:var(--ink3);font-weight:500;text-align:center">Digital.</th>
+            <th style="padding:4px;font-size:11px;color:var(--ink3);font-weight:500;text-align:center">Sostenib.</th>
+            <th style="padding:4px;font-size:11px;color:var(--ink3);font-weight:500;text-align:center">Igualdad</th>
+            <th style="padding:4px;font-size:11px;color:var(--ink3);font-weight:500;text-align:center">Empren.</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:4px 6px;font-weight:500;font-size:12px">ATZ</td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--amber2);color:var(--amber);border-radius:4px;padding:4px;text-align:center;font-size:11px">~</div></td>
+              <td><div style="background:var(--red2);color:var(--red);border-radius:4px;padding:4px;text-align:center;font-size:11px">✗</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+            </tr>
+            <tr><td style="padding:4px 6px;font-weight:500;font-size:12px">GNE</td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--amber2);color:var(--amber);border-radius:4px;padding:4px;text-align:center;font-size:11px">~</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+            </tr>
+            <tr><td style="padding:4px 6px;font-weight:500;font-size:12px">DDR</td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--amber2);color:var(--amber);border-radius:4px;padding:4px;text-align:center;font-size:11px">~</div></td>
+              <td><div style="background:var(--red2);color:var(--red);border-radius:4px;padding:4px;text-align:center;font-size:11px">✗</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+            </tr>
+            <tr><td style="padding:4px 6px;font-weight:500;font-size:12px">IYO</td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--amber2);color:var(--amber);border-radius:4px;padding:4px;text-align:center;font-size:11px">~</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--red2);color:var(--red);border-radius:4px;padding:4px;text-align:center;font-size:11px">✗</div></td>
+            </tr>
+            <tr><td style="padding:4px 6px;font-weight:500;font-size:12px">DJK</td>
+              <td><div style="background:var(--red2);color:var(--red);border-radius:4px;padding:4px;text-align:center;font-size:11px">✗</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+              <td><div style="background:var(--amber2);color:var(--amber);border-radius:4px;padding:4px;text-align:center;font-size:11px">~</div></td>
+              <td><div style="background:var(--green2);color:var(--green);border-radius:4px;padding:4px;text-align:center;font-size:11px">✓</div></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- JEFE: Intermodular -->
+    <div id="j-inter" class="screen">
+      <div class="page-header">
+        <div class="page-title">Proyecto intermodular</div>
+        <div class="page-sub">Diseño y fabricación de colección de mobiliario modular · Trimestre 2–3</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Módulos y aportación <span class="badge purple">80 h totales</span></div>
+        <div class="t-row"><span style="background:var(--ink);color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;flex-shrink:0">ATZ</span><span style="flex:1;font-size:12px;color:var(--ink2)">Programación CNC de piezas — RA 2 y RA 3</span><span class="badge gray">20 h</span></div>
+        <div class="t-row"><span style="background:var(--ink);color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;flex-shrink:0">GNE</span><span style="flex:1;font-size:12px;color:var(--ink2)">Planificación de producción — RA 1 y RA 2</span><span class="badge gray">20 h</span></div>
+        <div class="t-row"><span style="background:var(--ink);color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;flex-shrink:0">DDR</span><span style="flex:1;font-size:12px;color:var(--ink2)">Diseño y planos técnicos — RA 1 y RA 3</span><span class="badge gray">24 h</span></div>
+        <div class="t-row"><span style="background:var(--ink);color:#fff;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;flex-shrink:0">IYO</span><span style="flex:1;font-size:12px;color:var(--ink2)">Montaje e instalación — RA 2 y RA 4</span><span class="badge gray">16 h</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Progreso del proyecto</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><span style="font-size:12px;color:var(--ink3);min-width:70px">Diseño DDR</span><div class="prog-bg"><div class="prog-fill" style="width:100%;background:var(--green)"></div></div><span style="font-size:12px;color:var(--ink3)">Completado</span></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><span style="font-size:12px;color:var(--ink3);min-width:70px">CNC ATZ</span><div class="prog-bg"><div class="prog-fill" style="width:70%;background:var(--teal)"></div></div><span style="font-size:12px;color:var(--ink3)">70%</span></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><span style="font-size:12px;color:var(--ink3);min-width:70px">Gestión GNE</span><div class="prog-bg"><div class="prog-fill" style="width:60%;background:var(--teal)"></div></div><span style="font-size:12px;color:var(--ink3)">60%</span></div>
+        <div style="display:flex;gap:10px;align-items:center"><span style="font-size:12px;color:var(--ink3);min-width:70px">Montaje IYO</span><div class="prog-bg"><div class="prog-fill" style="width:20%;background:var(--amber)"></div></div><span style="font-size:12px;color:var(--ink3)">No iniciado</span></div>
+      </div>
+    </div>
+
+    <!-- JEFE: Grupos -->
+    <div id="j-grupos" class="screen">
+      <div class="page-header">
+        <div class="page-title">Grupos del departamento</div>
+        <div class="page-sub">Curso 2026-2027 · Familia Madera, Mueble y Corcho</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ciclos activos</div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">1º CFGS Diseño y Amueblamiento</div><div class="t-sub">Mañana · 24 alumnos · 5 módulos</div></div><span class="badge teal" style="background:var(--teal2);color:var(--teal)">LOMLOE</span></div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">2º CFGS Diseño y Amueblamiento</div><div class="t-sub">Mañana · 19 alumnos · 5 módulos + FCT</div></div><span class="badge teal" style="background:var(--teal2);color:var(--teal)">LOMLOE</span></div>
+      </div>
+    </div>
+
+    <!-- JEFE: Publicación -->
+    <div id="j-pub" class="screen">
+      <div class="page-header">
+        <div class="page-title">Publicar Programación Didáctica</div>
+        <div class="page-sub">2026-2027 · 2º CFGS Diseño y Amueblamiento</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Condiciones de publicación</div>
+        <div class="t-row"><span style="font-size:16px;flex-shrink:0">✅</span><span style="flex:1;font-size:13px">Todos los módulos aprobados</span><span class="badge amber">4 de 5</span></div>
+        <div class="t-row"><span style="font-size:16px;flex-shrink:0">⛔</span><span style="flex:1;font-size:13px">Sin alertas transversales de severidad Alta</span><span class="badge red">1 activa</span></div>
+        <div class="t-row"><span style="font-size:16px;flex-shrink:0">🔄</span><span style="flex:1;font-size:13px">Proyecto intermodular registrado y aprobado</span><span class="badge amber">En desarrollo</span></div>
+        <div class="t-row"><span style="font-size:16px;flex-shrink:0">✅</span><span style="flex:1;font-size:13px">Calendario académico completo</span><span class="badge green">Completado</span></div>
+        <div class="t-row"><span style="font-size:16px;flex-shrink:0">✅</span><span style="flex:1;font-size:13px">Marco normativo vinculado</span><span class="badge green">Completado</span></div>
+        <button style="width:100%;margin-top:14px;padding:10px;font-size:13px;font-weight:600;border-radius:var(--radius-sm);border:none;background:#ccc;color:#888;cursor:not-allowed;font-family:var(--font)">Publicar Programación Didáctica 2026-2027 — 2 condiciones pendientes</button>
+      </div>
+    </div>
+
+    <!-- PROF: Panel -->
+    <div id="p-panel" class="screen">
+      <div class="page-header">
+        <div class="page-title">Mi programación</div>
+        <div class="page-sub">ATZ — Automatización en Carpintería y Mueble · 2º CFGS · 122 h</div>
+      </div>
+      <div class="grid-2" style="margin-bottom:12px">
+        <div class="metric"><div class="metric-n" style="color:var(--amber)">4<span style="font-size:14px;font-weight:400;color:var(--ink3)">/6</span></div><div class="metric-l">Criterios RA 1 asignados</div></div>
+        <div class="metric"><div class="metric-n" style="color:var(--blue)">2<span style="font-size:14px;font-weight:400;color:var(--ink3)">/6</span></div><div class="metric-l">Unidades de trabajo creadas</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Estado de la programación <span class="badge blue">En revisión</span></div>
+        <div style="font-size:13px;color:var(--ink3);padding:6px 0 10px">El jefe de departamento está revisando tu programación. No puedes editarla hasta recibir respuesta.</div>
+        <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;font-size:12px;color:var(--ink2)">
+          <div style="font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:6px">Último comentario del jefe (29 mar)</div>
+          "Faltan los criterios e) y f) del RA 1 sin unidad de trabajo asignada. El peso del RA 5 no suma 100%. Por favor corrige ambos y reenvía."
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cobertura de RA</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:7px"><span style="font-size:11px;color:var(--ink3);min-width:36px">RA 1</span><div class="prog-bg"><div class="prog-fill" style="width:67%;background:var(--amber)"></div></div><span style="font-size:11px;color:var(--ink3)">4/6</span></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:7px"><span style="font-size:11px;color:var(--ink3);min-width:36px">RA 2</span><div class="prog-bg"><div class="prog-fill" style="width:25%;background:var(--blue)"></div></div><span style="font-size:11px;color:var(--ink3)">2/8</span></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:7px"><span style="font-size:11px;color:var(--ink3);min-width:36px">RA 3</span><div class="prog-bg"><div class="prog-fill" style="width:0%;background:var(--teal)"></div></div><span style="font-size:11px;color:var(--ink3)">0/7</span></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:7px"><span style="font-size:11px;color:var(--ink3);min-width:36px">RA 4</span><div class="prog-bg"><div class="prog-fill" style="width:0%;background:var(--teal)"></div></div><span style="font-size:11px;color:var(--ink3)">0/8</span></div>
+        <div style="display:flex;gap:10px;align-items:center"><span style="font-size:11px;color:var(--ink3);min-width:36px">RA 5</span><div class="prog-bg"><div class="prog-fill" style="width:0%;background:var(--teal)"></div></div><span style="font-size:11px;color:var(--ink3)">0/6</span></div>
+      </div>
+    </div>
+
+    <!-- PROF: RA -->
+    <div id="p-ra" class="screen">
+      <div class="page-header">
+        <div class="page-title">Resultados de aprendizaje</div>
+        <div class="page-sub">ATZ — Automatización · 6 RA · 35 criterios de evaluación</div>
+      </div>
+      <div class="card">
+        <div class="card-title">RA 1 — Organiza líneas de producción automatizada <span class="badge amber">4/6 criterios</span></div>
+        <div class="ra-item"><span class="ra-num done">a</span><span style="flex:1;color:var(--ink2)">Identifica tipos de maquinaria automática y semiautomática</span><span class="badge green" style="font-size:10px">UT 1</span></div>
+        <div class="ra-item"><span class="ra-num done">b</span><span style="flex:1;color:var(--ink2)">Compara tecnologías de automatización (neumática, eléctrica…)</span><span class="badge green" style="font-size:10px">UT 1</span></div>
+        <div class="ra-item"><span class="ra-num done">c</span><span style="flex:1;color:var(--ink2)">Determina características de una instalación automatizada</span><span class="badge green" style="font-size:10px">UT 2</span></div>
+        <div class="ra-item"><span class="ra-num done">d</span><span style="flex:1;color:var(--ink2)">Analiza programas en sistemas automatizados (PLC, robots…)</span><span class="badge green" style="font-size:10px">UT 2–3</span></div>
+        <div class="ra-item"><span class="ra-num part">e</span><span style="flex:1;color:var(--ink2)">Caracteriza diferencias entre sistemas de fabricación flexible</span><span class="badge amber" style="font-size:10px">Sin UT ⚠</span></div>
+        <div class="ra-item"><span class="ra-num part">f</span><span style="flex:1;color:var(--ink2)">Valora ventajas e inconvenientes de sistemas automatizados</span><span class="badge amber" style="font-size:10px">Sin UT ⚠</span></div>
+      </div>
+    </div>
+
+    <!-- PROF: UT -->
+    <div id="p-ut" class="screen">
+      <div class="page-header">
+        <div class="page-title">Unidades de trabajo</div>
+        <div class="page-sub">ATZ · 6 UT planificadas · 122 h totales</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div><div style="font-weight:600;font-size:13px">UT 1 — Sistemas de producción automatizada</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">Trimestre 1 · 18 h · RA 1a, 1b</div></div>
+          <span class="badge green">Completada</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-sm">Ver actividades</button>
+          <button class="btn btn-sm">Ver rúbrica</button>
+        </div>
+      </div>
+      <div class="card" style="border-color:var(--teal3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div><div style="font-weight:600;font-size:13px">UT 2 — Instalaciones automatizadas y PLC</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">Trimestre 1 · 24 h · RA 1c, 1d</div></div>
+          <span class="badge blue">En curso</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+          <div class="prog-bg"><div class="prog-fill" style="width:40%;background:var(--teal)"></div></div>
+          <span style="font-size:12px;color:var(--ink3)">40%</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-sm">Editar UT</button>
+          <button class="btn btn-sm">Registrar avance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROF: Evaluación -->
+    <div id="p-eval" class="screen">
+      <div class="page-header">
+        <div class="page-title">Criterios de evaluación</div>
+        <div class="page-sub">ATZ — distribución de calificación por RA</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Peso de cada RA en la calificación final</div>
+        <div class="t-row"><span style="flex:1;font-size:12px">RA 1 — Organiza líneas de producción</span><div style="display:flex;gap:8px;align-items:center"><div class="prog-bg" style="width:80px"><div class="prog-fill" style="width:100%;background:var(--teal)"></div></div><span style="font-size:12px;font-weight:600;min-width:28px;text-align:right">20%</span></div></div>
+        <div class="t-row"><span style="flex:1;font-size:12px">RA 2 — Programación CNC</span><div style="display:flex;gap:8px;align-items:center"><div class="prog-bg" style="width:80px"><div class="prog-fill" style="width:100%;background:var(--teal)"></div></div><span style="font-size:12px;font-weight:600;min-width:28px;text-align:right">25%</span></div></div>
+        <div class="t-row"><span style="flex:1;font-size:12px">RA 3 — Fabricación asistida CAM</span><div style="display:flex;gap:8px;align-items:center"><div class="prog-bg" style="width:80px"><div class="prog-fill" style="width:100%;background:var(--teal)"></div></div><span style="font-size:12px;font-weight:600;min-width:28px;text-align:right">25%</span></div></div>
+        <div class="t-row"><span style="flex:1;font-size:12px">RA 4 — Gestión de fabricación automatizada</span><div style="display:flex;gap:8px;align-items:center"><div class="prog-bg" style="width:80px"><div class="prog-fill" style="width:100%;background:var(--teal)"></div></div><span style="font-size:12px;font-weight:600;min-width:28px;text-align:right">20%</span></div></div>
+        <div class="t-row"><span style="flex:1;font-size:12px">RA 5 — Mantenimiento de equipos</span><div style="display:flex;gap:8px;align-items:center"><div class="prog-bg" style="width:80px"><div class="prog-fill" style="width:50%;background:var(--amber)"></div></div><span style="font-size:12px;font-weight:600;min-width:28px;text-align:right;color:var(--amber)">10%</span></div></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px">
+          <span class="badge green">Total: 100% ✓</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALUM: Panel -->
+    <div id="a-panel" class="screen">
+      <div class="page-header">
+        <div class="page-title">Mi curso</div>
+        <div class="page-sub">2º CFGS Diseño y Amueblamiento · IES Fernando Sagaseta · 2026-2027</div>
+      </div>
+      <div class="grid-3" style="margin-bottom:12px">
+        <div class="metric"><div class="metric-n teal">5</div><div class="metric-l">Módulos del curso</div></div>
+        <div class="metric"><div class="metric-n" style="color:var(--purple)">3</div><div class="metric-l">UT en curso ahora</div></div>
+        <div class="metric"><div class="metric-n amber">Mar</div><div class="metric-l">Próxima evaluación</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mis módulos</div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">ATZ — Automatización</div><div class="t-sub">UT 2 en curso · 40% completado</div></div><div style="display:flex;gap:8px;align-items:center"><div class="prog-bg" style="width:60px"><div class="prog-fill" style="width:40%;background:var(--teal)"></div></div><button class="btn btn-sm">Ver</button></div></div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">DDR — Diseño carpintería</div><div class="t-sub">UT 3 en curso · 65% completado</div></div><div style="display:flex;gap:8px;align-items:center"><div class="prog-bg" style="width:60px"><div class="prog-fill" style="width:65%;background:var(--teal)"></div></div><button class="btn btn-sm">Ver</button></div></div>
+        <div class="t-row"><div style="flex:1"><div class="t-label">GNE — Gestión producción</div><div class="t-sub">UT 2 en curso · 50% completado</div></div><div style="display:flex;gap:8px;align-items:center"><div class="prog-bg" style="width:60px"><div class="prog-fill" style="width:50%;background:var(--teal)"></div></div><button class="btn btn-sm">Ver</button></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Proyecto intermodular</div>
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:10px">Diseño y fabricación de colección de mobiliario modular · Trimestre 2–3</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="prog-bg"><div class="prog-fill" style="width:80%;background:var(--purple)"></div></div>
+          <span style="font-size:12px;color:var(--ink3)">80% del proyecto completado</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+</div><!-- /app -->
+
+<script>
+const allScreens=['j-panel','j-prog','j-trans','j-inter','j-grupos','j-pub','p-panel','p-ra','p-ut','p-eval','a-panel'];
+const roleSbs={jefe:'sb-jefe',prof:'sb-prof',alum:'sb-alum'};
+const roleDefault={jefe:'j-panel',prof:'p-panel',alum:'a-panel'};
+let curRole='jefe';
+
+function setScreen(id){
+  allScreens.forEach(s=>{
+    const el=document.getElementById(s);
+    if(el)el.className='screen'+(s===id?' active':'');
+  });
+  document.querySelectorAll('.s-item').forEach(b=>{
+    const oc=b.getAttribute('onclick')||'';
+    b.className='s-item'+(oc.includes("'"+id+"'")?' active':'');
+  });
+}
+
+function setRole(r){
+  curRole=r;
+  Object.entries(roleSbs).forEach(([k,v])=>{
+    document.getElementById(v).style.display=k===r?'block':'none';
+  });
+  document.querySelectorAll('.nav-role').forEach(b=>{
+    b.className='nav-role'+(b.getAttribute('onclick').includes("'"+r+"'")?' active':'');
+  });
+  setScreen(roleDefault[r]);
+}
+</script>

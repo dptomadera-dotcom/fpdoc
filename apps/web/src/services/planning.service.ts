@@ -1,44 +1,95 @@
-import api from '../lib/api-client';
+import { supabase } from '@/lib/supabase';
 
-export interface Session {
-  id: string;
-  groupId: string;
-  moduleId?: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  room?: string;
-  notes?: string;
-}
-
-export interface CalendarDay {
-  date: string;
-  isTeaching: boolean;
-  label?: string;
+export interface UnitOfWork {
+  id?: string;
+  title: string;
+  description?: string;
+  order: number;
+  estimatedHours: number;
+  programacionId: string;
+  raIds: string[];
+  ceIds: string[];
 }
 
 export const planningService = {
-  getSessions: async (groupId: string, start: string, end: string): Promise<Session[]> => {
-    const response = await api.get('/planning/sessions', {
-      params: { groupId, start, end },
-    });
-    return response.data;
+  /**
+   * Creates a new Programacion (Root document)
+   */
+  createProgramacion: async (data: {
+    year: string;
+    moduleId: string;
+    departmentId: string;
+  }) => {
+    const { data: programacion, error } = await supabase
+      .from('Programacion')
+      .insert(data)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return programacion;
   },
 
-  getCalendar: async (start: string, end: string): Promise<CalendarDay[]> => {
-    const response = await api.get('/planning/calendar', {
-      params: { start, end },
-    });
-    return response.data;
+  /**
+   * Creates a Unit of Work (UT) and links its RA/CE
+   */
+  createUnitOfWork: async (unit: UnitOfWork) => {
+    // 1. Create the UT entry
+    const { data: utData, error: utError } = await supabase
+      .from('UnidadTrabajo')
+      .insert({
+        title: unit.title,
+        description: unit.description,
+        order: unit.order,
+        estimatedHours: unit.estimatedHours,
+        programacionId: unit.programacionId
+      })
+      .select()
+      .single();
+
+    if (utError) throw utError;
+
+    // 2. Link Learning Outcomes (RA)
+    if (unit.raIds.length > 0) {
+      const raLinks = unit.raIds.map(raId => ({
+        utId: utData.id,
+        raId: raId
+      }));
+      const { error: raLinkError } = await supabase.from('UTLearningOutcome').insert(raLinks);
+      if (raLinkError) throw raLinkError;
+    }
+
+    // 3. Link Evaluation Criteria (CE)
+    if (unit.ceIds.length > 0) {
+      const ceLinks = unit.ceIds.map(ceId => ({
+        utId: utData.id,
+        ceId: ceId
+      }));
+      const { error: ceLinkError } = await supabase.from('UTEvaluationCriterion').insert(ceLinks);
+      if (ceLinkError) throw ceLinkError;
+    }
+
+    return utData;
   },
 
-  createSession: async (data: Omit<Session, 'id'>) => {
-    const response = await api.post('/planning/sessions', data);
-    return response.data;
-  },
+  /**
+   * Gets the full Programacion structure
+   */
+  getProgramacion: async (id: string) => {
+    const { data, error } = await supabase
+      .from('Programacion')
+      .select(`
+        *,
+        unidades:UnidadTrabajo(
+          *,
+          learningOutcomes:UTLearningOutcome(ra:LearningOutcome(*)),
+          criteria:UTEvaluationCriterion(ce:EvaluationCriterion(*))
+        )
+      `)
+      .eq('id', id)
+      .single();
 
-  markHoliday: async (date: string, label: string) => {
-    const response = await api.post('/planning/holidays', { date, label });
-    return response.data;
-  },
+    if (error) throw error;
+    return data;
+  }
 };

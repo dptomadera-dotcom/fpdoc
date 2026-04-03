@@ -1,0 +1,121 @@
+
+<style>
+.dpi{display:flex;gap:8px;padding:3px 0;font-size:13px;color:var(--color-text-secondary)}
+.dpdot{width:5px;height:5px;border-radius:50%;background:var(--color-text-tertiary);margin-top:6px;flex-shrink:0;display:block}
+</style>
+
+<p style="font-size:12px;color:var(--color-text-tertiary);text-align:center;margin:4px 0 6px">Haz clic en cualquier componente para ver sus detalles</p>
+
+<svg width="100%" viewBox="0 0 680 480">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<g class="node c-teal" onclick="sd('alumnado')">
+<rect x="40" y="28" width="185" height="48" rx="8" stroke-width="0.5"/>
+<text class="th" x="132" y="52" text-anchor="middle" dominant-baseline="central">Alumnado</text>
+</g>
+<g class="node c-purple" onclick="sd('profesorado')">
+<rect x="247" y="28" width="186" height="48" rx="8" stroke-width="0.5"/>
+<text class="th" x="340" y="52" text-anchor="middle" dominant-baseline="central">Profesorado</text>
+</g>
+<g class="node c-amber" onclick="sd('jefe')">
+<rect x="455" y="28" width="185" height="48" rx="8" stroke-width="0.5"/>
+<text class="th" x="547" y="52" text-anchor="middle" dominant-baseline="central">Jefe de Dpto.</text>
+</g>
+
+<line x1="132" y1="76" x2="132" y2="108" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+<line x1="340" y1="76" x2="340" y2="108" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+<line x1="547" y1="76" x2="547" y2="108" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+
+<g class="node c-teal" onclick="sd('alta-a')">
+<rect x="40" y="108" width="185" height="62" rx="8" stroke-width="0.5"/>
+<text class="th" x="132" y="130" text-anchor="middle" dominant-baseline="central">Perfil académico</text>
+<text class="ts" x="132" y="151" text-anchor="middle" dominant-baseline="central">Cuestionario inicial</text>
+</g>
+<g class="node c-purple" onclick="sd('alta-p')">
+<rect x="247" y="108" width="186" height="62" rx="8" stroke-width="0.5"/>
+<text class="th" x="340" y="130" text-anchor="middle" dominant-baseline="central">Datos del módulo</text>
+<text class="ts" x="340" y="151" text-anchor="middle" dominant-baseline="central">Módulos, RA, unidades</text>
+</g>
+<g class="node c-amber" onclick="sd('alta-j')">
+<rect x="455" y="108" width="185" height="62" rx="8" stroke-width="0.5"/>
+<text class="th" x="547" y="130" text-anchor="middle" dominant-baseline="central">Gestión del ciclo</text>
+<text class="ts" x="547" y="151" text-anchor="middle" dominant-baseline="central">Grupos, horarios, normas</text>
+</g>
+
+<line x1="132" y1="170" x2="132" y2="228" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+<line x1="340" y1="170" x2="340" y2="228" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+<line x1="547" y1="170" x2="547" y2="228" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+
+<rect x="22" y="204" width="636" height="152" rx="12" fill="none" stroke="var(--color-border-tertiary)" stroke-width="1" stroke-dasharray="5 4"/>
+<text class="ts" x="36" y="218" text-anchor="start" dominant-baseline="central" opacity=".5">Módulos funcionales del sistema</text>
+
+<g class="node c-blue" onclick="sd('curriculo')">
+<rect x="40" y="228" width="185" height="116" rx="8" stroke-width="0.5"/>
+<text class="th" x="132" y="254" text-anchor="middle" dominant-baseline="central">Gestión curricular</text>
+<text class="ts" x="132" y="275" text-anchor="middle" dominant-baseline="central">RA · criterios</text>
+<text class="ts" x="132" y="295" text-anchor="middle" dominant-baseline="central">Unidades de trabajo</text>
+<text class="ts" x="132" y="315" text-anchor="middle" dominant-baseline="central">Temporalización</text>
+</g>
+<g class="node c-green" onclick="sd('transversal')">
+<rect x="247" y="228" width="186" height="116" rx="8" stroke-width="0.5"/>
+<text class="th" x="340" y="254" text-anchor="middle" dominant-baseline="central">Transversalidad</text>
+<text class="ts" x="340" y="275" text-anchor="middle" dominant-baseline="central">PRL · digitalización</text>
+<text class="ts" x="340" y="295" text-anchor="middle" dominant-baseline="central">Sostenibilidad</text>
+<text class="ts" x="340" y="315" text-anchor="middle" dominant-baseline="central">Igualdad · diversidad</text>
+</g>
+<g class="node c-coral" onclick="sd('coord')">
+<rect x="455" y="228" width="185" height="116" rx="8" stroke-width="0.5"/>
+<text class="th" x="547" y="254" text-anchor="middle" dominant-baseline="central">Coordinación Dpto.</text>
+<text class="ts" x="547" y="275" text-anchor="middle" dominant-baseline="central">Panel supervisor</text>
+<text class="ts" x="547" y="295" text-anchor="middle" dominant-baseline="central">Validación y cambios</text>
+<text class="ts" x="547" y="315" text-anchor="middle" dominant-baseline="central">Proyectos intermod.</text>
+</g>
+
+<line x1="132" y1="344" x2="132" y2="386" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+<line x1="340" y1="344" x2="340" y2="386" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+<line x1="547" y1="344" x2="547" y2="386" stroke="var(--color-border-secondary)" stroke-width="1" marker-end="url(#a)"/>
+
+<g class="node c-gray" onclick="sd('prog')">
+<rect x="40" y="388" width="600" height="62" rx="10" stroke-width="0.5"/>
+<text class="th" x="340" y="409" text-anchor="middle" dominant-baseline="central">Programación Didáctica 2026-2027</text>
+<text class="ts" x="340" y="431" text-anchor="middle" dominant-baseline="central">Documento vivo · PDF exportable · 17 secciones · trazabilidad de cambios</text>
+</g>
+</svg>
+
+<div id="dp" style="margin:8px 0 0;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden">
+<div id="dp-hint" style="padding:14px;text-align:center;color:var(--color-text-tertiary);font-size:13px">
+Selecciona un componente arriba para explorar su función
+</div>
+<div id="dp-body" style="display:none;padding:14px 16px">
+<p id="dp-t" style="font-size:15px;font-weight:500;margin:0 0 4px;color:var(--color-text-primary)"></p>
+<p id="dp-d" style="font-size:13px;color:var(--color-text-secondary);margin:0 0 10px"></p>
+<div id="dp-i"></div>
+</div>
+</div>
+
+<script>
+const D={
+alumnado:{t:'Rol: Alumnado',d:'Receptor activo de la programación y agente de su propio itinerario formativo.',i:['Consulta programaciones, actividades y calendarios de sus módulos','Seguimiento de su itinerario personal para la empleabilidad (ITK)','Registro y seguimiento de prácticas en empresa (FCT)','Acceso a rúbricas y criterios de evaluación de cada RA','Feedback sobre metodología, recursos y experiencia del módulo']},
+profesorado:{t:'Rol: Profesorado',d:'Responsable de diseñar, registrar y actualizar la programación de cada módulo asignado.',i:['Introduce los RA y criterios de evaluación del módulo','Diseña y secuencia las unidades de trabajo (UT)','Define metodología, instrumentos de evaluación y recursos didácticos','Registra el avance real de los RA trabajados en clase','Propone y justifica modificaciones a lo largo del curso']},
+jefe:{t:'Rol: Jefe de Departamento',d:'Supervisor y validador con visión global del ciclo. Es quien publica la Programación final del curso.',i:['Configura los grupos del departamento (1º/2º CFGM · 1º/2º CFGS)','Introduce horarios, calendario académico y normativa aplicable','Supervisa y valida las programaciones de cada módulo y docente','Verifica la coherencia transversal del ciclo completo','Aprueba los proyectos intermodulares del departamento','Publica la Programación Didáctica oficial del curso']},
+'alta-a':{t:'Alta: Perfil académico del alumnado',d:'Cuestionario de incorporación con los datos educativos mínimos del alumno o alumna.',i:['Datos personales y vía de acceso al ciclo formativo','Formación previa y titulación de acceso','Situación laboral o experiencia profesional relacionada','Necesidades educativas específicas (ACNEAE) si procede','Disponibilidad horaria y preferencias para la FCT']},
+'alta-p':{t:'Alta: Datos del módulo (Profesorado)',d:'El docente carga la información estructurada del módulo que impartirá este curso académico.',i:['Módulo(s) asignado(s) y grupo(s) de impartición','Resultados de aprendizaje (RA) del módulo según normativa','Criterios de evaluación asociados a cada RA','Carga horaria semanal y total del módulo','Recursos y equipamiento disponible en el centro','Instrumentos de evaluación previstos (rúbricas, pruebas, proyectos)']},
+'alta-j':{t:'Alta: Gestión del ciclo (Jefe de Dpto.)',d:'Configuración del marco organizativo y normativo del departamento para el curso.',i:['Grupos del ciclo y número de alumnos por grupo','Asignación de módulos a docentes y distribución horaria','Calendario del curso: festivos, evaluaciones y períodos FCT','Normativa vigente: RD 1579/2011, LOMLOE/LOOIFP, orden canaria','Acuerdos pedagógicos del departamento (metodología, criterios comunes)']},
+curriculo:{t:'Módulo: Gestión curricular',d:'Núcleo del sistema. Gestiona la relación entre RA, criterios, UT, instrumentos y evidencias de evaluación.',i:['Vinculación RA ↔ criterios de evaluación ↔ instrumentos','Diseño y secuenciación de unidades de trabajo (UT)','Rúbricas de evaluación editables por criterio','Registro de actividades, tareas y proyectos por UT','Seguimiento del avance de cada RA a lo largo del curso','Autogeneración de secciones 4, 8 y 10 del índice de programación']},
+transversal:{t:'Módulo: Transversalidad',d:'Verifica y reporta la cobertura de los elementos transversales obligatorios en todos los módulos del ciclo.',i:['Mapa de cobertura de PRL: qué módulos y UT la trabajan','Digitalización aplicada: catálogo de proyectos y actividades digitales','Sostenibilidad: registro de actividades con perspectiva ambiental','Igualdad y diversidad: revisión del tratamiento en programaciones','Alerta de elementos sin cobertura suficiente en el ciclo','Informe exportable de transversalidad para el jefe de departamento']},
+coord:{t:'Módulo: Coordinación del Departamento',d:'Panel de control del jefe de departamento para supervisar, coordinar y publicar todas las programaciones.',i:['Estado en tiempo real de cada programación (borrador / revisión / publicado)','Registro de cambios justificados con fecha y autoría','Gestión de proyectos intermodulares entre módulos del ciclo','Herramienta de coherencia: detecta solapamientos y vacíos pedagógicos','Exportación de la Programación completa del departamento']},
+prog:{t:'Salida: Programación Didáctica 2026-2027',d:'Documento vivo que recoge la programación completa del departamento según el índice normativo de 17 secciones.',i:['Estructura completa del índice normativo (portada → bibliografía)','Actualización continua con trazabilidad de todos los cambios del curso','Versiones independientes por grupo (1º/2º CFGM · 1º/2º CFGS)','Exportación a PDF para dirección e inspección educativa','Memoria de fin de curso autogenerada desde los registros del sistema']}
+};
+function sd(id){
+const d=D[id];if(!d)return;
+document.getElementById('dp-hint').style.display='none';
+document.getElementById('dp-body').style.display='block';
+document.getElementById('dp-t').textContent=d.t;
+document.getElementById('dp-d').textContent=d.d;
+document.getElementById('dp-i').innerHTML=d.i.map(x=>`<div class="dpi"><span class="dpdot"></span><span>${x}</span></div>`).join('');
+}
+</script>

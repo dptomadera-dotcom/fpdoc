@@ -1,0 +1,245 @@
+
+<style>
+.tab{padding:6px 14px;font-size:13px;font-weight:500;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.tab:hover{background:var(--color-background-secondary)}
+.tab.on{border-width:1.5px;border-color:#378ADD;background:#E6F1FB;color:#0C447C}
+@media(prefers-color-scheme:dark){.tab.on{background:#042C53;color:#B5D4F4;border-color:#185FA5}}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:10px}
+.badge{display:inline-block;padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500}
+.row{display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.row:last-child{border-bottom:none}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;border:0.5px solid}
+.prog-bar-bg{background:var(--color-background-secondary);border-radius:4px;height:8px;flex:1}
+.prog-bar-fill{height:8px;border-radius:4px;transition:width .4s}
+.sl{font-size:12px;color:var(--color-text-tertiary)}
+.stt{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.sec-title{font-size:11px;font-weight:500;letter-spacing:.05em;color:var(--color-text-tertiary);margin:0 0 8px;text-transform:uppercase}
+.blq{display:flex;gap:8px;align-items:flex-start;padding:4px 0}
+.blqdot{width:4px;height:4px;border-radius:50%;background:var(--color-text-tertiary);margin-top:5px;flex-shrink:0}
+.blqtxt{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.sep{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:12px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.grid2{grid-template-columns:1fr}}
+.mini-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+</style>
+
+<div style="padding-top:8px">
+<div id="tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+<button class="tab on" onclick="show('ra')">RA y criterios</button>
+<button class="tab" onclick="show('ut')">Unidades de trabajo</button>
+<button class="tab" onclick="show('eval')">Evaluación</button>
+<button class="tab" onclick="show('traz')">Trazabilidad</button>
+<button class="tab" onclick="show('gen')">Generación</button>
+</div>
+
+<!-- RA y criterios -->
+<div id="sec-ra">
+<p class="sec-title">Resultados de aprendizaje y criterios de evaluación</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">El docente importa el PDF del módulo y el sistema extrae automáticamente los RA y sus criterios. También puede introducirlos manualmente.</p>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span class="stt">RA 1 — Organiza líneas de producción automatizada</span>
+    <span class="badge" style="background:#E6F1FB;color:#0C447C;border:0.5px solid #B5D4F4">6 criterios</span>
+  </div>
+  <div class="row"><span class="sl" style="min-width:18px">a)</span><span style="font-size:12px;color:var(--color-text-secondary);flex:1">Identifica tipos de maquinaria automática y semiautomática</span><span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">UT 1</span></div>
+  <div class="row"><span class="sl" style="min-width:18px">b)</span><span style="font-size:12px;color:var(--color-text-secondary);flex:1">Compara tecnologías de automatización (neumática, eléctrica…)</span><span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">UT 1</span></div>
+  <div class="row"><span class="sl" style="min-width:18px">c)</span><span style="font-size:12px;color:var(--color-text-secondary);flex:1">Determina características de una instalación automatizada</span><span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">UT 2</span></div>
+  <div class="row"><span class="sl" style="min-width:18px">d)</span><span style="font-size:12px;color:var(--color-text-secondary);flex:1">Analiza programas empleados en sistemas automatizados (PLC…)</span><span class="chip" style="background:#F5C4B3;color:#4A1B0C;border-color:#F0997B">UT 2–3</span></div>
+  <div class="row"><span class="sl" style="min-width:18px">e)</span><span style="font-size:12px;color:var(--color-text-secondary);flex:1">Caracteriza diferencias entre sistemas de fabricación flexible</span><span class="chip" style="background:#FAEEDA;color:#412402;border-color:#FAC775">Sin asignar</span></div>
+  <div class="row"><span class="sl" style="min-width:18px">f)</span><span style="font-size:12px;color:var(--color-text-secondary);flex:1">Valora ventajas e inconvenientes de sistemas automatizados</span><span class="chip" style="background:#FAEEDA;color:#412402;border-color:#FAC775">Sin asignar</span></div>
+</div>
+
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+  <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:67%;background:#639922"></div></div>
+  <span style="font-size:12px;color:var(--color-text-secondary);white-space:nowrap">4 de 6 criterios asignados a UT</span>
+</div>
+<p style="font-size:12px;color:var(--color-text-tertiary);margin:0">Los criterios sin asignar bloquean el envío a revisión. El sistema avisa antes de cerrar el borrador.</p>
+</div>
+
+<!-- Unidades de trabajo -->
+<div id="sec-ut" style="display:none">
+<p class="sec-title">Unidades de trabajo</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">Cada unidad de trabajo recoge los criterios que trabaja, las actividades, los instrumentos de evaluación y su peso en la calificación final del módulo.</p>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+    <div>
+      <span class="stt">UT 1 — Sistemas de producción automatizada</span>
+      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+        <span class="chip" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4">Trimestre 1</span>
+        <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">18 h</span>
+        <span class="chip" style="background:#EEEDFE;color:#3C3489;border-color:#CECBF6">RA 1a, 1b</span>
+      </div>
+    </div>
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Completada</span>
+  </div>
+  <hr class="sep">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div>
+      <p class="sec-title" style="margin-bottom:6px">Actividades</p>
+      <div class="blq"><span class="blqdot"></span><span class="blqtxt">Visita virtual a planta industrial automatizada (vídeo + debate)</span></div>
+      <div class="blq"><span class="blqdot"></span><span class="blqtxt">Análisis comparativo de líneas de producción (ficha técnica)</span></div>
+      <div class="blq"><span class="blqdot"></span><span class="blqtxt">Práctica en taller: identificación de maquinaria</span></div>
+    </div>
+    <div>
+      <p class="sec-title" style="margin-bottom:6px">Evaluación</p>
+      <div class="blq"><span class="blqdot"></span><span class="blqtxt">Rúbrica de práctica taller — 50%</span></div>
+      <div class="blq"><span class="blqdot"></span><span class="blqtxt">Prueba escrita criterios a) y b) — 30%</span></div>
+      <div class="blq"><span class="blqdot"></span><span class="blqtxt">Participación y debate — 20%</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="border-color:var(--color-border-secondary)">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+    <div>
+      <span class="stt">UT 2 — Instalaciones automatizadas y PLC</span>
+      <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+        <span class="chip" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4">Trimestre 1</span>
+        <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">24 h</span>
+        <span class="chip" style="background:#EEEDFE;color:#3C3489;border-color:#CECBF6">RA 1c, 1d</span>
+      </div>
+    </div>
+    <span class="badge" style="background:#E6F1FB;color:#0C447C;border:0.5px solid #B5D4F4">En curso</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:40%;background:#378ADD"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary);white-space:nowrap">40% completada</span>
+  </div>
+</div>
+
+<p style="font-size:12px;color:var(--color-text-tertiary);margin:0">Temporalización total del módulo ATZ: 6 UT · 122 h planificadas de 122 h totales.</p>
+</div>
+
+<!-- Evaluación -->
+<div id="sec-eval" style="display:none">
+<p class="sec-title">Evaluación y calificación</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">La calificación final de cada RA se construye desde los instrumentos definidos por UT. El sistema calcula pesos automáticamente y detecta incoherencias.</p>
+
+<div class="grid2">
+  <div class="mini-card">
+    <p class="sec-title" style="margin-bottom:6px">Instrumentos disponibles</p>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Rúbrica de práctica (taller o proyecto)</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Prueba escrita o tipo test</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Proyecto individual o grupal</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Diario de aprendizaje o portafolio</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Observación directa (lista de control)</span></div>
+  </div>
+  <div class="mini-card">
+    <p class="sec-title" style="margin-bottom:6px">Criterios de calificación</p>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Peso de cada RA en la nota del módulo (%)</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Peso de cada instrumento dentro del RA</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Nota mínima por RA para superar el módulo</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Condiciones de recuperación por RA</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Alerta si la suma de pesos no es 100%</span></div>
+  </div>
+</div>
+
+<hr class="sep">
+<p class="sec-title">Ejemplo: distribución de calificación — módulo ATZ</p>
+<div class="card" style="padding:10px 14px">
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-primary)">RA 1 — Organiza líneas de producción</span><span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">20%</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-primary)">RA 2 — Programación CNC</span><span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">25%</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-primary)">RA 3 — Fabricación asistida CAM</span><span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">25%</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-primary)">RA 4 — Gestión de fabricación automatizada</span><span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">20%</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-primary)">RA 5 — Mantenimiento de equipos</span><span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">10%</span></div>
+  <div style="display:flex;justify-content:flex-end;padding-top:6px">
+    <span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Total: 100% ✓</span>
+  </div>
+</div>
+</div>
+
+<!-- Trazabilidad -->
+<div id="sec-traz" style="display:none">
+<p class="sec-title">Trazabilidad RA → UT → Evidencia</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">El sistema registra qué criterios se han trabajado, en qué unidad, con qué actividad y con qué instrumento. Eso permite generar la memoria de fin de curso automáticamente.</p>
+
+<div class="card">
+  <p class="sec-title" style="margin-bottom:10px">Estado de cobertura — módulo ATZ (en curso)</p>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:90px">RA 1 (6 crit.)</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:67%;background:#639922"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:36px">4/6</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:90px">RA 2 (8 crit.)</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:25%;background:#378ADD"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:36px">2/8</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:90px">RA 3 (7 crit.)</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:0%;background:#639922"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:36px">0/7</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:90px">RA 4 (8 crit.)</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:0%;background:#639922"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:36px">0/8</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:90px">RA 5 (6 crit.)</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:0%;background:#639922"></div></div>
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:36px">0/6</span>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="mini-card">
+    <p class="sec-title" style="margin-bottom:6px">Registro de evidencias</p>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Fecha de trabajo de cada criterio en clase</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Instrumento de evaluación utilizado</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Vinculación con la UT correspondiente</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Observaciones del docente por criterio</span></div>
+  </div>
+  <div class="mini-card">
+    <p class="sec-title" style="margin-bottom:6px">Documentos generados</p>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Sección 4 de la programación (RA y objetivos)</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Sección 8 (evaluación y calificación)</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Sección 10 (desarrollo de cada UT)</span></div>
+    <div class="blq"><span class="blqdot"></span><span class="blqtxt">Memoria de fin de curso (autogenerada)</span></div>
+  </div>
+</div>
+</div>
+
+<!-- Generación -->
+<div id="sec-gen" style="display:none">
+<p class="sec-title">Generación automática de la programación</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 12px">Cada sección del índice normativo se construye desde los datos introducidos. El docente no redacta el documento, el sistema lo genera. Solo añade lo que no puede inferirse de los datos.</p>
+
+<div class="card">
+  <p class="sec-title" style="margin-bottom:10px">Índice de la programación — estado de generación</p>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">0. Portada</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">1. Introducción · contextualización</span><span class="badge" style="background:#FAEEDA;color:#412402;border:0.5px solid #FAC775">Manual</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">2. Marco normativo</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">3. Perfil profesional del título</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">4. Objetivos y RA</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">5. Competencias</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">6. Contenidos y secuenciación</span><span class="badge" style="background:#E6F1FB;color:#0C447C;border:0.5px solid #B5D4F4">Mixto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">7. Metodología</span><span class="badge" style="background:#FAEEDA;color:#412402;border:0.5px solid #FAC775">Manual</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">8. Evaluación y calificación</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">9. Atención a la diversidad</span><span class="badge" style="background:#E6F1FB;color:#0C447C;border:0.5px solid #B5D4F4">Mixto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">10. Unidades de trabajo</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">11. Elementos transversales</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">12–13. Actividades · Tutoría</span><span class="badge" style="background:#FAEEDA;color:#412402;border:0.5px solid #FAC775">Manual</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">14–15. Recursos · Temporalización</span><span class="badge" style="background:#EAF3DE;color:#27500A;border:0.5px solid #C0DD97">Auto</span></div>
+  <div class="row"><span style="font-size:12px;flex:1;color:var(--color-text-secondary)">16–17. Conclusión · Bibliografía</span><span class="badge" style="background:#FAEEDA;color:#412402;border:0.5px solid #FAC775">Manual</span></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+    <span class="chip" style="background:#EAF3DE;color:#27500A;border-color:#C0DD97">Auto — 10 secciones</span>
+    <span class="chip" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4">Mixto — 2 secciones</span>
+    <span class="chip" style="background:#FAEEDA;color:#412402;border-color:#FAC775">Manual — 5 secciones</span>
+  </div>
+</div>
+</div>
+
+</div>
+
+<script>
+const secs=['ra','ut','eval','traz','gen'];
+function show(id){
+secs.forEach(s=>{document.getElementById('sec-'+s).style.display=s===id?'block':'none'});
+document.querySelectorAll('.tab').forEach(b=>{
+b.className='tab'+(b.getAttribute('onclick').includes("'"+id+"'")?' on':'');
+});
+}
+</script>

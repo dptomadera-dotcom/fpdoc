@@ -1,0 +1,313 @@
+
+<style>
+.tab{padding:6px 14px;font-size:13px;font-weight:500;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.tab:hover{background:var(--color-background-secondary)}
+.tab.on{border-width:1.5px;border-color:#534AB7;background:#EEEDFE;color:#26215C}
+@media(prefers-color-scheme:dark){.tab.on{background:#26215C;color:#CECBF6;border-color:#7F77DD}}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.mini{background:var(--color-background-secondary);border-radius:8px;padding:10px 12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.chip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;border:0.5px solid;white-space:nowrap}
+.row{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.row:last-child{border-bottom:none}
+.sec{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin:0 0 8px}
+.stt{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.sl{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.blq{display:flex;gap:8px;align-items:flex-start;padding:3px 0}
+.bdot{width:4px;height:4px;border-radius:50%;background:var(--color-text-tertiary);margin-top:5px;flex-shrink:0}
+.btxt{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.sep{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:10px 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:480px){.g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
+.tech-box{background:var(--color-background-secondary);border-radius:8px;padding:10px 12px;border:0.5px solid var(--color-border-tertiary)}
+.tech-name{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.tech-why{font-size:11px;color:var(--color-text-tertiary);line-height:1.4}
+.fase-header{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.fase-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.fase-dur{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.prog-bg{background:var(--color-background-secondary);border-radius:4px;height:6px;flex:1}
+.prog-fill{height:6px;border-radius:4px}
+.risk{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin-bottom:6px;font-size:12px}
+.risk:last-child{margin-bottom:0}
+</style>
+
+<div style="padding-top:8px">
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+  <button class="tab on" onclick="show('stack')">Stack tecnológico</button>
+  <button class="tab" onclick="show('fases')">Fases de desarrollo</button>
+  <button class="tab" onclick="show('mvp')">MVP mínimo viable</button>
+  <button class="tab" onclick="show('riesgos')">Riesgos y decisiones</button>
+</div>
+
+<!-- Stack -->
+<div id="sec-stack">
+<p class="sec">Stack recomendado — criterio: máxima productividad con equipo pequeño</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 14px">Orientado a un desarrollo ágil por un equipo de 1–3 personas, con tecnologías maduras, documentación amplia y despliegue sencillo en infraestructura educativa.</p>
+
+<div class="card">
+  <p class="sec" style="margin-bottom:10px">Frontend</p>
+  <div class="g2">
+    <div class="tech-box">
+      <div class="tech-name">Next.js 15 (React)</div>
+      <div class="tech-why">Framework fullstack con SSR. Permite construir la UI y las API routes en el mismo proyecto. Ideal para aplicaciones con roles y dashboards complejos.</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">Tailwind CSS</div>
+      <div class="tech-why">Sistema de diseño basado en utilidades. Permite implementar el sistema visual de FPdoc con coherencia y rapidez sin CSS personalizado extenso.</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">shadcn/ui</div>
+      <div class="tech-why">Componentes accesibles y personalizables (tablas, formularios, modales). No es una librería de dependencia — el código vive en el proyecto.</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">Recharts</div>
+      <div class="tech-why">Gráficos de cobertura transversal, barras de progreso y mapas de calor del mapa de transversalidad. Ligero y compatible con React.</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="sec" style="margin-bottom:10px">Backend y base de datos</p>
+  <div class="g2">
+    <div class="tech-box">
+      <div class="tech-name">Supabase (PostgreSQL)</div>
+      <div class="tech-why">Base de datos relacional con autenticación, Row Level Security por rol y API REST generada automáticamente. Perfecto para el modelo de datos de FPdoc con sus relaciones complejas entre entidades.</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">Prisma ORM</div>
+      <div class="tech-why">Define el esquema de base de datos en código TypeScript. Genera migraciones automáticas y tipos seguros para todas las entidades (MODULO, RA, CRITERIO, UT…).</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">NextAuth.js</div>
+      <div class="tech-why">Gestión de sesiones y autenticación por rol (JEFE, DOCENTE, ALUMNO). Compatible con SSO institucional (Google Workspace, Microsoft Entra) habitual en centros educativos.</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">Resend (email)</div>
+      <div class="tech-why">Envío de notificaciones del sistema de estados (borrador → revisión, cambios solicitados, aprobación). API simple, plantillas React compatibles.</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="sec" style="margin-bottom:10px">Generación de documentos y despliegue</p>
+  <div class="g2">
+    <div class="tech-box">
+      <div class="tech-name">React PDF / Puppeteer</div>
+      <div class="tech-why">Generación del PDF de la Programación Didáctica completa (17 secciones). React PDF para plantillas en componentes React; Puppeteer como alternativa para fidelidad exacta al diseño.</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">pdf-parse / pdfjs</div>
+      <div class="tech-why">Extracción de RA y criterios desde los PDFs de los módulos que ya tiene el profesorado (ATZ_RA.pdf, PMB_RA.pdf…). Reduce el trabajo de introducción manual.</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">Vercel</div>
+      <div class="tech-why">Despliegue con un clic desde GitHub. Previews automáticos por rama para testing. Plan gratuito suficiente para piloto; escalable sin reconfiguración.</div>
+    </div>
+    <div class="tech-box">
+      <div class="tech-name">TypeScript</div>
+      <div class="tech-why">Tipado estático en todo el proyecto. Especialmente crítico aquí por la complejidad del modelo de datos (RA, criterios, UT, cambios) y el sistema de permisos por rol.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Fases -->
+<div id="sec-fases" style="display:none">
+<p class="sec">Plan de desarrollo en 4 fases — total estimado: 9–12 meses</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 14px">Cada fase entrega valor real y puede usarse de forma independiente. El objetivo es tener un piloto funcional con un departamento real al final de la Fase 2.</p>
+
+<div class="card">
+  <div class="fase-header">
+    <div class="fase-num" style="background:#EEEDFE;color:#3C3489">1</div>
+    <div style="flex:1">
+      <div class="stt">Fase 1 — Fundación y autenticación</div>
+      <div class="fase-dur">8–10 semanas · Equipo: 1 desarrollador</div>
+    </div>
+    <span class="badge" style="background:#EEEDFE;color:#3C3489;border:0.5px solid #AFA9EC">Meses 1–2</span>
+  </div>
+  <div class="g2">
+    <div>
+      <p class="sec" style="margin-bottom:6px">Entregables</p>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Sistema de autenticación y gestión de roles (JEFE, DOCENTE, ALUMNO)</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Flujo de alta completo para los 3 roles</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Modelo de datos implementado en Supabase (todas las entidades)</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Sidebar y navegación básica por rol</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Alta de departamento, ciclo, grupos y calendario</span></div>
+    </div>
+    <div>
+      <p class="sec" style="margin-bottom:6px">Criterio de éxito</p>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Un jefe, 3 docentes y 20 alumnos pueden registrarse y acceder a su panel correspondiente</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">El jefe puede configurar el ciclo completo (grupos, horarios, normativa)</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="fase-header">
+    <div class="fase-num" style="background:#E6F1FB;color:#0C447C">2</div>
+    <div style="flex:1">
+      <div class="stt">Fase 2 — Gestión curricular y ciclo de vida</div>
+      <div class="fase-dur">10–12 semanas · Equipo: 1–2 desarrolladores</div>
+    </div>
+    <span class="badge" style="background:#E6F1FB;color:#0C447C;border:0.5px solid #85B7EB">Meses 3–5</span>
+  </div>
+  <div class="g2">
+    <div>
+      <p class="sec" style="margin-bottom:6px">Entregables</p>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Editor completo de RA, criterios de evaluación y UT por módulo</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Extracción de RA desde PDF de módulo (pdfjs)</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Sistema de estados y ciclo de vida de PROG_MODULO</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Notificaciones por email en cada transición de estado</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Historial de cambios con fecha, autoría y justificación</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Panel de revisión del jefe (aprobar / solicitar cambios)</span></div>
+    </div>
+    <div>
+      <p class="sec" style="margin-bottom:6px">Criterio de éxito</p>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Un docente real puede programar su módulo completo y enviarlo a revisión en menos de 2 horas</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">El jefe puede revisar, comentar y aprobar desde su panel sin papel ni email</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">🎯 Piloto con un departamento real</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="fase-header">
+    <div class="fase-num" style="background:#E1F5EE;color:#085041">3</div>
+    <div style="flex:1">
+      <div class="stt">Fase 3 — Transversalidad y generación de documento</div>
+      <div class="fase-dur">8–10 semanas · Equipo: 1–2 desarrolladores</div>
+    </div>
+    <span class="badge" style="background:#E1F5EE;color:#085041;border:0.5px solid #5DCAA5">Meses 6–8</span>
+  </div>
+  <div class="g2">
+    <div>
+      <p class="sec" style="margin-bottom:6px">Entregables</p>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Motor de cálculo de cobertura transversal por módulo y ciclo</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Mapa de transversalidad con alertas por severidad</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Sistema de notificación de vacíos al docente y al jefe</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Generación automática del PDF de programación (17 secciones)</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Checklist de publicación y botón de publicar curso</span></div>
+    </div>
+    <div>
+      <p class="sec" style="margin-bottom:6px">Criterio de éxito</p>
+      <div class="blq"><span class="bdot"></span><span class="btxt">El PDF generado cumple el índice normativo completo y es presentable ante inspección</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">El jefe puede publicar el curso y el alumnado accede a sus programaciones</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="fase-header">
+    <div class="fase-num" style="background:#FAEEDA;color:#633806">4</div>
+    <div style="flex:1">
+      <div class="stt">Fase 4 — Intermodular, trazabilidad y memoria</div>
+      <div class="fase-dur">8–10 semanas · Equipo: 1–2 desarrolladores</div>
+    </div>
+    <span class="badge" style="background:#FAEEDA;color:#633806;border:0.5px solid #FAC775">Meses 9–12</span>
+  </div>
+  <div class="g2">
+    <div>
+      <p class="sec" style="margin-bottom:6px">Entregables</p>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Módulo de proyecto intermodular con seguimiento de progreso</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Trazabilidad en tiempo real de RA trabajados por UT</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Panel del alumnado: consulta de programación, RA y FCT</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Generación automática de la memoria de fin de curso</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">Extensión a otras familias profesionales (arquitectura multi-ciclo)</span></div>
+    </div>
+    <div>
+      <p class="sec" style="margin-bottom:6px">Criterio de éxito</p>
+      <div class="blq"><span class="bdot"></span><span class="btxt">La memoria de fin de curso se genera automáticamente sin trabajo adicional del docente</span></div>
+      <div class="blq"><span class="bdot"></span><span class="btxt">El sistema está listo para escalar a otros ciclos y centros</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MVP -->
+<div id="sec-mvp" style="display:none">
+<p class="sec">MVP — producto mínimo viable para el piloto</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 14px">El MVP es la versión más pequeña que un departamento real puede usar en un curso académico real. Equivale a las fases 1 y 2. El objetivo es llegar al inicio del curso 2026-2027 con el MVP operativo.</p>
+
+<div class="card">
+  <p class="sec" style="margin-bottom:10px">Incluido en el MVP</p>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">✅</span><div style="flex:1"><div class="stt">Alta y autenticación de los 3 roles</div><div class="sl">El jefe activa el curso, el docente y el alumnado se incorporan</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">✅</span><div style="flex:1"><div class="stt">Editor de módulo para el docente</div><div class="sl">RA, criterios, UT, metodología, evaluación e instrumentos</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">✅</span><div style="flex:1"><div class="stt">Ciclo de vida completo de la programación</div><div class="sl">Borrador → revisión → cambios → aprobado. Con notificaciones por email</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">✅</span><div style="flex:1"><div class="stt">Panel del jefe con estado de todas las programaciones</div><div class="sl">Revisión, comentarios, historial de cambios</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">✅</span><div style="flex:1"><div class="stt">Extracción básica de RA desde PDF</div><div class="sl">Reduce el tiempo de introducción de datos del docente</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">✅</span><div style="flex:1"><div class="stt">Exportación a PDF de la programación por módulo</div><div class="sl">Versión inicial, suficiente para presentar en jefatura o inspección</div></div></div>
+</div>
+
+<div class="card">
+  <p class="sec" style="margin-bottom:10px">Fuera del MVP (fase 3 y 4)</p>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">🔜</span><div style="flex:1"><div class="stt">Mapa de transversalidad y alertas automáticas</div><div class="sl">Requiere que todas las programaciones estén cargadas primero</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">🔜</span><div style="flex:1"><div class="stt">Generación automática de la Programación completa (17 secciones)</div><div class="sl">Depende de la cobertura total de datos del ciclo</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">🔜</span><div style="flex:1"><div class="stt">Módulo de proyecto intermodular</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">🔜</span><div style="flex:1"><div class="stt">Panel del alumnado (consulta de programaciones y FCT)</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">🔜</span><div style="flex:1"><div class="stt">Memoria de fin de curso autogenerada</div></div></div>
+</div>
+
+<div class="mini">
+  <p class="sec" style="margin-bottom:6px">Estimación de tiempo para el MVP</p>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:7px"><span style="font-size:12px;color:var(--color-text-secondary);min-width:100px">Fase 1 (fundación)</span><div class="prog-bg"><div class="prog-fill" style="width:100%;background:#7F77DD"></div></div><span style="font-size:12px;color:var(--color-text-secondary);white-space:nowrap">8–10 semanas</span></div>
+  <div style="display:flex;gap:10px;align-items:center"><span style="font-size:12px;color:var(--color-text-secondary);min-width:100px">Fase 2 (curricular)</span><div class="prog-bg"><div class="prog-fill" style="width:100%;background:#378ADD"></div></div><span style="font-size:12px;color:var(--color-text-secondary);white-space:nowrap">10–12 semanas</span></div>
+  <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary);font-size:12px;color:var(--color-text-secondary)">
+    <strong style="font-weight:500;color:var(--color-text-primary)">Total MVP: 18–22 semanas</strong> · Con inicio en mayo 2026 → piloto operativo en septiembre 2026 para el curso 2026-2027.
+  </div>
+</div>
+</div>
+
+<!-- Riesgos -->
+<div id="sec-riesgos" style="display:none">
+<p class="sec">Riesgos identificados y decisiones clave</p>
+<p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 14px">Los riesgos más relevantes no son técnicos — son de adopción. La tecnología más sofisticada falla si el profesorado no la usa. El diseño del MVP está pensado para minimizar esa fricción.</p>
+
+<div class="card">
+  <p class="sec" style="margin-bottom:10px">Riesgos técnicos</p>
+  <div class="risk" style="background:#FAEEDA;border:0.5px solid #FAC775">
+    <span style="font-size:14px;flex-shrink:0">⚡</span>
+    <div><div style="font-weight:500;font-size:13px;margin-bottom:3px">Extracción de RA desde PDF poco fiable</div><div class="btxt">Los PDFs de los módulos no tienen estructura estandarizada. La extracción automática será imperfecta — hay que diseñar un flujo de revisión manual rápida, no depender del 100% de acierto.</div></div>
+  </div>
+  <div class="risk" style="background:#FAEEDA;border:0.5px solid #FAC775">
+    <span style="font-size:14px;flex-shrink:0">⚡</span>
+    <div><div style="font-weight:500;font-size:13px;margin-bottom:3px">Generación de PDF con fidelidad al formato oficial</div><div class="btxt">Las programaciones tienen formatos específicos que varían por comunidad autónoma. El PDF generado debe ser aceptable ante inspección — requiere iteración con docentes reales durante el piloto.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="sec" style="margin-bottom:10px">Riesgos de adopción (los más críticos)</p>
+  <div class="risk" style="background:#FCEBEB;border:0.5px solid #F09595">
+    <span style="font-size:14px;flex-shrink:0">⚠️</span>
+    <div><div style="font-weight:500;font-size:13px;margin-bottom:3px">El profesorado percibe el sistema como más trabajo, no menos</div><div class="btxt">Mitigación: el MVP debe demostrar en la primera sesión que introduce los RA una vez y obtiene el 70% de su programación generada. Si el primer día no ve valor, no vuelve. La experiencia del docente en la Fase 2 es lo más importante.</div></div>
+  </div>
+  <div class="risk" style="background:#FCEBEB;border:0.5px solid #F09595">
+    <span style="font-size:14px;flex-shrink:0">⚠️</span>
+    <div><div style="font-weight:500;font-size:13px;margin-bottom:3px">El jefe de departamento no lidera la implantación</div><div class="btxt">Mitigación: el jefe es el usuario con más ganancia inmediata (visión del ciclo, alertas automáticas, menos emails). Hay que hacer la demo primero con él/ella, no con el docente.</div></div>
+  </div>
+  <div class="risk" style="background:#FAEEDA;border:0.5px solid #FAC775">
+    <span style="font-size:14px;flex-shrink:0">⚡</span>
+    <div><div style="font-weight:500;font-size:13px;margin-bottom:3px">Resistencia al cambio en centros con tradición de PDF en papel</div><div class="btxt">Mitigación: el sistema siempre exporta a PDF. No elimina el documento final — lo genera. Eso reduce la percepción de riesgo ante inspección.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="sec" style="margin-bottom:10px">Decisiones clave a tomar antes de empezar</p>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">1️⃣</span><div style="flex:1"><div class="stt">¿Piloto en un solo centro o multi-centro desde el inicio?</div><div class="sl">Recomendación: un solo centro (IES Fernando Sagaseta, Telde) para el MVP. Escalar después.</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">2️⃣</span><div style="flex:1"><div class="stt">¿Desarrollo propio o buscar colaboración técnica?</div><div class="sl">Si no hay perfil técnico disponible: buscar desarrollador freelance Next.js o colaboración con universidad (TFG/TFM de ingeniería informática).</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">3️⃣</span><div style="flex:1"><div class="stt">¿Financiación pública o desarrollo privado?</div><div class="sl">El proyecto encaja en convocatorias de innovación educativa del Gobierno de Canarias y en programas de digitalización de la FP del MEFP. Vale la pena explorar antes de financiación propia.</div></div></div>
+  <div class="row"><span style="font-size:16px;flex-shrink:0">4️⃣</span><div style="flex:1"><div class="stt">¿Licencia open source o producto cerrado?</div><div class="sl">Open source (MIT o similar) facilita la adopción en otros centros y puede atraer contribuidores. Modelo de negocio posible: hosting y soporte de implantación.</div></div></div>
+</div>
+</div>
+
+</div>
+
+<script>
+const secs=['stack','fases','mvp','riesgos'];
+function show(id){
+secs.forEach(s=>{document.getElementById('sec-'+s).style.display=s===id?'block':'none'});
+document.querySelectorAll('.tab').forEach(b=>{
+b.className='tab'+(b.getAttribute('onclick').includes("'"+id+"'")?' on':'');
+});
+}
+</script>

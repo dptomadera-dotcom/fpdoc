@@ -1,0 +1,169 @@
+
+<style>
+#erd svg { width: 100%; height: auto; }
+#erd svg.erDiagram .divider path { stroke-opacity: 0.5; }
+#erd svg.erDiagram .row-rect-odd path,
+#erd svg.erDiagram .row-rect-odd rect,
+#erd svg.erDiagram .row-rect-even path,
+#erd svg.erDiagram .row-rect-even rect { stroke: none !important; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.ley-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+.ley-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+</style>
+
+<div id="erd" style="padding-top:8px"></div>
+
+<div class="leyenda">
+  <div class="ley-item"><div class="ley-dot" style="background:#E1F5EE;border:1.5px solid #1D9E75"></div>Entidades de usuario y organización</div>
+  <div class="ley-item"><div class="ley-dot" style="background:#EEEDFE;border:1.5px solid #7F77DD"></div>Entidades curriculares</div>
+  <div class="ley-item"><div class="ley-dot" style="background:#E6F1FB;border:1.5px solid #378ADD"></div>Entidades de programación</div>
+  <div class="ley-item"><div class="ley-dot" style="background:#EAF3DE;border:1.5px solid #639922"></div>Elementos transversales y trazabilidad</div>
+</div>
+
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+    primaryColor: dark ? '#1a1a18' : '#f5f4f0',
+    primaryBorderColor: dark ? '#4a4a46' : '#c0beb4',
+    attributeBackgroundColorEven: dark ? '#1e1e1c' : '#fafaf8',
+    attributeBackgroundColorOdd: dark ? '#252523' : '#f1f0ec',
+  },
+});
+
+const diagram = `erDiagram
+  DEPARTAMENTO {
+    uuid id PK
+    string nombre
+    string familia_profesional
+    string centro_ies
+  }
+  CICLO {
+    uuid id PK
+    string nombre
+    string nivel
+    uuid departamento_id FK
+  }
+  GRUPO {
+    uuid id PK
+    string nombre
+    int num_alumnos
+    uuid ciclo_id FK
+  }
+  USUARIO {
+    uuid id PK
+    string nombre
+    string email
+    enum rol
+    uuid departamento_id FK
+  }
+  MODULO {
+    uuid id PK
+    string codigo
+    string nombre
+    int horas_totales
+    uuid ciclo_id FK
+  }
+  RA {
+    uuid id PK
+    int numero
+    string descripcion
+    uuid modulo_id FK
+  }
+  CRITERIO {
+    uuid id PK
+    string letra
+    string descripcion
+    int peso_pct
+    uuid ra_id FK
+  }
+  PROGRAMACION {
+    uuid id PK
+    string curso_academico
+    enum estado
+    date publicado_en
+    uuid departamento_id FK
+  }
+  PROG_MODULO {
+    uuid id PK
+    enum estado
+    uuid programacion_id FK
+    uuid modulo_id FK
+    uuid docente_id FK
+    uuid grupo_id FK
+  }
+  UT {
+    uuid id PK
+    int orden
+    string titulo
+    int horas
+    int trimestre
+    uuid prog_modulo_id FK
+  }
+  TRANSVERSAL {
+    uuid id PK
+    enum tipo
+    string descripcion
+  }
+  CAMBIO {
+    uuid id PK
+    string justificacion
+    date fecha
+    uuid prog_modulo_id FK
+    uuid usuario_id FK
+  }
+
+  DEPARTAMENTO ||--o{ CICLO : "gestiona"
+  DEPARTAMENTO ||--|| PROGRAMACION : "genera"
+  DEPARTAMENTO ||--o{ USUARIO : "agrupa"
+  CICLO ||--o{ GRUPO : "tiene"
+  CICLO ||--o{ MODULO : "contiene"
+  MODULO ||--o{ RA : "define"
+  MODULO ||--o{ PROG_MODULO : "se programa en"
+  RA ||--o{ CRITERIO : "desglosa"
+  USUARIO ||--o{ PROG_MODULO : "responsable de"
+  GRUPO ||--o{ PROG_MODULO : "recibe"
+  PROGRAMACION ||--o{ PROG_MODULO : "incluye"
+  PROG_MODULO ||--o{ UT : "secuencia"
+  PROG_MODULO ||--o{ CAMBIO : "registra"
+  PROG_MODULO }o--o{ TRANSVERSAL : "cubre"
+  UT }o--o{ CRITERIO : "trabaja"
+`;
+
+const { svg } = await mermaid.render('erd-svg', diagram);
+document.getElementById('erd').innerHTML = svg;
+
+document.querySelectorAll('#erd svg.erDiagram .node').forEach(node => {
+  const firstPath = node.querySelector('path[d]');
+  if (!firstPath) return;
+  const d = firstPath.getAttribute('d');
+  const nums = d.match(/-?[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+  }
+  firstPath.replaceWith(rect);
+});
+
+document.querySelectorAll('#erd svg.erDiagram .row-rect-odd path, #erd svg.erDiagram .row-rect-even path').forEach(p => {
+  p.setAttribute('stroke', 'none');
+});
+</script>

@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -16,8 +17,15 @@ model User {
   role                  UserRole
   isActive              Boolean                @default(true)
   centerId              String?
+  departmentId          String?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
+  
+  // Relaciones FPdoc
+  center                Center?                @relation(fields: [centerId], references: [id])
+  department            Department?            @relation(fields: [departmentId], references: [id])
+  
+  // Otros
   aiInteractions        AIInteraction[]
   alerts                Alert[]
   assessmentRecords     AssessmentRecord[]
@@ -25,9 +33,9 @@ model User {
   machineAuthorizations MachineAuthorization[]
   teacherModules        ModuleTeacher[]
   observations          Observation[]
-  studentGroup          StudentGroup[]
+  studentGroups         StudentGroup[]
   studentProgress       StudentProgress[]
-  center                Center?                @relation(fields: [centerId], references: [id])
+  changesAuthored       JustificacionCambio[]
 }
 
 model Center {
@@ -40,11 +48,13 @@ model Center {
 }
 
 model Department {
-  id       String   @id @default(cuid())
-  name     String
-  centerId String
-  center   Center   @relation(fields: [centerId], references: [id])
-  families Family[]
+  id             String          @id @default(cuid())
+  name           String
+  centerId       String
+  center         Center          @relation(fields: [centerId], references: [id])
+  families       Family[]
+  users          User[]
+  programaciones Programacion[]
 }
 
 model Family {
@@ -105,20 +115,11 @@ model Module {
   hours            Int
   year             Int
   cycleId          String
-  learningOutcomes LearningOutcome[]
   cycle            Cycle             @relation(fields: [cycleId], references: [id])
+  learningOutcomes LearningOutcome[]
   teachers         ModuleTeacher[]
   projectModules   ProjectModule[]
-}
-
-model ModuleTeacher {
-  id       String @id @default(cuid())
-  userId   String
-  moduleId String
-  module   Module @relation(fields: [moduleId], references: [id])
-  user     User   @relation(fields: [userId], references: [id])
-
-  @@unique([userId, moduleId])
+  programaciones   Programacion[]
 }
 
 model LearningOutcome {
@@ -131,6 +132,7 @@ model LearningOutcome {
   module             Module                @relation(fields: [moduleId], references: [id])
   studentProgress    StudentProgress[]
   taskLinks          TaskCurriculumLink[]
+  utLinks            UTLearningOutcome[]
 }
 
 model EvaluationCriterion {
@@ -141,6 +143,64 @@ model EvaluationCriterion {
   assessmentRecords AssessmentRecord[]
   learningOutcome   LearningOutcome      @relation(fields: [learningOutcomeId], references: [id])
   taskLinks         TaskCurriculumLink[]
+  utLinks           UTEvaluationCriterion[]
+}
+
+// NUEVO: El Documento Vivo
+model Programacion {
+  id             String          @id @default(cuid())
+  year           String          // Ej: "2023-2024"
+  status         ProjectStatus   @default(BORRADOR)
+  departmentId   String
+  moduleId       String
+  department     Department      @relation(fields: [departmentId], references: [id])
+  module         Module          @relation(fields: [moduleId], references: [id])
+  unidades       UnidadTrabajo[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+// NUEVO: Unidades de Trabajo
+model UnidadTrabajo {
+  id             String                @id @default(cuid())
+  title          String
+  description    String?
+  order          Int
+  estimatedHours Int
+  programacionId String
+  programacion   Programacion          @relation(fields: [programacionId], references: [id])
+  learningOutcomes UTLearningOutcome[]
+  criteria       UTEvaluationCriterion[]
+  changes        JustificacionCambio[]
+}
+
+// Tablas de unión para UT -> RA/CE
+model UTLearningOutcome {
+  utId String
+  raId String
+  ut   UnidadTrabajo   @relation(fields: [utId], references: [id])
+  ra   LearningOutcome @relation(fields: [raId], references: [id])
+  @@id([utId, raId])
+}
+
+model UTEvaluationCriterion {
+  utId String
+  ceId String
+  ut   UnidadTrabajo       @relation(fields: [utId], references: [id])
+  ce   EvaluationCriterion @relation(fields: [ceId], references: [id])
+  @@id([utId, ceId])
+}
+
+// NUEVO: Trazabilidad de cambios (Justificación)
+model JustificacionCambio {
+  id              String        @id @default(cuid())
+  reason          String
+  impact          String?
+  authorId        String
+  utId            String
+  createdAt       DateTime      @default(now())
+  author          User          @relation(fields: [authorId], references: [id])
+  unidadTrabajo   UnidadTrabajo @relation(fields: [utId], references: [id])
 }
 
 model Project {
