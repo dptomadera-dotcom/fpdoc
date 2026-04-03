@@ -116,7 +116,7 @@ export default function TransversalPage() {
                     <circle 
                       cx={node.x} cy={node.y} r={selectedNode?.id === node.id ? 28 : 22} 
                       className={`transition-all duration-300 ${selectedNode?.id === node.id ? 'fill-[var(--ink)]' : `fill-white`}`}
-                      stroke={selectedNode?.id === node.id ? `var(--teal)` : `var(--${node.color})`}
+                      stroke={selectedNode?.id === node.id ? 'var(--teal)' : 'var(--' + node.color + ')'}
                       strokeWidth={4}
                     />
                     <text 
@@ -150,9 +150,17 @@ export default function TransversalPage() {
                 <div key={i} className="bg-white p-5 rounded-[24px] border border-[#f0eee8] shadow-sm flex items-center justify-between">
                   <div>
                     <div className="text-[10px] font-bold text-[var(--ink3)] uppercase mb-1">{stat.label}</div>
-                    <div className={`text-xl font-black text-[var(--${stat.color})]`}>{stat.value}</div>
+                    <div 
+                      className="text-xl font-black"
+                      style={{ color: 'var(--' + stat.color + ')' }}
+                    >
+                      {stat.value}
+                    </div>
                   </div>
-                  <stat.icon className={`w-8 h-8 opacity-20 text-[var(--${stat.color})]`} />
+                  <stat.icon 
+                    className="w-8 h-8 opacity-20" 
+                    style={{ color: 'var(--' + stat.color + ')' }}
+                  />
                 </div>
               ))}
             </div>

@@ -13,10 +13,16 @@ const ReportCard = ({ title, desc, icon: Icon, color, onGenerate }: any) => (
   <motion.div 
     whileHover={{ y: -5, scale: 1.02 }}
     className="fp-card border-none bg-white p-6 shadow-sm hover:shadow-xl transition-all cursor-pointer relative overflow-hidden group border-b-4"
-    style={{ borderBottomColor: `var(--${color})` }}
+    style={{ borderBottomColor: 'var(--' + color + ')' }}
   >
-    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:rotate-12 bg-[var(--${color}2)]`}>
-      <Icon className={`w-6 h-6 text-[var(--${color})]`} />
+    <div 
+      className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:rotate-12"
+      style={{ backgroundColor: 'var(--' + color + '2)' }}
+    >
+      <Icon 
+        className="w-6 h-6" 
+        style={{ color: 'var(--' + color + ')' }}
+      />
     </div>
     
     <h3 className="text-[15px] font-bold text-[var(--ink)] mb-2">{title}</h3>
@@ -50,7 +56,10 @@ export default function ReportsPage() {
       {isGenerating && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center">
           <div className="bg-white p-10 rounded-3xl text-center max-w-sm animate-in zoom-in-95 duration-200">
-            <div className="w-20 h-20 border-4 border-[var(--teal2)] border-t-[var(--teal)] rounded-full animate-spin mx-auto mb-6"></div>
+            <div 
+              className="w-20 h-20 border-4 rounded-full animate-spin mx-auto mb-6"
+              style={{ borderColor: 'var(--teal2)', borderTopColor: 'var(--teal)' }}
+            />
             <h2 className="text-xl font-bold mb-2">Compilando Informe...</h2>
             <p className="text-xs text-[var(--ink3)]">Extrayendo trazabilidad, métricas de seguimiento y cobertura de decretos.</p>
           </div>
@@ -60,7 +69,12 @@ export default function ReportsPage() {
         <header className="mb-10 p-6 bg-gradient-to-br from-[var(--ink)] to-[#1a1a1a] rounded-3xl text-white relative overflow-hidden shadow-2xl shadow-[var(--ink)]/20">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="text-[10px] text-[var(--teal2)] font-black uppercase tracking-[0.3em] mb-2 opacity-80">Phase 2.1 • Document Excellence</div>
+              <div 
+                className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 opacity-80"
+                style={{ color: 'var(--teal2)' }}
+              >
+                Phase 2.1 • Document Excellence
+              </div>
               <h1 className="text-3xl font-bold font-serif mb-2 tracking-tight">Centro de Informes y Memorias</h1>
               <p className="text-[13px] text-white/60 max-w-lg">Consolida automáticamente meses de actividad académica en documentos oficiales listos para inspección o auditoría con un clic.</p>
             </div>
@@ -130,7 +144,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Configuración de Reportes */}
-          <div className="fp-card border-none bg-[var(--surface)] p-8">
+          <div className="fp-card border-none p-8" style={{ backgroundColor: 'var(--surface)' }}>
             <h2 className="text-lg font-bold font-serif mb-6 flex items-center gap-2">
               <Settings className="w-4 h-4 text-[var(--ink3)]" /> Configuración
             </h2>
@@ -139,8 +153,18 @@ export default function ReportsPage() {
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-[var(--ink2)] tracking-widest">Formato de Exportación</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <button className="p-2 border-2 border-[var(--teal)] rounded-xl text-[10px] font-bold text-[var(--teal)] bg-[var(--teal2)]">PDF (Oficial)</button>
-                  <button className="p-2 border border-[#e5e3dc] rounded-xl text-[10px] font-bold text-[var(--ink3)]">Excel (Editable)</button>
+                  <button 
+                    className="p-2 border-2 border-[#0d6e6e] rounded-xl text-[10px] font-bold"
+                    style={{ backgroundColor: 'var(--teal2)', color: 'var(--teal)' }}
+                  >
+                    PDF (Oficial)
+                  </button>
+                  <button 
+                    className="p-2 border border-[#e5e3dc] rounded-xl text-[10px] font-bold"
+                    style={{ color: 'var(--ink3)' }}
+                  >
+                    Excel (Editable)
+                  </button>
                 </div>
               </div>
 

@@ -21,16 +21,16 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="fp-card">
-          <div className="text-[26px] font-semibold text-[var(--ink)] leading-none">12</div>
-          <div className="text-[11px] text-[var(--ink3)] mt-1 font-bold uppercase tracking-wider">Unidades Activas</div>
+          <div className="text-[26px] font-semibold leading-none" style={{ color: 'var(--ink)' }}>12</div>
+          <div className="text-[11px] mt-1 font-bold uppercase tracking-wider" style={{ color: 'var(--ink3)' }}>Unidades Activas</div>
         </div>
         <div className="fp-card">
-          <div className="text-[26px] font-semibold text-[var(--teal)] leading-none">84%</div>
-          <div className="text-[11px] text-[var(--ink3)] mt-1 font-bold uppercase tracking-wider">Progreso Medio</div>
+          <div className="text-[26px] font-semibold leading-none" style={{ color: 'var(--teal)' }}>84%</div>
+          <div className="text-[11px] mt-1 font-bold uppercase tracking-wider" style={{ color: 'var(--ink3)' }}>Progreso Medio</div>
         </div>
         <div className="fp-card">
-          <div className="text-[26px] font-semibold text-[var(--amber)] leading-none">3</div>
-          <div className="text-[11px] text-[var(--ink3)] mt-1 font-bold uppercase tracking-wider">Cambios Pendientes</div>
+          <div className="text-[26px] font-semibold leading-none" style={{ color: 'var(--amber)' }}>3</div>
+          <div className="text-[11px] mt-1 font-bold uppercase tracking-wider" style={{ color: 'var(--ink3)' }}>Cambios Pendientes</div>
         </div>
       </div>
 
@@ -39,7 +39,12 @@ export default function DashboardPage() {
         <div className="fp-card">
           <h2 className="font-bold text-sm mb-4 flex items-center justify-between">
             Actividad del Currículo
-            <span className="text-[10px] text-[var(--teal)] font-bold cursor-pointer hover:underline">Ver Historial</span>
+            <span 
+              className="text-[10px] font-bold cursor-pointer hover:underline"
+              style={{ color: 'var(--teal)' }}
+            >
+              Ver Historial
+            </span>
           </h2>
           
           <div className="space-y-3">
@@ -50,14 +55,18 @@ export default function DashboardPage() {
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3 py-2 border-b border-[#f0eee8] last:border-none">
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-[var(--ink)]">{item.title}</div>
-                  <div className="text-[11px] text-[var(--ink3)]">{item.sub}</div>
+                  <div className="text-sm font-medium" style={{ color: 'var(--ink)' }}>{item.title}</div>
+                  <div className="text-[11px]" style={{ color: 'var(--ink3)' }}>{item.sub}</div>
                 </div>
-                <span className={`fp-badge ${
-                  item.color === 'amber' ? 'bg-[var(--amber2)] text-[var(--amber)]' :
-                  item.color === 'teal' ? 'bg-[var(--teal2)] text-[var(--teal)]' :
-                  'bg-[var(--bg2)] text-[var(--ink3)]'
-                }`}>
+                <span 
+                  className="fp-badge"
+                  style={{ 
+                    backgroundColor: item.color === 'amber' ? 'var(--amber2)' : 
+                                   item.color === 'teal' ? 'var(--teal2)' : 'var(--bg2)',
+                    color: item.color === 'amber' ? 'var(--amber)' : 
+                           item.color === 'teal' ? 'var(--teal)' : 'var(--ink3)'
+                  }}
+                >
                   {item.status}
                 </span>
               </div>
@@ -66,10 +75,13 @@ export default function DashboardPage() {
         </div>
 
         {/* Cola de Aprobación para Jefe de Departamento */}
-        <div className="fp-card border-none bg-[var(--ink)] text-white shadow-xl shadow-[var(--ink)]/10">
+        <div 
+          className="fp-card border-none text-white shadow-xl" 
+          style={{ backgroundColor: 'var(--ink)', boxShadow: '0 20px 25px -5px rgba(26, 26, 36, 0.25)' }}
+        >
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-bold text-sm tracking-widest uppercase flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[var(--teal)]" />
+              <ShieldCheck className="w-4 h-4" style={{ color: 'var(--teal)' }} />
               Cola de Validación
             </h2>
             <span className="px-2 py-0.5 bg-white/10 rounded-full text-[10px] font-black">4 PENDIENTES</span>
@@ -88,14 +100,23 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-[11px] opacity-60 mb-3">{task.author} en {task.doc}</div>
                 <div className="flex gap-2">
-                  <button className="flex-1 py-1.5 bg-[var(--teal)] text-white text-[10px] font-bold rounded-lg shadow-lg shadow-[var(--teal)]/10 group-hover:scale-[1.02] transition-transform">Revisar</button>
+                  <button 
+                    className="flex-1 py-1.5 text-white text-[10px] font-bold rounded-lg shadow-lg group-hover:scale-[1.02] transition-transform"
+                    style={{ backgroundColor: 'var(--teal)', boxShadow: '0 10px 15px -3px rgba(13, 110, 110, 0.2)' }}
+                  >
+                    Revisar
+                  </button>
                   <button className="px-2 py-1.5 bg-white/10 text-white text-[10px] font-bold rounded-lg hover:bg-white/20">Aprobar</button>
                 </div>
               </div>
             ))}
           </div>
           
-          <Link href="/dashboard/programaciones" className="mt-6 block text-center text-[10px] font-black uppercase tracking-widest text-[var(--teal2)] hover:text-white transition-colors">
+          <Link 
+            href="/dashboard/programaciones" 
+            className="mt-6 block text-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors"
+            style={{ color: 'var(--teal2)' }}
+          >
             Ver todas las programaciones →
           </Link>
         </div>

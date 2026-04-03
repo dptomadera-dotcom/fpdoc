@@ -90,12 +90,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </span>
                   <span>{item.label}</span>
                   {item.badge && (
-                    <span className={`ml-auto px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                      item.badge.color === 'red' ? 'bg-[var(--red2)] text-[var(--red)]' :
-                      item.badge.color === 'amber' ? 'bg-[var(--amber2)] text-[var(--amber)]' :
-                      item.badge.color === 'teal' ? 'bg-[var(--teal2)] text-[var(--teal)]' :
-                      'bg-[var(--bg2)] text-[var(--ink3)] border border-[#e5e3dc]'
-                    }`}>
+                    <span 
+                      className="ml-auto px-2 py-0.5 rounded-full text-[9px] font-bold"
+                      style={{ 
+                        backgroundColor: item.badge.color === 'red' ? 'var(--red2)' : 
+                                       item.badge.color === 'amber' ? 'var(--amber2)' : 
+                                       item.badge.color === 'teal' ? 'var(--teal2)' : 'var(--bg2)',
+                        color: item.badge.color === 'red' ? 'var(--red)' : 
+                               item.badge.color === 'amber' ? 'var(--amber)' : 
+                               item.badge.color === 'teal' ? 'var(--teal)' : 'var(--ink3)',
+                        border: !item.badge.color ? '1px solid #e5e3dc' : 'none'
+                      }}
+                    >
                       {item.badge.text}
                     </span>
                   )}
@@ -104,10 +110,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             })}
           </div>
 
-          <div className="mt-auto p-4 bg-[var(--bg2)] rounded-2xl border border-[#e5e3dc] relative overflow-hidden group">
+          <div 
+            className="mt-auto p-4 rounded-2xl border border-[#e5e3dc] relative overflow-hidden group"
+            style={{ backgroundColor: 'var(--bg2)' }}
+          >
             <div className="relative z-10">
-              <div className="text-[10px] font-bold text-[var(--ink)] uppercase tracking-widest mb-1">Centro Educativo</div>
-              <div className="text-[11px] text-[var(--ink3)] font-medium">IES Antigravity Tech</div>
+              <div 
+                className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                style={{ color: 'var(--ink)' }}
+              >
+                Centro Educativo
+              </div>
+              <div 
+                className="text-[11px] font-medium"
+                style={{ color: 'var(--ink3)' }}
+              >
+                IES Antigravity Tech
+              </div>
             </div>
             <div className="absolute -right-4 -bottom-4 text-4xl opacity-5 group-hover:opacity-10 transition-opacity rotate-12">🏢</div>
           </div>
@@ -118,11 +137,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <header className="mb-10 flex justify-between items-end">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                  currentRole === 'JEFE' ? 'bg-[var(--teal)] text-white' :
-                  currentRole === 'DOCENTE' ? 'bg-blue-600 text-white' :
-                  'bg-orange-500 text-white'
-                } shadow-sm`}>
+                <span 
+                  className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm"
+                  style={{ 
+                    backgroundColor: currentRole === 'JEFE' ? 'var(--teal)' : 
+                                   currentRole === 'DOCENTE' ? '#2563eb' : '#f97316',
+                    color: 'white'
+                  }}
+                >
                   {currentRole === 'JEFE' ? 'Jefe Dpto.' : currentRole === 'DOCENTE' ? 'Docente' : 'Alumno'}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-[var(--ink3)] opacity-30" />

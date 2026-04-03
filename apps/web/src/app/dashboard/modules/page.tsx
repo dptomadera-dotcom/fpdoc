@@ -18,7 +18,10 @@ const ModuleProgressCard = ({ module, index }: any) => (
     style={{ borderLeftColor: module.progress > 80 ? 'var(--teal)' : module.progress > 40 ? 'var(--amber)' : 'var(--red)' }}
   >
     <div className="flex justify-between items-start mb-4">
-      <div className={`p-3 rounded-2xl bg-[var(--bg2)] text-[var(--ink)] group-hover:bg-[var(--ink)] group-hover:text-white transition-colors`}>
+      <div 
+        className="p-3 rounded-2xl group-hover:text-white transition-colors"
+        style={{ backgroundColor: 'var(--bg2)', color: 'var(--ink)' }}
+      >
         <BookOpen className="w-5 h-5" />
       </div>
       <div className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-[0.2em]">{module.id} • 1º DAW</div>
@@ -133,7 +136,11 @@ export default function StudentModulesPage() {
                 { mod: 'SI', ra: 'RA 2: Servidores', desc: 'Instalación básica de Linux Server.', date: 'Semana 10' },
                 { mod: 'PR', ra: 'RA 5: Gestión memoria', desc: 'Control de punteros y buffers.', date: 'Semana 14' },
               ].map((goal, i) => (
-                <div key={i} className="flex items-center gap-4 p-4 bg-[var(--bg2)]/50 rounded-2xl border border-transparent hover:border-[var(--teal2)] hover:bg-white hover:shadow-lg transition-all cursor-pointer group/item">
+                <div 
+                  key={i} 
+                  className="flex items-center gap-4 p-4 rounded-2xl border border-transparent hover:border-[var(--teal2)] hover:bg-white hover:shadow-lg transition-all cursor-pointer group/item"
+                  style={{ backgroundColor: 'rgba(236, 234, 228, 0.5)' }}
+                >
                   <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center font-black text-[var(--ink)] text-[11px]">
                     {goal.mod}
                   </div>
@@ -153,8 +160,8 @@ export default function StudentModulesPage() {
           </div>
 
           <div className="bg-[var(--bg2)]/80 p-8 rounded-[32px] border border-[#e5e3dc] relative overflow-hidden flex flex-col items-center text-center justify-center">
-            <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mb-6 shadow-xl border border-[#f0eee8] transform rotate-12 group-hover:rotate-0 transition-transform">
-              <grad-icon className="text-3xl">🏅</grad-icon>
+            <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mb-6 shadow-xl border border-[#f0eee8] transform rotate-12 group-hover:rotate-0 transition-transform text-3xl">
+              🏅
             </div>
             <h3 className="text-lg font-bold font-serif mb-2">Insignias por Desbloquear</h3>
             <p className="text-[11px] text-[var(--ink3)] leading-relaxed mb-6">Completa todos los criterios de evaluación de un RA para ganar tu insignia oficial de módulo.</p>
