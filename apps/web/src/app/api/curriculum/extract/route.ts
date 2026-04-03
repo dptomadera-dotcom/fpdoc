@@ -1,21 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 // @ts-ignore
-import pdf from 'pdf-parse/lib/pdf-parse.js';
+import * as pdf_parse from 'pdf-parse';
+const pdf = (pdf_parse as any).default || pdf_parse;
+
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
+
     if (!file) {
       return NextResponse.json({ error: 'No se envió ningún archivo.' }, { status: 400 });
     }
 
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+
     // Extract text from PDF
     const data = await pdf(buffer);
+
 
     return NextResponse.json({
       text: data.text,
