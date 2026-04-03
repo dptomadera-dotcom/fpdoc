@@ -2,6 +2,13 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "fpdoc-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "frontend", "dev"],
+      "port": 3001,
+      "autoPort": true
+    },
+    {
       "name": "fpdoc-static",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "apps/web/out", "-p", "3003", "--no-clipboard"],

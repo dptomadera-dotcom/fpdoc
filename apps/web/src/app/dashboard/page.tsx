@@ -204,9 +204,9 @@ function DashboardJefe({ user }: { user: any }) {
           </div>
           <div className="space-y-3">
             {[
-              { author: 'J. Pérez', type: 'Cambio UT', doc: 'Sistemas Inf.', time: '2h', link: '/dashboard/programaciones/default/' },
-              { author: 'L. Mosa', type: 'Nuevo RA', doc: 'Bases de Datos', time: '5h', link: '/dashboard/programaciones/default/' },
-              { author: 'R. Velasco', type: 'Ajuste CE', doc: 'Programación', time: '1d', link: '/dashboard/settings/' },
+              { author: 'J. Pérez', type: 'Cambio UT', doc: 'Sistemas Inf.', time: '2h', link: '/dashboard/programaciones' },
+              { author: 'L. Mosa', type: 'Nuevo RA', doc: 'Bases de Datos', time: '5h', link: '/dashboard/programaciones' },
+              { author: 'R. Velasco', type: 'Ajuste CE', doc: 'Programación', time: '1d', link: '/dashboard/settings' },
             ].map((task, i) => (
               <div key={i} className="p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
                 <div className="flex justify-between items-start mb-1">
@@ -302,12 +302,14 @@ export default function DashboardPage() {
     setLoading(false);
   }, []);
 
-  const role = user?.role || 'PROFESOR';
+  // REFUERZO: Si el email es el de departamento, forzar JEFATURA
+  const isDeptEmail = user?.email?.toLowerCase() === 'departamento.madera@gmail.com';
+  const role = isDeptEmail ? 'JEFATURA' : (user?.role || 'PROFESOR');
 
   const ROLE_HEADERS: Record<string, { title: string; sub: string; color: string }> = {
     ALUMNO: { title: 'Mi espacio formativo', sub: 'Consulta tus módulos, actividades y seguimiento FCT.', color: '#0d6e6e' },
     PROFESOR: { title: 'Panel del docente', sub: 'Gestiona tus programaciones, RA y unidades de trabajo.', color: '#7c3aed' },
-    JEFATURA: { title: 'Panel de jefatura', sub: 'Supervisa el ciclo completo y valida las programaciones.', color: '#b45309' },
+    JEFATURA: { title: 'Panel de Departamento', sub: 'Supervisa el ciclo completo y valida las programaciones.', color: '#b45309' },
   };
 
   const header = ROLE_HEADERS[role] || ROLE_HEADERS['PROFESOR'];

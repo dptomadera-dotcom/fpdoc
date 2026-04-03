@@ -29,6 +29,21 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Evita que el file watcher entre en loop con el junction .next → AppData
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: [
+          '**/node_modules/**',
+          '**/.next/**',
+          '**/out/**',
+          '**/AppData/**',
+        ],
+      };
+    }
+    return config;
+  },
 };
 
 export default withPWA(nextConfig);

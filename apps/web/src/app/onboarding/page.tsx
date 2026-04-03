@@ -304,7 +304,7 @@ const ROLE_CONFIG: Record<string, {
     Icon: GraduationCap,
     label: 'Alumnado',
     intro: 'Este cuestionario nos ayuda a conocerte desde el primer día y adaptar tu itinerario formativo. Solo son datos educativos, no invasivos. Se completa en 3 pasos.',
-    redirect: typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/fpdoc/dashboard' : '/dashboard',
+    redirect: '/dashboard',
   },
   PROFESOR: {
     steps: STEPS_PROFESOR,
@@ -314,7 +314,7 @@ const ROLE_CONFIG: Record<string, {
     Icon: BookOpen,
     label: 'Profesorado',
     intro: 'Configura la información estructural de los módulos que impartirás. Con esto el sistema construye la base de tu programación didáctica desde el primer día.',
-    redirect: typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/fpdoc/dashboard/programaciones' : '/dashboard/programaciones',
+    redirect: '/dashboard/programaciones',
   },
   JEFATURA: {
     steps: STEPS_JEFATURA,
@@ -324,7 +324,7 @@ const ROLE_CONFIG: Record<string, {
     Icon: ShieldCheck,
     label: 'Jefe de Dpto.',
     intro: 'Define el marco organizativo del departamento para el curso. Esta configuración inicial permite que todo el equipo trabaje sobre una base común validada.',
-    redirect: typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/fpdoc/dashboard' : '/dashboard',
+    redirect: '/dashboard',
   },
 };
 
@@ -344,14 +344,14 @@ function FieldInput({
     return (
       <div className="space-y-2">
         {field.options!.map(opt => (
-          <label key={opt} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${value === opt ? 'border-current bg-current/5' : 'border-[#f0eee8] hover:border-[#e0ddd6]'}`}
-            style={value === opt ? { borderColor: color, background: `${color}10` } : {}}>
+          <label key={opt} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${value === opt ? 'border-current bg-current/10' : 'border-white/10 hover:border-white/20 bg-white/5'}`}
+            style={value === opt ? { borderColor: color } : {}}>
             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all`}
-              style={{ borderColor: value === opt ? color : '#d1cfc9' }}>
+              style={{ borderColor: value === opt ? color : 'rgba(255,255,255,0.2)' }}>
               {value === opt && <div className="w-2 h-2 rounded-full" style={{ background: color }} />}
             </div>
             <input type="radio" className="sr-only" checked={value === opt} onChange={() => onChange(field.key, opt)} />
-            <span className="text-sm text-[var(--ink)]">{opt}</span>
+            <span className="text-sm text-white font-medium">{opt}</span>
           </label>
         ))}
       </div>
@@ -365,10 +365,10 @@ function FieldInput({
         {field.options!.map(opt => {
           const checked = selected.includes(opt);
           return (
-            <label key={opt} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all`}
-              style={checked ? { borderColor: color, background: `${color}10` } : { borderColor: '#f0eee8' }}>
+            <label key={opt} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${checked ? 'bg-white/10' : 'bg-white/5 border-white/10'}`}
+              style={checked ? { borderColor: color } : {}}>
               <div className={`w-4 h-4 rounded-md border-2 flex items-center justify-center flex-shrink-0`}
-                style={{ borderColor: checked ? color : '#d1cfc9', background: checked ? color : 'transparent' }}>
+                style={{ borderColor: checked ? color : 'rgba(255,255,255,0.2)', background: checked ? color : 'transparent' }}>
                 {checked && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
               </div>
               <input type="checkbox" className="sr-only" checked={checked}
@@ -376,7 +376,7 @@ function FieldInput({
                   const next = checked ? selected.filter(s => s !== opt) : [...selected, opt];
                   onChange(field.key, next);
                 }} />
-              <span className="text-sm text-[var(--ink)]">{opt}</span>
+              <span className="text-sm text-white font-medium">{opt}</span>
             </label>
           );
         })}
@@ -391,7 +391,7 @@ function FieldInput({
         onChange={e => onChange(field.key, e.target.value)}
         placeholder={field.placeholder}
         rows={4}
-        className="w-full bg-[var(--bg1)] border border-[#f0eee8] rounded-2xl px-4 py-3 text-sm text-[var(--ink)] placeholder-[var(--ink3)]/50 resize-none outline-none transition-all focus:border-current focus:bg-white"
+        className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder-white/20 resize-none outline-none transition-all focus:border-current focus:bg-white/10"
         style={{ '--tw-ring-color': color } as any}
         onFocus={e => { e.target.style.borderColor = color; }}
         onBlur={e => { e.target.style.borderColor = ''; }}
@@ -433,7 +433,7 @@ function FieldInput({
       value={value || ''}
       onChange={e => onChange(field.key, e.target.value)}
       placeholder={field.placeholder}
-      className="w-full h-12 bg-[var(--bg1)] border border-[#f0eee8] rounded-2xl px-4 text-sm text-[var(--ink)] outline-none transition-all focus:bg-white"
+      className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 text-sm text-white placeholder-white/20 outline-none transition-all focus:bg-white/10"
       onFocus={e => { e.target.style.borderColor = color; }}
       onBlur={e => { e.target.style.borderColor = ''; }}
     />
@@ -451,8 +451,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const u = authService.getCurrentUser();
-    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
-    if (!u) { router.push(isProd ? '/fpdoc/login' : '/login'); return; }
+    if (!u) { router.push('/login'); return; }
     setUser(u);
   }, [router]);
 
@@ -520,15 +519,15 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-[var(--bg1)] flex flex-col">
       {/* ── Header fijo ── */}
-      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-[#f0eee8] px-6 py-4">
+      <header className="sticky top-0 z-20 bg-[#0a0a0b]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: bg, border: `1.5px solid ${color}30` }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${color}10`, border: `1.5px solid ${color}30` }}>
               <Icon className="w-4 h-4" style={{ color }} />
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest" style={{ color }}>Cuestionario inicial</p>
-              <p className="text-xs font-bold text-[var(--ink)]">{label}</p>
+              <p className="text-xs font-bold text-white">{label}</p>
             </div>
           </div>
 
@@ -539,11 +538,11 @@ export default function OnboardingPage() {
                 {steps.map((_, i) => (
                   <div key={i} className="h-1.5 rounded-full transition-all" style={{
                     width: i < step ? '24px' : '8px',
-                    background: i < step ? color : '#f0eee8',
+                    background: i < step ? color : 'rgba(255,255,255,0.1)',
                   }} />
                 ))}
               </div>
-              <span className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest">{step}/{totalSteps}</span>
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{step}/{totalSteps}</span>
             </div>
           )}
         </div>
@@ -572,19 +571,19 @@ export default function OnboardingPage() {
                   Perfil inicial · {label}
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-bold font-serif text-[var(--ink)] tracking-tight mb-4">
+                <h1 className="text-4xl md:text-5xl font-bold font-serif text-white tracking-tight mb-4">
                   Bienvenido/a,<br /><span style={{ color }}>{user.firstName || user.email?.split('@')[0]}</span>
                 </h1>
 
-                <p className="text-base text-[var(--ink3)] leading-relaxed max-w-lg mx-auto mb-10">
+                <p className="text-base text-white/60 leading-relaxed max-w-lg mx-auto mb-10">
                   {intro}
                 </p>
 
                 <div className="grid grid-cols-3 gap-4 mb-10 max-w-sm mx-auto">
                   {steps.map((s, i) => (
-                    <div key={i} className="text-center p-4 bg-white rounded-2xl border border-[#f0eee8]">
+                    <div key={i} className="text-center p-4 bg-white/5 rounded-2xl border border-white/10">
                       <div className="text-2xl font-bold font-serif mb-1" style={{ color }}>{i + 1}</div>
-                      <div className="text-[10px] font-bold text-[var(--ink3)] leading-tight">{s.title.split(' ').slice(0, 3).join(' ')}</div>
+                      <div className="text-[10px] font-bold text-white/40 leading-tight">{s.title.split(' ').slice(0, 3).join(' ')}</div>
                     </div>
                   ))}
                 </div>
@@ -599,7 +598,7 @@ export default function OnboardingPage() {
 
                 <button
                   onClick={() => router.push(redirect)}
-                  className="mt-4 block text-center text-[11px] font-bold text-[var(--ink3)] hover:text-[var(--ink)] transition-colors mx-auto"
+                  className="mt-4 block text-center text-[11px] font-bold text-white/40 hover:text-white transition-colors mx-auto"
                 >
                   Omitir por ahora →
                 </button>
@@ -617,11 +616,8 @@ export default function OnboardingPage() {
               >
                 {/* Título del paso */}
                 <div className="mb-8">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest" style={{ color }}>Paso {step} de {totalSteps}</span>
-                  </div>
-                  <h2 className="text-3xl font-bold font-serif text-[var(--ink)] tracking-tight">{currentStep.title}</h2>
-                  <p className="text-sm text-[var(--ink3)] mt-1 leading-relaxed">{currentStep.subtitle}</p>
+                  <h2 className="text-2xl font-bold text-white mb-2">{currentStep.title}</h2>
+                  <p className="text-sm text-white/60">{currentStep.subtitle}</p>
                 </div>
 
                 {/* Campos */}

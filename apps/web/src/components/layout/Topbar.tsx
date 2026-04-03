@@ -18,7 +18,6 @@ export default function Topbar() {
   const [user, setUser] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-  const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
 
   useEffect(() => {
     setUser(authService.getCurrentUser());
@@ -35,8 +34,7 @@ export default function Topbar() {
   const handleLogout = async () => {
     setMenuOpen(false);
     await authService.logout();
-    const loginPath = isProd ? '/fpdoc/login' : '/login';
-    window.location.href = loginPath;
+    window.location.href = '/login';
   };
 
   const roleMeta = user ? (ROLE_META[user.role] || ROLE_META['PROFESOR']) : null;
@@ -164,7 +162,7 @@ export default function Topbar() {
           </>
         ) : (
           <div className="flex items-center gap-3">
-            <Link href={isProd ? "/fpdoc/login" : "/login"} className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+            <Link href="/login" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">
               Iniciar sesión
             </Link>
           </div>

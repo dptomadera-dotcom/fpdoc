@@ -25,8 +25,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     authService.logout();
-    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
-    window.location.href = isProd ? '/fpdoc/login' : '/login';
+    window.location.href = '/login';
   };
 
   const getInitials = (email: string) => {
@@ -90,7 +89,7 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-4">
-                <Link href={typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? "/fpdoc/login" : "/login"} className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Acceder</Link>
+                <Link href="/login" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Acceder</Link>
                 <Link href="/register" className="h-11 px-6 bg-[var(--teal)] text-white text-[10px] font-black rounded-2xl transition-all shadow-xl shadow-[var(--teal)]/20 uppercase tracking-widest flex items-center">
                   Empieza Gratis
                 </Link>
@@ -142,7 +141,7 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href={typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? "/fpdoc/login" : "/login"} onClick={() => setMobileOpen(false)} className="flex items-center justify-center h-16 px-6 rounded-[24px] bg-white/5 border border-white/5 text-white font-black text-sm uppercase tracking-widest shadow-sm">
+                <Link href="/login" onClick={() => setMobileOpen(false)} className="flex items-center justify-center h-16 px-6 rounded-[24px] bg-white/5 border border-white/5 text-white font-black text-sm uppercase tracking-widest shadow-sm">
                   Iniciar Sesión
                 </Link>
                 <Link href="/register" onClick={() => setMobileOpen(false)} className="flex items-center justify-center h-16 px-6 rounded-[24px] bg-[var(--teal)] text-white font-black text-sm uppercase tracking-widest shadow-2xl shadow-[var(--teal)]/30">

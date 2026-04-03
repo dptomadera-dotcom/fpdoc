@@ -77,6 +77,34 @@ export default function LoginPage() {
     return r?.redirect || '/dashboard';
   };
 
+  const handleGoogleLogin = async (roleValue: 'PROFESOR' | 'ALUMNO' | 'JEFATURA') => {
+    setLoading(true);
+    try {
+      // 🏗️ SIMULACIÓN LOGIN (Sustituir por Supabase real en producción)
+      // Forzamos el role que el usuario ha solicitado al pulsar el botón
+      const mockUser = {
+        id: '1',
+        email: 'departamento.madera@gmail.com', // Forzado para desarrollo
+        role: roleValue,
+        firstName: 'Usuario',
+        lastName: 'Demo'
+      };
+      
+      authService.setUser(mockUser);
+      
+      // 🧭 REDIRECCIÓN SEGÚN ROL
+      if (roleValue === 'JEFATURA') {
+        router.push('/dashboard');
+      } else if (roleValue === 'PROFESOR') {
+        router.push('/dashboard/programaciones');
+      } else {
+        router.push('/onboarding');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -94,6 +122,10 @@ export default function LoginPage() {
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {
     setError('');
+    // Guardar rol seleccionado para recuperarlo tras el redirect de OAuth
+    if (selectedRole) {
+      sessionStorage.setItem('selectedRole', selectedRole);
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: window.location.origin + window.location.pathname },
@@ -107,11 +139,14 @@ export default function LoginPage() {
       if (session?.user) {
         setLoading(true);
         try {
+          const storedRole = sessionStorage.getItem('selectedRole');
           const { user } = await authService.socialLogin({
             email: session.user.email!,
+            role: storedRole || undefined,
             firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name?.split(' ')[0] || '',
             lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.full_name?.split(' ')[1] || '',
           });
+          sessionStorage.removeItem('selectedRole');
           router.push(getRedirectForRole(user.role));
         } catch (err: any) {
           setError(extractErrorMessage(err));
@@ -331,8 +366,34 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Acceso rápido (solo dev) */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-6">
+              <div className="relative flex items-center gap-4 text-[10px] font-black uppercase text-white/20 tracking-[0.2em] mb-3">
+                <div className="flex-1 h-px bg-white/10" />Acceso rápido dev<div className="flex-1 h-px bg-white/10" />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {ROLES.map(r => {
+                  const Icon = r.icon;
+                  return (
+                    <button
+                      key={r.key}
+                      type="button"
+                      onClick={() => handleGoogleLogin(r.key as any)}
+                      disabled={loading}
+                      className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border border-dashed border-white/10 hover:border-white/30 hover:bg-white/5 transition-all text-center"
+                    >
+                      <Icon className="w-4 h-4" style={{ color: r.color }} />
+                      <span className="text-[9px] font-black uppercase tracking-wide text-white/40 leading-tight">{r.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* OAuth */}
-          <div className="mt-8">
+          <div className="mt-6">
             <div className="relative flex items-center gap-4 text-[10px] font-black uppercase text-white/20 tracking-[0.2em] mb-5">
               <div className="flex-1 h-px bg-white/10" />O mediante<div className="flex-1 h-px bg-white/10" />
             </div>

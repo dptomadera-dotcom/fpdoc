@@ -114,15 +114,27 @@ export const authService = {
     Cookies.remove('token');
     Cookies.remove('user');
     
-    // Redirección dinámica basada en el entorno
-    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
-    window.location.href = isProd ? '/fpdoc/login' : '/login';
+    // Redirección usando el basePath configurado en Next.js
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    window.location.href = `${basePath}/login`;
   },
 
   getCurrentUser: () => {
     if (typeof window !== 'undefined') {
-      const user = localStorage.getItem('user') || Cookies.get('user');
-      return user ? JSON.parse(user) : null;
+      const userStr = localStorage.getItem('user') || Cookies.get('user');
+      if (!userStr) return null;
+      try {
+        const user = JSON.parse(userStr);
+        // 🔥 REFUERZO DE SEGURIDAD: Override de correo institucional
+        const userEmail = user?.email?.toLowerCase();
+        const isDeptEmail = userEmail === 'departamento.madera@gmail.com';
+        user.role = isDeptEmail ? 'JEFATURA' : (user?.role || 'PROFESOR');
+        // Persistimos el override para evitar desincronizaciones
+        localStorage.setItem('user', JSON.stringify(user));
+        return user;
+      } catch {
+        return null;
+      }
     }
     return null;
   },
@@ -135,54 +147,35 @@ export const authService = {
   },
 
   forgotPassword: async (email: string) => {
-    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
-    const redirectPrefix = isProd ? '/fpdoc' : '';
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     return await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + redirectPrefix + '/reset-password',
+      redirectTo: window.location.origin + basePath + '/reset-password',
     });
   },
 
-  socialLogin: async (data: { email: string; firstName?: string; lastName?: string, id?: string }): Promise<AuthResponse> => {
-    // Si viene de un OAuth exitoso, ya tenemos la sesión en Supabase.
-    // Solo aseguramos que el perfil público exista.
+  setUser: (userData: any) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(userData));
+      Cookies.set('user', JSON.stringify(userData), { expires: 7 });
+    }
+  },
+
+  socialLogin: async (data: { email: string; firstName?: string; lastName?: string, id?: string, role?: string }): Promise<AuthResponse> => {
     const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) throw new Error('No hay sesión activa');
+    if (!session?.user) throw new Error('No hay sesión activa de Supabase');
 
-    // Verificar si existe el perfil
-    const { data: existingProfile } = await supabase
-      .from('User')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-
-    if (!existingProfile) {
-      // Regla especial: el correo del departamento es siempre JEFATURA
-      const initialRole = session.user.email === 'departamento.madera@gmail.com' ? 'JEFATURA' : 'ALUMNO';
-      
-      const { error: insertError } = await supabase.from('User').insert({
-        id: session.user.id,
-        email: session.user.email!,
-        passwordHash: 'SOCIAL_AUTH',
-        firstName: data.firstName || session.user.user_metadata?.full_name?.split(' ')[0] || '',
-        lastName: data.lastName || session.user.user_metadata?.full_name?.split(' ')[1] || '',
-        role: initialRole,
-      });
-
-      if (insertError) {
-        console.warn('Advertencia: No se pudo crear el perfil público para el login social:', insertError);
-      }
+    // Lógica de rol simplificada y robusta
+    let finalRole = data.role || 'ALUMNO';
+    if (session.user.email?.toLowerCase() === 'departamento.madera@gmail.com') {
+      finalRole = 'JEFATURA';
     }
 
     const userData = {
       id: session.user.id,
       email: session.user.email!,
-      role: (session.user.email === 'departamento.madera@gmail.com') 
-        ? 'JEFATURA' 
-        : (existingProfile?.role || 'ALUMNO'),
-      firstName: existingProfile?.firstName || data.firstName,
-      lastName: existingProfile?.lastName || data.lastName,
-      departmentId: existingProfile?.departmentId,
+      role: finalRole as any,
+      firstName: data.firstName || session.user.user_metadata?.full_name?.split(' ')[0] || '',
+      lastName: data.lastName || session.user.user_metadata?.full_name?.split(' ')[1] || '',
     };
 
     localStorage.setItem('token', session.access_token);

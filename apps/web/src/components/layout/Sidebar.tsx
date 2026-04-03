@@ -41,7 +41,7 @@ const navigation: NavItem[] = [
 
   // ── Alumno ──
   { name: 'Mis Módulos', href: '/dashboard/programaciones', icon: FolderOpen, roles: ['ALUMNO'], group: 'alumno' },
-  { name: 'Mi Progreso', href: '/dashboard', icon: BarChart3, roles: ['ALUMNO'], group: 'alumno' },
+  { name: 'Mi Progreso', href: '/dashboard/modules', icon: BarChart3, roles: ['ALUMNO'], group: 'alumno' },
 
   // ── Docente + Jefe ──
   { name: 'Programaciones', href: '/dashboard/programaciones', icon: BookOpen, roles: ['JEFATURA', 'PROFESOR'], group: 'docente' },
@@ -51,14 +51,14 @@ const navigation: NavItem[] = [
 
   // ── Solo Jefe ──
   { name: 'Transversalidad', href: '/dashboard/transversal', icon: Target, roles: ['JEFATURA'], group: 'jefe' },
-  { name: 'Coordinación', href: '/dashboard', icon: Users, roles: ['JEFATURA'], group: 'jefe' },
+  { name: 'Coordinación', href: '/dashboard/reports', icon: Users, roles: ['JEFATURA'], group: 'jefe' },
   { name: 'Informes', href: '/dashboard/reports', icon: BarChart3, roles: ['JEFATURA'], group: 'jefe' },
 ];
 
 const ROLE_META: Record<string, { label: string; color: string; bg: string; Icon: any }> = {
   ALUMNO: { label: 'Alumnado', color: 'var(--teal)', bg: 'rgba(20, 184, 166, 0.1)', Icon: GraduationCap },
-  PROFESOR: { label: 'Docente', color: '#a78bfa', bg: 'rgba(167, 139, 250, 0.1)', Icon: BookOpen },
-  JEFATURA: { label: 'Jefe de Dpto.', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.1)', Icon: ShieldCheck },
+  PROFESOR: { label: 'Profesorado', color: '#a78bfa', bg: 'rgba(167, 139, 250, 0.1)', Icon: BookOpen },
+  JEFATURA: { label: 'Departamento', color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.1)', Icon: ShieldCheck },
 };
 
 const GROUP_LABELS: Record<string, string> = {
@@ -77,10 +77,8 @@ export default function Sidebar() {
     setUser(authService.getCurrentUser());
   }, []);
 
-  const handleLogout = () => {
-    authService.logout();
-    const isProd = window.location.hostname !== 'localhost';
-    router.push(isProd ? '/fpdoc/login' : '/login');
+  const handleLogout = async () => {
+    await authService.logout(); // ya redirige internamente vía window.location
   };
 
   const role = user?.role || 'PROFESOR';

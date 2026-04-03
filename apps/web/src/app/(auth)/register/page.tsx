@@ -47,9 +47,19 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      await authService.register(formData);
+      const { user } = await authService.register(formData);
       setSuccess(true);
-      setTimeout(() => router.push('/onboarding'), 1500);
+      
+      // Redirección inteligente post-registro manual
+      setTimeout(() => {
+        if (user.role === 'JEFATURA') {
+          router.push('/dashboard');
+        } else if (user.role === 'PROFESOR') {
+          router.push('/dashboard/programaciones');
+        } else {
+          router.push('/onboarding');
+        }
+      }, 1500);
     } catch (err: any) {
       setError(extractErrorMessage(err));
     } finally {
@@ -59,6 +69,10 @@ export default function RegisterPage() {
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {
     setError('');
+    // Guardar rol seleccionado para recuperarlo tras el redirect de OAuth
+    if (formData.role) {
+      sessionStorage.setItem('selectedRole', formData.role);
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -74,12 +88,23 @@ export default function RegisterPage() {
       if (session?.user) {
         setLoading(true);
         try {
-          await authService.socialLogin({
+          const storedRole = sessionStorage.getItem('selectedRole');
+          const { user } = await authService.socialLogin({
             email: session.user.email!,
+            role: storedRole || undefined,
             firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name?.split(' ')[0] || '',
             lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.full_name?.split(' ')[1] || '',
           });
-          router.push('/');
+          sessionStorage.removeItem('selectedRole');
+          
+          // Redirección inteligente post-registro social
+          if (user.role === 'JEFATURA') {
+            router.push('/dashboard');
+          } else if (user.role === 'PROFESOR') {
+            router.push('/dashboard/programaciones');
+          } else {
+            router.push('/onboarding');
+          }
         } catch (err: any) {
           setError(extractErrorMessage(err));
         } finally {

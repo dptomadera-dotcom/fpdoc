@@ -112,7 +112,7 @@ function ProgCard({ prog, canEdit }: { prog: Programacion; canEdit: boolean }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -3 }}
-      className="bg-white border border-[#f0eee8] rounded-3xl p-6 shadow-sm hover:shadow-md hover:border-[var(--teal)]/30 transition-all group flex flex-col"
+      className="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:border-[var(--teal)]/40 hover:bg-white/[0.07] transition-all group flex flex-col backdrop-blur-sm"
     >
       {/* Cabecera */}
       <div className="flex items-start justify-between mb-4">
@@ -130,7 +130,7 @@ function ProgCard({ prog, canEdit }: { prog: Programacion; canEdit: boolean }) {
       </div>
 
       {/* Módulo */}
-      <h3 className="text-[15px] font-bold text-[var(--ink)] mb-1 leading-snug group-hover:text-[var(--teal)] transition-colors flex-1">
+      <h3 className="text-[15px] font-bold text-white mb-1 leading-snug group-hover:text-[var(--teal)] transition-colors flex-1">
         {prog.modulo}
       </h3>
       {prog.docente && (
@@ -146,9 +146,9 @@ function ProgCard({ prog, canEdit }: { prog: Programacion; canEdit: boolean }) {
           { val: prog.utsTotal, label: 'UT' },
           { val: `${prog.horas}h`, label: 'Horas' },
         ].map((s, i) => (
-          <div key={i} className="text-center bg-[var(--bg1)] rounded-xl py-2">
-            <div className="text-sm font-bold text-[var(--ink)]">{s.val}</div>
-            <div className="text-[9px] font-black uppercase tracking-widest text-[var(--ink3)]">{s.label}</div>
+          <div key={i} className="text-center bg-white/5 rounded-xl py-2 border border-white/5">
+            <div className="text-sm font-bold text-white/90">{s.val}</div>
+            <div className="text-[9px] font-black uppercase tracking-widest text-white/40">{s.label}</div>
           </div>
         ))}
       </div>
