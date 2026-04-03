@@ -50,16 +50,8 @@ export default function RegisterPage() {
       const { user } = await authService.register(formData);
       setSuccess(true);
       
-      // Redirección inteligente post-registro manual
-      setTimeout(() => {
-        if (user.role === 'JEFATURA') {
-          router.push('/dashboard');
-        } else if (user.role === 'PROFESOR') {
-          router.push('/dashboard/programaciones');
-        } else {
-          router.push('/onboarding');
-        }
-      }, 1500);
+      // Todos los roles pasan por el cuestionario inicial
+      setTimeout(() => router.push('/onboarding'), 1500);
     } catch (err: any) {
       setError(extractErrorMessage(err));
     } finally {
@@ -97,14 +89,8 @@ export default function RegisterPage() {
           });
           sessionStorage.removeItem('selectedRole');
           
-          // Redirección inteligente post-registro social
-          if (user.role === 'JEFATURA') {
-            router.push('/dashboard');
-          } else if (user.role === 'PROFESOR') {
-            router.push('/dashboard/programaciones');
-          } else {
-            router.push('/onboarding');
-          }
+          // Todos los roles pasan por el cuestionario inicial
+          router.push('/onboarding');
         } catch (err: any) {
           setError(extractErrorMessage(err));
         } finally {

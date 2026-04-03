@@ -119,6 +119,28 @@ const STEPS_PROFESOR: Step[] = [
     subtitle: 'Configura los módulos que impartirás este curso.',
     fields: [
       {
+        key: 'familia_profesional',
+        label: '¿A qué familia profesional pertenecen tus módulos?',
+        type: 'select',
+        options: [
+          'Informática y Comunicaciones',
+          'Administración y Gestión',
+          'Sanidad',
+          'Servicios Socioculturales y a la Comunidad',
+          'Electricidad y Electrónica',
+          'Fabricación Mecánica',
+          'Madera, Mueble y Corcho',
+          'Edificación y Obra Civil',
+          'Hostelería y Turismo',
+          'Comercio y Marketing',
+          'Imagen Personal',
+          'Agraria',
+          'Artes Gráficas',
+          'Otra',
+        ],
+        required: true,
+      },
+      {
         key: 'modulos',
         label: '¿Qué módulos impartes este curso? (uno por línea)',
         type: 'textarea',
@@ -198,6 +220,14 @@ const STEPS_PROFESOR: Step[] = [
   },
 ];
 
+// ─── Año académico dinámico ───────────────────────────────────────────────────
+function getCourseYear(): number {
+  const now = new Date();
+  // El curso empieza en septiembre; si estamos antes de sept. el año inicio es el anterior
+  return now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+}
+const COURSE_START = getCourseYear();
+
 // ─── CUESTIONARIO JEFATURA ────────────────────────────────────────────────────────
 const STEPS_JEFATURA: Step[] = [
   {
@@ -235,7 +265,7 @@ const STEPS_JEFATURA: Step[] = [
         key: 'inicio_curso',
         label: '¿Cuándo está previsto el inicio del curso lectivo?',
         type: 'radio',
-        options: ['Septiembre 2026', 'Octubre 2026', 'Otro mes'],
+        options: [`Septiembre ${COURSE_START + 1}`, `Octubre ${COURSE_START + 1}`, 'Otro mes'],
       },
       {
         key: 'periodos_fct',
@@ -384,6 +414,27 @@ function FieldInput({
     );
   }
 
+  if (field.type === 'select') {
+    return (
+      <div className="relative">
+        <select
+          value={value || ''}
+          onChange={e => onChange(field.key, e.target.value)}
+          className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 text-sm text-white outline-none transition-all focus:bg-white/10 appearance-none cursor-pointer"
+          style={{ colorScheme: 'dark' }}
+          onFocus={e => { e.target.style.borderColor = color; }}
+          onBlur={e => { e.target.style.borderColor = ''; }}
+        >
+          <option value="" disabled className="bg-[#18181b]">Selecciona una opción…</option>
+          {field.options!.map(opt => (
+            <option key={opt} value={opt} className="bg-[#18181b]">{opt}</option>
+          ))}
+        </select>
+        <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+      </div>
+    );
+  }
+
   if (field.type === 'textarea') {
     return (
       <textarea
@@ -412,14 +463,14 @@ function FieldInput({
               className="flex-1 h-12 rounded-xl border-2 font-bold text-sm transition-all"
               style={num === n
                 ? { borderColor: color, background: color, color: 'white' }
-                : { borderColor: '#f0eee8', color: 'var(--ink3)' }
+                : { borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)' }
               }
             >
               {n}
             </button>
           ))}
         </div>
-        <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--ink3)]">
+        <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-white/40">
           <span>{field.scaleMin}</span>
           <span>{field.scaleMax}</span>
         </div>
@@ -481,6 +532,7 @@ export default function OnboardingPage() {
   const handleFinish = async () => {
     setSaving(true);
     try {
+      // Guardar respuestas del cuestionario
       await supabase.from('onboarding_responses').upsert({
         user_id: user.id,
         role: role,
@@ -490,6 +542,16 @@ export default function OnboardingPage() {
     } catch (_) {
       // Si la tabla no existe aún, continuar igualmente
     }
+    try {
+      // Marcar onboarding como completado en el perfil
+      await supabase
+        .from('User')
+        .update({ onboardingCompleted: true })
+        .eq('id', user.id);
+    } catch (_) {}
+    // Actualizar usuario en localStorage/cookie
+    const updatedUser = { ...user, onboardingCompleted: true };
+    authService.setUser(updatedUser);
     setDone(true);
     setTimeout(() => router.push(redirect), 2000);
   };
@@ -624,7 +686,7 @@ export default function OnboardingPage() {
                 <div className="space-y-8">
                   {currentStep.fields.map(field => (
                     <div key={field.key}>
-                      <label className="block text-sm font-bold text-[var(--ink)] mb-3">
+                      <label className="block text-sm font-bold text-white/80 mb-3">
                         {field.label}
                         {field.required && <span className="ml-1 text-red-400">*</span>}
                       </label>
@@ -634,10 +696,10 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Navegación */}
-                <div className="flex items-center justify-between mt-10 pt-6 border-t border-[#f0eee8]">
+                <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/10">
                   <button
                     onClick={() => setStep(step - 1)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-[#f0eee8] text-sm font-bold text-[var(--ink3)] hover:text-[var(--ink)] hover:border-[#d1cfc9] transition-all"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm font-bold text-white/50 hover:text-white hover:border-white/20 transition-all"
                   >
                     <ChevronLeft className="w-4 h-4" /> Atrás
                   </button>
