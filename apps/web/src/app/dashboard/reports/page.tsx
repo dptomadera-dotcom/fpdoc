@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { 
-  FileText, Download, Clock, CheckCircle, 
-  Settings, Zap, BarChart3, ChevronRight, 
-  Globe, ShieldCheck 
+import {
+  FileText, Download, Clock, CheckCircle2,
+  Settings, Zap, BarChart3, ChevronRight,
+  Globe, ShieldCheck
 } from 'lucide-react';
 
 const ReportCard = ({ title, desc, icon: Icon, color, onGenerate }: any) => (
@@ -39,20 +39,39 @@ const ReportCard = ({ title, desc, icon: Icon, color, onGenerate }: any) => (
 
 export default function ReportsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [lastGenerated, setLastGenerated] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const handleGenerate = (type: string) => {
     setIsGenerating(true);
-    // Simulate a complex generation process (Phase 2 core)
     setTimeout(() => {
       setIsGenerating(false);
-      setLastGenerated(type);
-      alert(`✅ ${type} generado con éxito y sincronizado con el servidor.`);
+      showToast(`${type} generado y sincronizado correctamente.`);
     }, 2000);
   };
 
   return (
     <DashboardLayout>
+      {/* ── Toast ── */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.96 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 bg-[var(--ink)] text-white rounded-2xl shadow-2xl shadow-black/30 border border-white/10"
+          >
+            <CheckCircle2 className="w-4 h-4 text-[var(--teal)] flex-shrink-0" />
+            <span className="text-sm font-bold">{toast}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {isGenerating && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center">
           <div className="bg-white p-10 rounded-3xl text-center max-w-sm animate-in zoom-in-95 duration-200">

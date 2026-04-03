@@ -2,22 +2,45 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { Save, Building2, Bell, Shield, Palette } from 'lucide-react';
+import { Save, Building2, Bell, Shield, Palette, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('centro');
   const [isSaving, setIsSaving] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const handleSave = () => {
     setIsSaving(true);
     setTimeout(() => {
       setIsSaving(false);
-      alert('Configuración guardada correctamente');
+      showToast('Configuración guardada correctamente');
     }, 1000);
   };
 
   return (
     <DashboardLayout>
+      {/* ── Toast ── */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.96 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 bg-[var(--ink)] text-white rounded-2xl shadow-2xl shadow-black/30 border border-white/10"
+          >
+            <CheckCircle2 className="w-4 h-4 text-[var(--teal)] flex-shrink-0" />
+            <span className="text-sm font-bold">{toast}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
