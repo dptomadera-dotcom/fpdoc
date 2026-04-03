@@ -51,7 +51,7 @@ const navigation: NavItem[] = [
 
   // ── Solo Jefe ──
   { name: 'Transversalidad', href: '/dashboard/transversal', icon: Target, roles: ['JEFATURA'], group: 'jefe' },
-  { name: 'Coordinación', href: '/dashboard/reports', icon: Users, roles: ['JEFATURA'], group: 'jefe' },
+  { name: 'Coordinación', href: '/dashboard/coordinacion', icon: Users, roles: ['JEFATURA'], group: 'jefe' },
   { name: 'Informes', href: '/dashboard/reports', icon: BarChart3, roles: ['JEFATURA'], group: 'jefe' },
 ];
 
