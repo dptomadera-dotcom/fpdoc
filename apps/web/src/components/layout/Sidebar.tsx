@@ -79,7 +79,8 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     authService.logout();
-    router.push('/login');
+    const isProd = window.location.hostname !== 'localhost';
+    router.push(isProd ? '/fpdoc/login' : '/login');
   };
 
   const role = user?.role || 'PROFESOR';

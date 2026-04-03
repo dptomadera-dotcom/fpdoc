@@ -113,7 +113,10 @@ export const authService = {
     localStorage.removeItem('user');
     Cookies.remove('token');
     Cookies.remove('user');
-    window.location.href = '/login';
+    
+    // Redirección dinámica basada en el entorno
+    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+    window.location.href = isProd ? '/fpdoc/login' : '/login';
   },
 
   getCurrentUser: () => {
@@ -132,8 +135,10 @@ export const authService = {
   },
 
   forgotPassword: async (email: string) => {
+    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+    const redirectPrefix = isProd ? '/fpdoc' : '';
     return await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password',
+      redirectTo: window.location.origin + redirectPrefix + '/reset-password',
     });
   },
 

@@ -30,7 +30,8 @@ function ProjectsPageContent() {
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
-    if (!currentUser) { router.push('/login'); return; }
+    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+    if (!currentUser) { router.push(isProd ? '/fpdoc/login' : '/login'); return; }
     setUser(currentUser);
 
     projectsService.getProjects()
@@ -152,7 +153,10 @@ function ProjectsPageContent() {
               return (
                 <div
                   key={project.id}
-                  onClick={() => router.push(`/projects/${project.id}`)}
+                  onClick={() => {
+                    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+                    router.push(isProd ? `/fpdoc/projects/${project.id}` : `/projects/${project.id}`);
+                  }}
                   className="group bg-white border border-[#f0eee8] rounded-[40px] p-8 hover:shadow-2xl hover:shadow-[var(--bg2)]/50 transition-all duration-500 cursor-pointer relative overflow-hidden"
                 >
                   <div className="flex items-start justify-between gap-4 mb-6">

@@ -304,7 +304,7 @@ const ROLE_CONFIG: Record<string, {
     Icon: GraduationCap,
     label: 'Alumnado',
     intro: 'Este cuestionario nos ayuda a conocerte desde el primer día y adaptar tu itinerario formativo. Solo son datos educativos, no invasivos. Se completa en 3 pasos.',
-    redirect: '/dashboard',
+    redirect: typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/fpdoc/dashboard' : '/dashboard',
   },
   PROFESOR: {
     steps: STEPS_PROFESOR,
@@ -314,7 +314,7 @@ const ROLE_CONFIG: Record<string, {
     Icon: BookOpen,
     label: 'Profesorado',
     intro: 'Configura la información estructural de los módulos que impartirás. Con esto el sistema construye la base de tu programación didáctica desde el primer día.',
-    redirect: '/dashboard/programaciones',
+    redirect: typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/fpdoc/dashboard/programaciones' : '/dashboard/programaciones',
   },
   JEFATURA: {
     steps: STEPS_JEFATURA,
@@ -324,7 +324,7 @@ const ROLE_CONFIG: Record<string, {
     Icon: ShieldCheck,
     label: 'Jefe de Dpto.',
     intro: 'Define el marco organizativo del departamento para el curso. Esta configuración inicial permite que todo el equipo trabaje sobre una base común validada.',
-    redirect: '/dashboard',
+    redirect: typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/fpdoc/dashboard' : '/dashboard',
   },
 };
 
@@ -451,7 +451,8 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const u = authService.getCurrentUser();
-    if (!u) { router.push('/login'); return; }
+    const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+    if (!u) { router.push(isProd ? '/fpdoc/login' : '/login'); return; }
     setUser(u);
   }, [router]);
 
