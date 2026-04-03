@@ -157,13 +157,16 @@ export const authService = {
       .single();
 
     if (!existingProfile) {
+      // Regla especial: el correo del departamento es siempre JEFATURA
+      const initialRole = session.user.email === 'departamento.madera@gmail.com' ? 'JEFATURA' : 'ALUMNO';
+      
       const { error: insertError } = await supabase.from('User').insert({
         id: session.user.id,
         email: session.user.email!,
         passwordHash: 'SOCIAL_AUTH',
         firstName: data.firstName || session.user.user_metadata?.full_name?.split(' ')[0] || '',
         lastName: data.lastName || session.user.user_metadata?.full_name?.split(' ')[1] || '',
-        role: 'ALUMNO',
+        role: initialRole,
       });
 
       if (insertError) {
@@ -174,7 +177,9 @@ export const authService = {
     const userData = {
       id: session.user.id,
       email: session.user.email!,
-      role: existingProfile?.role || 'ALUMNO',
+      role: (session.user.email === 'departamento.madera@gmail.com') 
+        ? 'JEFATURA' 
+        : (existingProfile?.role || 'ALUMNO'),
       firstName: existingProfile?.firstName || data.firstName,
       lastName: existingProfile?.lastName || data.lastName,
       departmentId: existingProfile?.departmentId,
