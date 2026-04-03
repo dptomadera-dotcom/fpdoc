@@ -32,7 +32,7 @@ export const authService = {
     const userData = {
       id: data.user.id,
       email: data.user.email!,
-      role: profile?.role || 'ALUMNO',
+      role: profile?.role || 'ALUMNO', // valores válidos: ALUMNO | PROFESOR | JEFATURA | ADMIN
       firstName: profile?.firstName,
       lastName: profile?.lastName,
       departmentId: profile?.departmentId,
@@ -80,7 +80,11 @@ export const authService = {
         role: userData.role,
       });
 
-    if (profileError) console.error('Error al crear perfil público:', profileError);
+    if (profileError) {
+      console.warn('Advertencia: El perfil público no pudo crearse automáticamente.', profileError);
+      // No lanzamos error para permitir que el registro de auth continúe,
+      // pero el desarrollador verá la advertencia con el detalle del RLS.
+    }
 
     const finalUser = {
       id: data.user.id,
@@ -148,7 +152,7 @@ export const authService = {
       .single();
 
     if (!existingProfile) {
-      await supabase.from('User').insert({
+      const { error: insertError } = await supabase.from('User').insert({
         id: session.user.id,
         email: session.user.email!,
         passwordHash: 'SOCIAL_AUTH',
@@ -156,6 +160,10 @@ export const authService = {
         lastName: data.lastName || session.user.user_metadata?.full_name?.split(' ')[1] || '',
         role: 'ALUMNO',
       });
+
+      if (insertError) {
+        console.warn('Advertencia: No se pudo crear el perfil público para el login social:', insertError);
+      }
     }
 
     const userData = {

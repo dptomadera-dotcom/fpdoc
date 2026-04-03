@@ -10,10 +10,13 @@ export const viewport = {
   userScalable: false,
 };
 
+const isProd = process.env.NODE_ENV === "production";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isProd ? "/FPDOC" : "");
+
 export const metadata: Metadata = {
-  title: "FPdoc - Gestión Curricular Colaborativa",
-  description: "Plataforma de gestión académica avanzada para la Formación Profesional.",
-  manifest: "/manifest.json",
+  title: "FPdoc - Gestión Curricular",
+  description: "Plataforma avanzada para la gestión de programaciones y transversalidad en FP.",
+  manifest: `${basePath}/manifest.json`,
 };
 
 export default function RootLayout({

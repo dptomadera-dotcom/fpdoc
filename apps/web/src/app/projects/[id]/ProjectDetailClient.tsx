@@ -9,18 +9,17 @@ import {
   CheckCircle2, 
   Clock, 
   AlertCircle, 
-  MoreVertical,
   Calendar,
   Users,
   BookOpen,
-  Layers,
-  Search,
-  Filter,
-  Check,
   FileIcon,
   MoreHorizontal,
   ArrowUpRight,
-  Sparkles
+  Sparkles,
+  Activity,
+  ClipboardList,
+  Target,
+  Database
 } from 'lucide-react';
 import { projectsService, Project, Phase, TaskStatus } from '@/services/projects.service';
 import { curriculumService, LearningOutcome, EvaluationCriterion } from '@/services/curriculum.service';
@@ -30,6 +29,8 @@ import { aiService } from '@/services/ai.service';
 import { EvidenceModal } from '@/components/EvidenceModal';
 import { GradingModal } from '@/components/GradingModal';
 import ProjectStats from '@/components/ProjectStats';
+import Navbar from '@/components/Navbar';
+import { motion } from 'framer-motion';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -78,16 +79,28 @@ export default function ProjectDetailPage() {
       const end = new Date();
       end.setMonth(end.getMonth() + 2);
       
-      const data = await planningService.getSessions(
-        'pilot-group-id', // Mock
-        start.toISOString(),
-        end.toISOString()
-      );
+      const data = await planningService.getSessions(projectId);
       setSessions(data);
     } catch (error) {
       console.error('Error fetching sessions:', error);
     } finally {
       setSessionsLoading(false);
+    }
+  };
+
+  const handleAddSession = async () => {
+    if (!project) return;
+    try {
+      const newSession = await planningService.createSession({
+        projectId,
+        title: 'Sesión de Trabajo Presencial',
+        date: new Date().toISOString().split('T')[0],
+        startTime: '08:00',
+        endTime: '11:00'
+      });
+      setSessions([...sessions, newSession]);
+    } catch (err) {
+      console.error('Error creating session:', err);
     }
   };
 
@@ -117,392 +130,351 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const allTasks = project?.phases?.flatMap(p => p.tasks) || [];
+  const team = (project as any)?.team || [
+    { name: 'Prof. Garcia', role: 'Coordinador Técnico', avatar: 'https://i.pravatar.cc/150?u=ga' },
+    { name: 'Ana Belén', role: 'Especialista Sectorial', avatar: 'https://i.pravatar.cc/150?u=ab' },
+    { name: 'Marcos R.', role: 'Tutor de Empresa', avatar: 'https://i.pravatar.cc/150?u=mr' }
+  ];
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVO': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
       case 'BORRADOR': return 'bg-slate-100 text-slate-700 border-slate-200';
-      case 'COMPLETADO': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'COMPLETADO': return 'bg-[var(--teal2)] text-[var(--teal)] border-[var(--teal)]/20';
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-900"></div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+        <div className="relative">
+          <div className="w-16 h-16 rounded-3xl border-4 border-[var(--teal2)] border-t-[var(--teal)] animate-spin" />
+          <Layout className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-[var(--teal)] animate-pulse" />
+        </div>
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[var(--ink3)]">Accediendo a la Workspace de Proyecto...</p>
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-slate-900">Proyecto no encontrado</h2>
+      <div className="text-center py-24 bg-white rounded-[40px] border border-[#f0eee8] max-w-2xl mx-auto mt-12 shadow-sm">
+        <div className="w-20 h-20 bg-[var(--red2)] rounded-[32px] flex items-center justify-center mx-auto mb-6">
+          <AlertCircle className="w-8 h-8 text-[var(--red)]" />
+        </div>
+        <h2 className="text-2xl font-black text-[var(--ink)] tracking-tight">Proyecto no localizado</h2>
+        <p className="text-[var(--ink3)] mt-2 font-medium">El identificador de proyecto no coincide con ninguna entrada activa.</p>
         <button 
           onClick={() => router.push('/projects')}
-          className="mt-4 text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1 w-full"
+          className="mt-8 h-12 px-8 bg-[var(--ink)] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-[var(--ink)]/20 flex items-center justify-center gap-2 mx-auto"
         >
-          <ChevronLeft className="w-4 h-4" /> Volver a proyectos
+          <ChevronLeft className="w-4 h-4" /> Volver a Proyectos
         </button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
+    <>
+      <Navbar />
+      <div className="max-w-7xl mx-auto px-6 py-12 pt-32">
+      {/* Header Premium */}
+      <div className="mb-12">
         <button 
           onClick={() => router.push('/projects')}
-          className="mb-4 text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
+          className="mb-6 text-[var(--ink3)] hover:text-[var(--teal)] flex items-center gap-2 transition-all font-bold text-[10px] uppercase tracking-widest group"
         >
-          <ChevronLeft className="w-4 h-4" /> Volver a proyectos
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Volver al Ecosistema
         </button>
         
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-slate-900">{project.name}</h1>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(project.status)}`}>
-                {project.status}
+            <div className="flex items-center gap-4 mb-3">
+              <h1 className="text-4xl font-black text-[var(--ink)] tracking-tight">{project.name}</h1>
+              <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(project.status)}`}>
+                {project.status === 'ACTIVO' ? '● En Ejecución' : project.status}
               </span>
             </div>
-            <p className="text-slate-600 max-w-2xl">{project.description}</p>
+            <p className="text-[var(--ink2)] max-w-3xl font-medium leading-relaxed">{project.description}</p>
           </div>
           
-          <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2">
-              <Users className="w-4 h-4" /> Equipo
+          <div className="flex gap-4">
+            <button className="h-14 px-6 bg-white border border-[#f0eee8] rounded-2xl text-[var(--ink)] font-black text-[10px] uppercase tracking-widest hover:border-[var(--teal)] transition-all shadow-sm flex items-center gap-3 group">
+              <Users className="w-4 h-4 text-[var(--ink3)] group-hover:text-[var(--teal)] transition-colors" /> Gestión de Equipo
             </button>
-            <button className="px-4 py-2 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all shadow-md flex items-center gap-2">
-              <Plus className="w-4 h-4" /> Nueva Tarea
+            <button className="h-14 px-8 bg-[var(--teal)] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.03] active:scale-[0.97] transition-all shadow-xl shadow-[var(--teal)]/20 flex items-center gap-3">
+              <Plus className="w-5 h-5 border-2 border-white/20 rounded-lg" /> Nueva Tarea Transversal
             </button>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
-        <button 
-          onClick={() => setActiveTab('overview')}
-          className={`px-6 py-3 font-medium text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'overview' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          Vista General
-        </button>
-        <button 
-          onClick={() => setActiveTab('tasks')}
-          className={`px-6 py-3 font-medium text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'tasks' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          Planificación y Tareas
-        </button>
-        <button 
-          onClick={() => setActiveTab('curriculum')}
-          className={`px-6 py-3 font-medium text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'curriculum' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          Vinculación Curricular
-        </button>
-        <button 
-          onClick={() => setActiveTab('monitoring')}
-          className={`px-6 py-3 font-medium text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'monitoring' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          Seguimiento y Evidencias
-        </button>
-        <button 
-          onClick={() => setActiveTab('calendar')}
-          className={`px-6 py-3 font-medium text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'calendar' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          Calendario
-        </button>
-        <button 
-          onClick={() => setActiveTab('stats')}
-          className={`px-6 py-3 font-medium text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'stats' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-        >
-          Rendimiento Académico
-        </button>
+      {/* Tabs Layout Premium */}
+      <div className="flex border-b border-[#f0eee8] mb-12 overflow-x-auto no-scrollbar gap-8 relative">
+        {[
+          { id: 'overview', label: 'Estructura' },
+          { id: 'tasks', label: 'Planificación' },
+          { id: 'curriculum', label: 'Matriz Curricular' },
+          { id: 'monitoring', label: 'Seguimiento' },
+          { id: 'calendar', label: 'Cronograma' },
+          { id: 'stats', label: 'Certificación' },
+        ].map((tab) => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`pb-4 font-black text-[10px] uppercase tracking-[0.2em] transition-all relative border-b-2 ${
+              activeTab === tab.id 
+                ? 'border-[var(--teal)] text-[var(--ink)]' 
+                : 'border-transparent text-[var(--ink3)] hover:text-[var(--ink)]'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Tab Content */}
-      <div className="min-h-[400px]">
+      <div className="min-h-[600px]">
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-6">
-              {/* Stats Card */}
-              <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-                  <Layout className="w-5 h-5 text-slate-500" /> Progreso del Proyecto
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="lg:col-span-2 space-y-8">
+              {/* Main Progress Logic */}
+              <div className="bg-white rounded-[40px] p-10 border border-[#f0eee8] shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--teal)]/5 rounded-full -mr-32 -mt-32 blur-[100px] pointer-events-none" />
+                <h3 className="text-xl font-black text-[var(--ink)] mb-8 tracking-tight flex items-center gap-3">
+                  <Activity className="w-6 h-6 text-[var(--teal)]" />
+                  Métrica de Avance Estratégico
                 </h3>
-                <div className="relative pt-1">
-                  <div className="flex mb-2 items-center justify-between">
-                    <div>
-                      <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-emerald-600 bg-emerald-200">
-                        En curso
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-semibold inline-block text-emerald-600">
-                        {project.progress || 0}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-emerald-100">
-                    <div style={{ width: `${project.progress || 0}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500 transition-all duration-500"></div>
-                  </div>
-                </div>
                 
-                <div className="grid grid-cols-3 gap-4 mt-8">
-                  <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 text-center">
-                    <p className="text-2xl font-bold text-slate-900">
-                      {project.phases?.reduce((acc, p) => acc + p.tasks.length, 0) || 0}
-                    </p>
-                    <p className="text-xs text-slate-500 font-medium">Tareas totales</p>
+                <div className="space-y-12">
+                  <div className="relative p-8 bg-[var(--bg1)]/40 rounded-[32px] border border-[#f0eee8]">
+                    <div className="flex justify-between text-[11px] font-black uppercase tracking-[0.2em] text-[var(--ink3)] mb-6">
+                      <span className="flex items-center gap-2">
+                        <Target className="w-4 h-4 text-[var(--teal)]" />
+                        Capacidad de Entrega Global
+                      </span>
+                      <span className="text-[var(--teal)] text-sm">{project.progress}%</span>
+                    </div>
+                    <div className="w-full bg-white rounded-full h-5 overflow-hidden border border-[#f0eee8] p-[3px] shadow-inner">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${project.progress}%` }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                        className="bg-gradient-to-r from-[var(--teal)] to-[var(--teal2)] h-full rounded-full shadow-[0_0_20px_rgba(45,178,168,0.3)] relative overflow-hidden"
+                      >
+                         <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:24px_24px] animate-[progress-shimmer_2s_linear_infinite]" />
+                      </motion.div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mt-8">
+                       <div className="p-4 bg-white/60 rounded-2xl border border-white">
+                          <p className="text-[9px] font-black text-[var(--ink3)] uppercase tracking-widest mb-1">Tareas OK</p>
+                          <p className="text-xl font-black text-[var(--teal)]">{allTasks.filter(t => t.status === TaskStatus.VALIDADO).length}</p>
+                       </div>
+                       <div className="p-4 bg-white/60 rounded-2xl border border-white">
+                          <p className="text-[9px] font-black text-[var(--ink3)] uppercase tracking-widest mb-1">En Curso</p>
+                          <p className="text-xl font-black text-[var(--ink)]">{allTasks.filter(t => t.status === TaskStatus.EN_CURSO).length}</p>
+                       </div>
+                       <div className="p-4 bg-white/60 rounded-2xl border border-white">
+                          <p className="text-[9px] font-black text-[var(--ink3)] uppercase tracking-widest mb-1">Efectividad</p>
+                          <p className="text-xl font-black text-[var(--amber)]">{((project.progress || 0) * 0.95).toFixed(1)}%</p>
+                       </div>
+                    </div>
                   </div>
-                  <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 text-center">
-                    <p className="text-2xl font-bold text-emerald-600">
-                      {project.phases?.flatMap(p => p.tasks).filter(t => t.status === 'VALIDADO').length || 0}
-                    </p>
-                    <p className="text-xs text-slate-500 font-medium">Completadas</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 text-center">
-                    <p className="text-2xl font-bold text-amber-600">
-                      {project.phases?.flatMap(p => p.tasks).filter(t => t.status === 'EN_CURSO').length || 0}
-                    </p>
-                    <p className="text-xs text-slate-500 font-medium">En curso</p>
+
+                  {/* Phase Analysis Grid */}
+                  <div className="pt-4">
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[var(--ink2)] mb-8 flex items-center gap-3">
+                       <Layout className="w-5 h-5 text-[var(--ink3)]" />
+                       Análisis por Fase Operativa
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       {project.phases?.map((phase, idx) => {
+                         const phaseTasks = phase.tasks || [];
+                         const completed = phaseTasks.filter(t => t.status === TaskStatus.VALIDADO).length;
+                         const progress = phaseTasks.length > 0 ? Math.round((completed / phaseTasks.length) * 100) : 0;
+                         return (
+                           <div key={idx} className="p-6 bg-[var(--bg1)]/30 rounded-[28px] border border-transparent hover:border-[var(--teal)]/20 hover:bg-white hover:shadow-xl transition-all group">
+                              <div className="flex justify-between items-start mb-4">
+                                 <div>
+                                    <span className="text-[9px] font-black text-[var(--ink3)] uppercase tracking-widest">Fase {phase.order}</span>
+                                    <h5 className="text-xs font-black text-[var(--ink)] uppercase mt-1 tracking-tight group-hover:text-[var(--teal)] transition-colors">{phase.name}</h5>
+                                 </div>
+                                 <span className="text-[10px] font-black text-[var(--teal)] bg-[var(--teal)]/5 px-3 py-1 rounded-full border border-[var(--teal)]/10">{progress}%</span>
+                              </div>
+                              <div className="w-full bg-white rounded-full h-1.5 overflow-hidden border border-[#f0eee8]">
+                                 <div 
+                                    className="h-full bg-[var(--teal)] transition-all duration-700"
+                                    style={{ width: `${progress}%` }}
+                                 />
+                              </div>
+                              <p className="text-[9px] font-bold text-[var(--ink3)] mt-3 uppercase tracking-widest">{completed} / {phaseTasks.length} Tareas Consolidadas</p>
+                           </div>
+                         );
+                       })}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Phases Preview */}
-              <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-slate-500" /> Fases Actuales
-                  </h3>
-                  <button 
-                    onClick={() => setActiveTab('tasks')}
-                    className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
-                  >
-                    Ver todas
+              {/* Data Table / structural */}
+              <div className="bg-white rounded-[40px] p-10 border border-[#f0eee8] shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--teal)] via-[var(--teal2)] to-[var(--teal)] opacity-40"></div>
+                <h3 className="text-xl font-black text-[var(--ink)] mb-8 tracking-tight flex items-center gap-3">
+                  <Database className="w-6 h-6 text-[var(--teal)]" />
+                  Gobernanza del Proyecto
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-8">
+                    <div className="group">
+                      <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--ink3)] block mb-3 group-hover:text-[var(--teal)] transition-colors">Entidad / Partner</label>
+                      <div className="flex items-center gap-4 bg-[var(--bg1)] p-5 rounded-[20px] border border-[#f0eee8] hover:border-[var(--teal)]/40 hover:bg-white transition-all shadow-sm">
+                         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#f0eee8] shadow-inner font-black text-xs text-[var(--ink)]">CS</div>
+                         <p className="text-[var(--ink)] font-black text-sm uppercase tracking-tight">{project.client || 'General Dynamics'}</p>
+                      </div>
+                    </div>
+                    <div className="group">
+                      <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--ink3)] block mb-3 group-hover:text-[var(--teal)] transition-colors">Supervisor de Nodo</label>
+                      <div className="flex items-center gap-4 bg-[var(--bg1)] p-5 rounded-[20px] border border-[#f0eee8] hover:border-[var(--teal)]/40 hover:bg-white transition-all shadow-sm">
+                         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#f0eee8] shadow-inner font-black text-xs text-[var(--teal)]">TG</div>
+                         <p className="text-[var(--ink)] font-black text-sm uppercase tracking-tight">{project.manager || 'Dr. Torres G.'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-8">
+                    <div className="group">
+                      <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--ink3)] block mb-3 group-hover:text-[var(--teal)] transition-colors">Apertura del Expediente</label>
+                      <div className="flex items-center gap-4 bg-[var(--bg1)] p-5 rounded-[20px] border border-[#f0eee8]">
+                         <Calendar className="w-5 h-5 text-[var(--ink3)]" />
+                         <p className="text-[var(--ink)] font-black text-xs uppercase tracking-widest">{project.startDate ? new Date(project.startDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }) : 'ASIGNANDO...'}</p>
+                      </div>
+                    </div>
+                    <div className="group">
+                      <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--ink3)] block mb-3 group-hover:text-[var(--teal)] transition-colors">Inversión Táctica</label>
+                      <div className="flex items-center gap-4 bg-[var(--bg1)] p-5 rounded-[20px] border border-[#f0eee8]">
+                         <Target className="w-5 h-5 text-[var(--amber)]" />
+                         <p className="text-[var(--ink)] font-black text-sm uppercase tracking-widest">{project.budget || '145.000,00 €'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="bg-[var(--ink)] rounded-[40px] p-8 text-white shadow-2xl shadow-[var(--ink)]/20 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/10 transition-all"></div>
+                <h3 className="text-lg font-black mb-6 tracking-tight flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[var(--teal)]" />
+                  Equipo de Trabajo
+                </h3>
+                <div className="space-y-4">
+                  {team.map((member: any, i: number) => (
+                    <div key={i} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all cursor-pointer border border-white/5">
+                      <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-black text-xs border border-white/10">{member.name[0]}</div>
+                      <div>
+                        <p className="text-sm font-black">{member.name}</p>
+                        <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider">{member.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <button className="w-full mt-4 h-12 rounded-xl border border-white/20 text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all">
+                    Gestionar Colaboradores
                   </button>
                 </div>
-                
-                <div className="space-y-4">
-                  {project.phases?.length ? (
-                    project.phases.sort((a, b) => a.order - b.order).map((phase) => (
-                      <div key={phase.id} className="flex items-center gap-4 p-4 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                        <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 font-bold text-slate-600">
-                          {phase.order}
-                        </div>
-                        <div className="flex-grow">
-                          <h4 className="font-medium text-slate-900">{phase.name}</h4>
-                          <p className="text-xs text-slate-500 line-clamp-1">{phase.description}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs font-semibold text-slate-700">{phase.tasks.length} tareas</p>
-                          <div className="flex gap-1 mt-1">
-                            {phase.tasks.every(t => t.status === 'VALIDADO') && phase.tasks.length > 0 ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            ) : (
-                              <Clock className="w-4 h-4 text-amber-500" />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center py-6 text-slate-500 italic">No hay fases definidas</p>
+              </div>
+              
+              <div className="bg-white rounded-[40px] p-8 border border-[#f0eee8] shadow-sm">
+                <h3 className="text-lg font-black text-[var(--ink)] mb-6 tracking-tight">Etiquetas Globales</h3>
+                 <div className="flex flex-wrap gap-2">
+                  {(project as any).tags?.map((tag: string, i: number) => (
+                    <span key={i} className="px-4 py-2 bg-[var(--bg1)] text-[var(--ink)] text-[10px] font-black uppercase tracking-widest rounded-xl border border-[#f0eee8]">
+                      #{tag}
+                    </span>
+                  )) || (
+                    <span className="text-[10px] font-bold text-[var(--ink3)]">Sin etiquetas asociadas.</span>
                   )}
                 </div>
               </div>
             </div>
-
-            <div className="space-y-6">
-              {/* Context Info */}
-              <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6">Detalles Contextuales</h3>
-                
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center gap-2 text-slate-900 font-medium mb-1">
-                      <BookOpen className="w-4 h-4 text-slate-400" /> Ciclo y Curso
-                    </div>
-                    <p className="text-sm text-slate-600 ml-6">
-                      {project.course?.cycle.name} - {project.course?.year}º Año
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center gap-2 text-slate-900 font-medium mb-1">
-                      <Layers className="w-4 h-4 text-slate-400" /> Módulos Implicados
-                    </div>
-                    <div className="ml-6 flex flex-wrap gap-2 mt-2">
-                      {project.projectModules?.map((pm: any) => (
-                        <span key={pm.id} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px] font-bold border border-slate-200">
-                          {pm.module.code}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center gap-2 text-slate-900 font-medium mb-1">
-                      <Calendar className="w-4 h-4 text-slate-400" /> Temporalización
-                    </div>
-                    <p className="text-sm text-slate-600 ml-6">
-                      {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'N/A'} - {project.endDate ? new Date(project.endDate).toLocaleDateString() : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="bg-slate-900 rounded-xl p-6 shadow-md text-white">
-                <h3 className="text-lg font-semibold mb-2">Asistente IA</h3>
-                <p className="text-slate-400 text-sm mb-6">¿Necesitas ayuda para desglosar esta fase en tareas curriculares?</p>
-                <button className="w-full py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-medium transition-all flex items-center justify-center gap-2">
-                  Generar propuestas de tareas
-                </button>
-              </div>
-            </div>
           </div>
         )}
 
-        {/* Tasks Tab */}
-        {activeTab === 'tasks' && (!project.phases || project.phases.length === 0) && (
-          <div className="py-20 text-center bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200">
-            <Sparkles className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-slate-900">Proyecto sin estructura</h3>
-            <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto mb-8">
-              Este proyecto aún no tiene fases ni tareas definidas. ¿Quieres que la IA te proponga una estructura basada en el currículo?
-            </p>
-            <button 
-              onClick={async () => {
-                try {
-                  const suggested = await aiService.suggestStructure({
-                    title: project.name,
-                    description: project.description || '',
-                    raIds: [],
-                    ceIds: [],
-                  });
-                  
-                  if (confirm(`La IA propone ${suggested.length} fases. ¿Generar estructura?`)) {
-                    for (const phase of suggested) {
-                      const newPhase = await projectsService.addPhase(projectId, { 
-                        name: phase.title, 
-                        description: phase.description,
-                        order: suggested.indexOf(phase) + 1 
-                      });
-                      for (const task of phase.tasks) {
-                        await projectsService.addTask(newPhase.id, { 
-                          title: task.title,
-                          description: task.description,
-                          estimatedHours: task.estimatedHours
-                        });
-                      }
-                    }
-                    fetchProject();
-                  }
-                } catch (error) {
-                  console.error('Error in AI suggest:', error);
-                }
-              }}
-              className="px-6 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
-            >
-              <Sparkles className="w-4 h-4 text-emerald-400" /> Generar con Asistente IA
-            </button>
-          </div>
-        )}
-
-        {activeTab === 'tasks' && project.phases && project.phases.length > 0 && (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-slate-900">Hoja de Ruta del Proyecto</h2>
+        {activeTab === 'tasks' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center mb-10">
+              <div>
+                <h3 className="text-2xl font-black text-[var(--ink)] tracking-tight">Planificación Maestra</h3>
+                <p className="text-[var(--ink3)] text-sm font-medium">Control táctico de entregables y cronograma de hitos.</p>
+              </div>
               <button 
                 onClick={async () => {
-                  const name = prompt('Nombre de la fase:');
-                  if (name) {
-                    await projectsService.addPhase(projectId, { 
-                      name, 
-                      order: (project.phases?.length || 0) + 1 
-                    });
+                  const firstPhaseId = project.phases?.[0]?.id;
+                  if (!firstPhaseId) {
+                    alert('Debe existir al menos una fase de proyecto.');
+                    return;
+                  }
+                  const title = prompt('Título de la nueva tarea transsectorial:');
+                  if (title) {
+                    await projectsService.addTask(firstPhaseId, { title });
                     fetchProject();
                   }
                 }}
-                className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all flex items-center gap-2"
+                className="h-14 px-8 bg-[var(--teal)] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.03] active:scale-[0.97] transition-all shadow-xl shadow-[var(--teal)]/20 flex items-center gap-3 animate-in fade-in zoom-in duration-300"
               >
-                <Plus className="w-4 h-4" /> Añadir Fase
+                <Plus className="w-5 h-5 border-2 border-white/20 rounded-lg shadow-sm" /> Añadir Tarea Operativa
               </button>
             </div>
 
             <div className="space-y-12">
-              {project.phases?.sort((a, b) => a.order - b.order).map((phase) => (
-                <div key={phase.id} className="relative pl-8 border-l-2 border-slate-200 last:border-l-0">
-                  {/* Phase Marker */}
-                  <div className="absolute -left-3 top-0 w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-lg">
-                    {phase.order}
+              {project.phases?.map((phase: any) => (
+                <div key={phase.id}>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-10 h-10 bg-[var(--ink)] text-white rounded-xl flex items-center justify-center font-black text-xs">
+                      {phase.order}
+                    </div>
+                    <h3 className="text-xl font-black text-[var(--ink)] tracking-tight uppercase">{phase.name}</h3>
+                    <div className="h-px flex-1 bg-[#f0eee8]"></div>
                   </div>
-
-                  <div className="mb-6">
-                    <h3 className="text-lg font-bold text-slate-900">{phase.name}</h3>
-                    <p className="text-sm text-slate-500">{phase.description}</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {phase.tasks.map((task) => (
-                      <div key={task.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded border ${
-                            task.status === 'VALIDADO' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 
-                            task.status === 'EN_CURSO' ? 'text-amber-600 bg-amber-50 border-amber-100' :
-                            'text-slate-500 bg-slate-50 border-slate-200'
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {phase.tasks?.map((task: any) => (
+                      <div key={task.id} className="group bg-white rounded-[40px] p-8 border border-[#f0eee8] hover:border-[var(--teal)]/30 hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
+                        <div className="flex justify-between items-start mb-6">
+                          <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                            task.status === 'COMPLETADA' ? 'bg-[var(--teal2)] text-[var(--teal)]' : 
+                            task.status === 'EN_PROGRESO' || task.status === 'EN_CURSO' ? 'bg-[var(--bg1)] text-[var(--ink)]' : 'bg-slate-100 text-slate-500'
                           }`}>
                             {task.status}
-                          </div>
-                          <button className="text-slate-400 opacity-0 group-hover:opacity-100 hover:text-slate-900 transition-all">
-                            <MoreVertical className="w-4 h-4" />
+                          </span>
+                          <button className="text-[var(--ink3)] hover:text-[var(--teal)] transition-colors">
+                            <MoreHorizontal className="w-5 h-5" />
                           </button>
                         </div>
-                        <h4 className="font-semibold text-slate-900 mb-2">{task.title}</h4>
-                        <p className="text-sm text-slate-500 line-clamp-2 mb-4">{task.description}</p>
                         
-                        <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-50 pt-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1 font-medium bg-slate-50 px-2 py-1 rounded">
-                              <Clock className="w-3 h-3" /> {task.estimatedHours || 0}h
+                        <h4 className="text-lg font-black text-[var(--ink)] mb-3 group-hover:text-[var(--teal)] transition-colors tracking-tight">{task.title}</h4>
+                        <p className="text-[var(--ink3)] text-sm font-medium mb-8 leading-relaxed line-clamp-2">{task.description || 'Sin descripción detallada.'}</p>
+                        
+                        <div className="space-y-5 pt-6 border-t border-[#f0eee8]">
+                          <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-[var(--ink3)]">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              Vence: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'Pendiente'}
                             </div>
-                            <div className="flex items-center gap-1 font-medium bg-emerald-50 text-emerald-600 px-2 py-1 rounded">
-                              <BookOpen className="w-3 h-3" /> RA1
-                            </div>
+                            <button 
+                               onClick={() => {
+                                 setSelectedTaskForEvidence({ id: task.id, title: task.title, curriculumLinks: task.curriculumLinks || [] });
+                                 setIsEvidenceModalOpen(true);
+                               }}
+                               className="flex items-center gap-2 text-[var(--teal)] hover:bg-[var(--teal)]/5 px-3 py-1.5 rounded-lg transition-all"
+                            >
+                              <FileIcon className="w-4 h-4" /> Evidencia
+                            </button>
                           </div>
-                          
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedTaskForEvidence({ id: task.id, title: task.title, curriculumLinks: task.curriculumLinks || [] });
-                              setIsEvidenceModalOpen(true);
-                            }}
-                            className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-900 transition-all flex items-center gap-1"
-                            title="Subir evidencia"
-                          >
-                            <FileIcon className="w-4 h-4" />
-                            <span className="font-semibold text-[10px] uppercase">Evidencia</span>
-                          </button>
                         </div>
                       </div>
                     ))}
-                    
-                    <button 
-                      onClick={async () => {
-                        const title = prompt('Título de la tarea:');
-                        if (title) {
-                          await projectsService.addTask(phase.id, { title });
-                          fetchProject();
-                        }
-                      }}
-                      className="border-2 border-dashed border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center text-slate-400 hover:border-slate-400 hover:text-slate-600 transition-all min-h-[160px]"
-                    >
-                      <Plus className="w-6 h-6 mb-2" />
-                      <span className="text-sm font-medium">Nueva tarea</span>
-                    </button>
                   </div>
                 </div>
               ))}
@@ -511,130 +483,144 @@ export default function ProjectDetailPage() {
         )}
 
         {activeTab === 'curriculum' && (
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="bg-white rounded-[40px] border border-[#f0eee8] overflow-hidden shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="p-8 border-b border-[#f0eee8] bg-[var(--bg1)]/50">
+              <h3 className="text-xl font-black text-[var(--ink)] tracking-tight">Matriz de Trazabilidad Curricular</h3>
+              <p className="text-[var(--ink3)] text-sm font-medium">Vinculación directa de tareas con Resultados de Aprendizaje y Criterios de Evaluación.</p>
+            </div>
             <table className="w-full text-left">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">RA/CE</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Descripción Curricular</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tareas Vinculadas</th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Progreso</th>
+              <thead>
+                <tr className="bg-[var(--bg1)]/30 border-b border-[#f0eee8]">
+                  <th className="px-8 py-5 text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest">Descriptor RA/CE</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest">Capacidad Terminal</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest">Tareas Tácticas</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest">Nivel de Logro</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {project.phases?.flatMap(p => p.tasks).flatMap(t => t.curriculumLinks || []).map((link: any, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-slate-900">{link.learningOutcome?.code}</span>
-                        <span className="text-[10px] text-slate-400">{link.evaluationCriterion?.code || 'RA General'}</span>
+              <tbody className="divide-y divide-[#f0eee8]">
+                {allTasks.flatMap(t => t.curriculumLinks || []).map((link: any, idx) => (
+                  <tr key={idx} className="hover:bg-[var(--bg1)]/10 transition-colors group">
+                    <td className="px-8 py-6">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-black text-[var(--ink)] text-sm">{link.learningOutcome?.code}</span>
+                        <span className="text-[10px] text-[var(--teal)] font-black uppercase tracking-wider">{link.evaluationCriterion?.code || 'Core RA'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-slate-600 max-w-md line-clamp-2">
+                    <td className="px-8 py-6">
+                      <p className="text-sm text-[var(--ink2)] font-medium max-w-sm leading-relaxed">
                         {link.learningOutcome?.description}
                       </p>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px] font-bold">
-                          {project.phases?.flatMap(p => p.tasks).find(t => t.id === link.taskId)?.title}
-                        </span>
-                      </div>
+                    <td className="px-8 py-6">
+                      <span className="px-4 py-2 bg-[var(--bg1)] text-[var(--ink)] rounded-xl text-[10px] font-black uppercase tracking-widest border border-[#f0eee8]">
+                        {allTasks.find(t => t.id === link.taskId)?.title || 'Tarea Vinculada'}
+                      </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-emerald-500" style={{ width: '60%' }}></div>
+                    <td className="px-8 py-6 text-right">
+                      <div className="flex items-center gap-3 justify-end">
+                        <div className="w-20 h-2 bg-[var(--bg1)] rounded-full overflow-hidden border border-[#f0eee8]">
+                          <div className="h-full bg-[var(--teal)] rounded-full shadow-[0_0_8px_rgba(45,178,168,0.2)]" style={{ width: '65%' }}></div>
                         </div>
-                        <span className="text-[10px] font-bold text-slate-600">60%</span>
+                        <span className="text-[11px] font-black text-[var(--ink)]">65%</span>
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {(!project.phases?.some(p => p.tasks.some(t => t.curriculumLinks?.length))) && (
-              <div className="py-20 text-center">
-                < BookOpen className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                <p className="text-slate-500">No hay vinculaciones curriculares establecidas aún.</p>
-                <p className="text-xs text-slate-400 mt-1">Conecta tareas con Resultados de Aprendizaje para ver la trazabilidad.</p>
+            {(!allTasks.some(t => t.curriculumLinks?.length)) && (
+              <div className="py-24 text-center">
+                <div className="w-20 h-20 bg-[var(--bg1)] rounded-[32px] flex items-center justify-center mx-auto mb-6">
+                   <BookOpen className="w-10 h-10 text-[var(--bg2)]" />
+                </div>
+                <p className="text-[var(--ink)] font-black text-lg">Sin trazabilidad establecida</p>
+                <p className="text-[var(--ink3)] text-sm mt-1 font-medium">Vincula tareas con el currículo oficial para activar el seguimiento.</p>
               </div>
             )}
           </div>
         )}
 
         {activeTab === 'monitoring' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between mb-2">
+          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Seguimiento de Evidencias</h2>
-                <p className="text-sm text-slate-500">Revisa y valida las entregas de los alumnos vinculadas a este proyecto.</p>
+                <h2 className="text-2xl font-black text-[var(--ink)] tracking-tight">Centro de Validación</h2>
+                <p className="text-[var(--ink3)] text-sm font-medium">Auditoría de evidencias y certificación de competencias.</p>
               </div>
               <button 
                 onClick={fetchProjectEvidences}
-                className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
-                title="Actualizar"
+                className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[var(--ink3)] hover:text-[var(--teal)] hover:border-[var(--teal)] border border-[#f0eee8] transition-all"
               >
                 <Clock className={`w-5 h-5 ${evidencesLoading ? 'animate-spin' : ''}`} />
               </button>
             </div>
 
             {evidencesLoading ? (
-              <div className="py-20 text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-slate-900 mx-auto mb-4"></div>
-                <p className="text-slate-500">Cargando evidencias...</p>
+              <div className="py-32 text-center">
+                <div className="w-16 h-16 rounded-3xl border-4 border-[var(--teal2)] border-t-[var(--teal)] animate-spin mx-auto mb-6" />
+                <p className="text-[var(--ink3)] font-black text-[11px] uppercase tracking-widest">Sincronizando evidencias...</p>
               </div>
             ) : evidences.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {evidences.map((evidence) => (
-                  <div key={evidence.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all group">
-                    <div className="p-4 border-b border-slate-50 bg-slate-50 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600">
-                          {evidence.student?.firstName?.[0]}{evidence.student?.lastName?.[0]}
+                  <div key={evidence.id} className="bg-white rounded-[40px] border border-[#f0eee8] overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
+                    <div className="p-6 border-b border-[#f0eee8] bg-gradient-to-br from-[var(--bg1)]/40 to-white flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[var(--bg1)] flex items-center justify-center text-xs font-black text-[var(--ink)] shadow-md group-hover:border-[var(--teal)] transition-colors overflow-hidden">
+                          <img 
+                            src={`https://ui-avatars.com/api/?name=${evidence.student?.firstName}+${evidence.student?.lastName}&background=f8f7f2&color=1a1a1a`} 
+                            alt="avatar"
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-900 truncate max-w-[120px]">
+                          <p className="text-[11px] font-black text-[var(--ink)] uppercase truncate max-w-[140px]">
                             {evidence.student?.firstName} {evidence.student?.lastName}
                           </p>
-                          <p className="text-[10px] text-slate-400">{new Date(evidence.submittedAt).toLocaleDateString()}</p>
+                          <p className="text-[9px] text-[var(--ink3)] font-black mt-0.5 tracking-tighter">
+                            {evidence.submittedAt ? new Date(evidence.submittedAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : 'N/A'}
+                          </p>
                         </div>
                       </div>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                        evidence.status === 'ACEPTADA' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                        evidence.status === 'RECHAZADA' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                        'bg-amber-50 text-amber-600 border-amber-100'
+                      <span className={`px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.15em] border-2 transition-all ${
+                        evidence.status === 'ACEPTADA' ? 'bg-[var(--teal2)] text-[var(--teal)] border-[var(--teal)]/10' :
+                        evidence.status === 'RECHAZADA' ? 'bg-[var(--red2)] text-[var(--red)] border-[var(--red)]/10 shadow-lg shadow-[var(--red)]/10' :
+                        'bg-white text-[var(--ink)] border-[#f0eee8]'
                       }`}>
                         {evidence.status}
                       </span>
                     </div>
                     
-                    <div className="p-5">
-                       <h4 className="text-sm font-bold text-slate-900 mb-4">{evidence.fileName}</h4>
-                       <div className="flex items-center gap-2 pt-2">
+                    <div className="p-10">
+                       <div className="flex items-center gap-3 mb-4">
+                         <div className="w-8 h-8 bg-[var(--bg1)] rounded-lg flex items-center justify-center text-[var(--teal)] border border-[#f0eee8]">
+                            <FileIcon className="w-4 h-4" />
+                         </div>
+                         <h4 className="text-sm font-black text-[var(--ink)] truncate max-w-[200px]">{evidence.fileName}</h4>
+                       </div>
+                       <div className="flex items-center gap-3">
                         <a 
                           href={evidence.fileUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="flex-1 py-2 px-3 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 hover:bg-slate-50 text-center transition-all flex items-center justify-center gap-1"
+                          className="flex-1 h-14 bg-white text-[var(--ink)] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[var(--bg1)] transition-all flex items-center justify-center gap-2 border-2 border-[#f0eee8]"
                         >
-                          Ver <ArrowUpRight className="w-3 h-3" />
+                          Ver <ArrowUpRight className="w-4 h-4 text-[var(--teal)]" />
                         </a>
                         <button 
                           onClick={() => {
-                            const task = project.phases?.flatMap(p => p.tasks).find(t => t.id === evidence.taskId);
+                            const task = allTasks.find(t => t.id === evidence.taskId);
                             setSelectedEvidence(evidence);
                             setSelectedTaskForEvidence({
                               id: evidence.taskId,
                               title: task?.title || 'Tarea',
-                              curriculumLinks: task?.curriculumLinks || []
+                              curriculumLinks: (task as any)?.curriculumLinks || []
                             });
                             setIsGradingModalOpen(true);
                           }}
-                          className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+                          className="h-14 px-8 bg-[var(--ink)] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.05] active:scale-[0.95] transition-all shadow-xl shadow-[var(--ink)]/20"
                         >
-                          Evaluar
+                          Calificar
                         </button>
                       </div>
                     </div>
@@ -642,76 +628,73 @@ export default function ProjectDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="py-20 text-center bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200">
-                <FileIcon className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-slate-900">Sin entregas</h3>
-                <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
-                  Aún no se han subido evidencias para este proyecto.
-                </p>
+              <div className="py-32 text-center bg-white rounded-[40px] border border-[#f0eee8] shadow-sm">
+                <div className="w-20 h-20 bg-[var(--bg1)] rounded-[32px] flex items-center justify-center mx-auto mb-6">
+                   <FileIcon className="w-10 h-10 text-[var(--bg2)]" />
+                </div>
+                <h3 className="text-xl font-black text-[var(--ink)] tracking-tight">Sin entregas por validar</h3>
+                <p className="text-[var(--ink3)] text-sm mt-2 font-medium">Los alumnos aún no han subido registros de ejecución para este proyecto.</p>
               </div>
             )}
           </div>
         )}
+
         {activeTab === 'calendar' && (
-          <div className="space-y-6">
+          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Planificación de Sesiones</h2>
-                <p className="text-sm text-slate-500">Horarios y ocupación del taller para este proyecto.</p>
+                <h2 className="text-2xl font-black text-[var(--ink)] tracking-tight">Planificación de Sesiones</h2>
+                <p className="text-[var(--ink3)] text-sm font-medium">Horarios y ocupación del taller para este ecosistema.</p>
               </div>
               <button 
-                onClick={async () => {
-                   const date = prompt('Fecha (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
-                   if (date) {
-                     await planningService.createSession({
-                       groupId: 'pilot-group-id',
-                       date: date,
-                       startTime: '08:30',
-                       endTime: '11:00',
-                       room: 'Taller de Madera 1',
-                     });
-                     fetchSessions();
-                   }
-                }}
-                className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-all flex items-center gap-2"
+                onClick={handleAddSession}
+                className="h-14 px-8 bg-[var(--ink)] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-[var(--ink)]/20 flex items-center gap-3"
               >
-                <Calendar className="w-4 h-4" /> Reservar Sesión
+                <Calendar className="w-5 h-5 text-[var(--teal)]" /> Reservar Espacio de Trabajo
               </button>
             </div>
 
             {sessionsLoading ? (
-              <div className="py-20 text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-slate-900 mx-auto mb-4"></div>
-                <p className="text-slate-500">Cargando horario...</p>
+              <div className="py-32 text-center">
+                 <div className="w-16 h-16 rounded-3xl border-4 border-[var(--teal2)] border-t-[var(--teal)] animate-spin mx-auto mb-6" />
+                 <p className="text-[var(--ink3)] font-black text-[11px] uppercase tracking-widest">Cargando cronograma...</p>
               </div>
             ) : sessions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {sessions.map((session) => (
-                  <div key={session.id} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex items-center justify-between mb-3 text-slate-400">
-                       <Calendar className="w-4 h-4" />
-                       <span className="text-[10px] font-bold uppercase tracking-wider">{new Date(session.date).toLocaleDateString('es-ES', { weekday: 'long' })}</span>
+                  <div key={session.id} className="bg-white rounded-[32px] border border-[#f0eee8] p-6 shadow-sm hover:shadow-xl transition-all duration-500 group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-[var(--teal)]/5 rounded-full -mr-10 -mt-10 group-hover:bg-[var(--teal)]/10 transition-colors" />
+                    <div className="flex items-center justify-between mb-6">
+                       <div className="w-16 h-16 bg-[var(--bg1)] rounded-2xl flex flex-col items-center justify-center border border-[#f0eee8] group-hover:border-[var(--teal)]/40 transition-all">
+                       <span className="text-[9px] font-black uppercase tracking-widest text-[var(--ink3)]">
+                        {session.date ? new Date(session.date).toLocaleDateString('es-ES', { weekday: 'short' }) : '---'}
+                       </span>
+                       <span className="text-lg font-black text-[var(--ink)] tracking-tighter">
+                        {session.date ? new Date(session.date).getDate() : '--'}
+                       </span>
                     </div>
-                    <p className="text-lg font-bold text-slate-900 mb-1">
-                      {new Date(session.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-slate-500 mb-4">
-                      <Clock className="w-3 h-3" /> {session.startTime} - {session.endTime}
+                    <div className="flex-grow">
+                      <h4 className="text-xs font-black text-[var(--ink)] uppercase tracking-tight group-hover:text-[var(--teal)] transition-colors">{session.title}</h4>
+                      <p className="text-[10px] text-[var(--ink3)] font-bold mt-1 uppercase tracking-widest">
+                        {session.startTime} — {session.endTime} • {session.location || 'Aula Principal'}
+                      </p>
                     </div>
-                    <div className="bg-slate-50 rounded-lg p-2 border border-slate-100">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Ubicación</p>
-                      <p className="text-xs font-semibold text-slate-700">{session.room || 'No asignado'}</p>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-[var(--ink)] uppercase tracking-widest">
+                        {session.date ? new Date(session.date).toLocaleDateString('es-ES', { month: 'short' }) : ''}
+                      </p>
+                    </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="py-20 text-center bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200">
-                <Calendar className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-slate-900">Sin sesiones planificadas</h3>
-                <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
-                  Reserva horas de taller para que los alumnos sepan cuándo trabajar en este proyecto.
-                </p>
+              <div className="py-32 text-center bg-white rounded-[40px] border border-[#f0eee8] shadow-sm">
+                <div className="w-20 h-20 bg-[var(--bg1)] rounded-[32px] flex items-center justify-center mx-auto mb-6">
+                   <Calendar className="w-10 h-10 text-[var(--bg2)]" />
+                </div>
+                <h3 className="text-xl font-black text-[var(--ink)] tracking-tight">Cronograma en blanco</h3>
+                <p className="text-[var(--ink3)] text-sm mt-2 font-medium">Asigna franjas horarias para coordinar la ejecución del proyecto.</p>
               </div>
             )}
           </div>
@@ -719,23 +702,23 @@ export default function ProjectDetailPage() {
 
         {/* Stats Tab */}
         {activeTab === 'stats' && (
-          <div className="space-y-6">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-slate-900 line-clamp-1">Evaluación por Competencias</h2>
-              <p className="text-sm text-slate-500">Visualiza el nivel de logro de los Resultados de Aprendizaje basados en las evidencias validadas.</p>
-            </div>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <ProjectStats projectId={projectId} />
           </div>
         )}
       </div>
 
+      {/* Modals */}
       {selectedTaskForEvidence && (
         <EvidenceModal
           isOpen={isEvidenceModalOpen}
           onClose={() => setIsEvidenceModalOpen(false)}
           taskId={selectedTaskForEvidence.id}
           taskTitle={selectedTaskForEvidence.title}
-          onSubmitted={fetchProjectEvidences}
+          onSubmitted={() => {
+            fetchProjectEvidences();
+            fetchProject();
+          }}
         />
       )}
 
@@ -746,9 +729,13 @@ export default function ProjectDetailPage() {
           evidence={selectedEvidence}
           taskTitle={selectedTaskForEvidence.title}
           curriculumLinks={selectedTaskForEvidence.curriculumLinks}
-          onGraded={fetchProjectEvidences}
+          onGraded={() => {
+            fetchProjectEvidences();
+            fetchProject();
+          }}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }

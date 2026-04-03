@@ -1,18 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/services/auth.service';
 import PWAInstallButton from '@/components/PWAInstallButton';
 import { supabase } from '@/lib/supabase';
-import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  UserPlus, ArrowRight, 
+  Mail, Lock, Loader2, AlertCircle,
+  User, CheckCircle2, Sparkles, ChevronDown
+} from 'lucide-react';
 
-// Helper: NestJS puede devolver `message` como string o como array de strings
+const GithubIcon = () => (
+  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+);
+
 function extractErrorMessage(err: any): string {
-  // Errores de Supabase
   if (err?.message) return err.message;
-  // Errores de Axios (backend antiguo)
   const data = err?.response?.data;
   if (data?.message) {
     const msg = data.message;
@@ -28,7 +34,7 @@ export default function RegisterPage() {
     password: '',
     nombre: '',
     apellido: '',
-    role: 'ALUMNO',
+    role: 'ALUMNO' as string,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -43,7 +49,7 @@ export default function RegisterPage() {
     try {
       await authService.register(formData);
       setSuccess(true);
-      setTimeout(() => router.push('/'), 1200);
+      setTimeout(() => router.push('/onboarding'), 1500);
     } catch (err: any) {
       setError(extractErrorMessage(err));
     } finally {
@@ -89,154 +95,150 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white p-4">
-      <div className="w-full max-w-md bg-[#161616] rounded-2xl border border-white/10 p-8 shadow-2xl backdrop-blur-xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent italic">
-            TRANSVERSAL FP
+    <div className="min-h-screen bg-[var(--ink)] flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Decorative Background */}
+      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-[var(--teal)]/10 blur-[120px] rounded-full -ml-32 -mt-32 pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[var(--teal)]/5 blur-[100px] rounded-full -mr-32 -mb-32 pointer-events-none" />
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-[500px] bg-[#18181b]/80 backdrop-blur-2xl border border-white/5 rounded-[40px] p-10 shadow-2xl relative z-10"
+      >
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-white/5 rounded-2xl mb-6 shadow-sm border border-white/10">
+             <UserPlus className="w-7 h-7 text-[var(--teal)]" />
+          </div>
+          <h1 className="text-4xl font-bold font-serif text-white tracking-tight">
+            Únete a FP<span className="text-[var(--teal)] italic">doc</span>
           </h1>
-          <p className="text-gray-400 mt-2">Crea tu cuenta institucional.</p>
+          <p className="text-[10px] font-black text-white/40 mt-2 uppercase tracking-[0.2em]">SISTEMA DE GESTIÓN ACADÉMICA</p>
         </div>
 
-        {error && (
-          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg text-center">
-            ⚠️ {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-6 p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm rounded-lg text-center">
-            ✅ Cuenta creada correctamente. Redirigiendo...
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Nombre</label>
-              <input
-                name="nombre"
-                type="text"
-                value={formData.nombre}
-                onChange={handleChange}
-                className="w-full bg-[#1e1e1e] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                placeholder="Juan"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Apellido</label>
-              <input
-                name="apellido"
-                type="text"
-                value={formData.apellido}
-                onChange={handleChange}
-                className="w-full bg-[#1e1e1e] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                placeholder="Pérez"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Correo Electrónico</label>
-            <input
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full bg-[#1e1e1e] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              placeholder="ejemplo@transversalfp.es"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Contraseña{' '}
-              <span className="text-gray-500 font-normal">(mínimo 6 caracteres)</span>
-            </label>
-            <input
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full bg-[#1e1e1e] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              placeholder="••••••••"
-              minLength={6}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Rol en la Institución</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full bg-[#1e1e1e] border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none cursor-pointer"
+        <AnimatePresence mode="wait">
+          {error && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="mb-8 p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-black rounded-2xl flex items-center gap-3 overflow-hidden"
             >
-              <option value="ALUMNO">Alumno</option>
-              <option value="PROFESOR">Profesor</option>
-              <option value="JEFATURA">Jefatura de Departamento</option>
-            </select>
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </motion.div>
+          )}
+
+          {success && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              className="mb-8 p-4 bg-[var(--teal)]/10 border border-[var(--teal)]/20 text-[var(--teal)] text-xs font-black rounded-2xl flex items-center gap-3 overflow-hidden"
+            >
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              Cuenta creada con éxito. Redirigiendo...
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase text-white/40 tracking-widest ml-1">Nombre</label>
+                <input
+                  name="nombre"
+                  type="text"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  className="w-full h-12 bg-white/5 border border-white/5 rounded-[18px] px-4 text-sm font-bold text-white placeholder-white/20 focus:bg-white/10 focus:border-[var(--teal)]/50 transition-all outline-none"
+                  placeholder="Ej. Maria"
+                  required
+                />
+             </div>
+             <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase text-white/40 tracking-widest ml-1">Apellido</label>
+                <input
+                  name="apellido"
+                  type="text"
+                  value={formData.apellido}
+                  onChange={handleChange}
+                  className="w-full h-12 bg-white/5 border border-white/5 rounded-[18px] px-4 text-sm font-bold text-white placeholder-white/20 focus:bg-white/10 focus:border-[var(--teal)]/50 transition-all outline-none"
+                  placeholder="Ej. García"
+                  required
+                />
+             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[9px] font-black uppercase text-white/40 tracking-widest ml-1">Email Institucional</label>
+            <div className="relative group">
+               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-[var(--teal)] transition-colors" />
+               <input
+                 name="email"
+                 type="email"
+                 value={formData.email}
+                 onChange={handleChange}
+                 className="w-full h-12 bg-white/5 border border-white/5 rounded-[18px] pl-12 pr-4 text-sm font-bold text-white placeholder-white/20 focus:bg-white/10 focus:border-[var(--teal)]/50 transition-all outline-none"
+                 placeholder="maria@centro.es"
+                 required
+               />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[9px] font-black uppercase text-white/40 tracking-widest ml-1">Clave de Seguridad</label>
+            <div className="relative group">
+               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-[var(--teal)] transition-colors" />
+               <input
+                 name="password"
+                 type="password"
+                 value={formData.password}
+                 onChange={handleChange}
+                 className="w-full h-12 bg-white/5 border border-white/5 rounded-[18px] pl-12 pr-4 text-sm font-bold text-white placeholder-white/20 focus:bg-white/10 focus:border-[var(--teal)]/50 transition-all outline-none"
+                 placeholder="Mínimo 6 caracteres"
+                 minLength={6}
+                 required
+               />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[9px] font-black uppercase text-white/40 tracking-widest ml-1">Responsabilidad</label>
+            <div className="relative">
+               <select
+                 name="role"
+                 value={formData.role}
+                 onChange={handleChange}
+                 className="w-full h-12 bg-white/5 border border-white/5 rounded-[18px] px-4 text-sm font-bold text-white focus:bg-white/10 focus:border-[var(--teal)]/50 transition-all outline-none appearance-none cursor-pointer"
+               >
+                 <option value="ALUMNO" className="bg-[#18181b]">Alumno / Estudiante</option>
+                 <option value="PROFESOR" className="bg-[#18181b]">Profesor / Docente</option>
+                 <option value="JEFATURA" className="bg-[#18181b]">Jefatura de Departamento</option>
+               </select>
+               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading || success}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-900/20 transition-all mt-4 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-14 bg-[var(--teal)] text-white font-black text-xs uppercase tracking-widest rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-[var(--teal)]/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 mt-4"
           >
-            {loading ? 'Creando cuenta...' : success ? '¡Cuenta creada!' : 'Registrarse'}
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>CREAR MI CUENTA</span>}
+            <Sparkles className="w-4 h-4 text-white/80" />
           </button>
         </form>
 
-        <div className="mt-8">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/5"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-[#161616] px-2 text-gray-500">O regístrate con</span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <button
-              onClick={() => handleSocialLogin('google')}
-              className="flex w-full items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white font-medium py-2.5 rounded-xl border border-white/10 transition-all active:scale-[0.98]"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              <span>Google</span>
-            </button>
-            <button
-              onClick={() => handleSocialLogin('github')}
-              className="flex w-full items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white font-medium py-2.5 rounded-xl border border-white/10 transition-all active:scale-[0.98]"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd"/>
-              </svg>
-              <span>GitHub</span>
-            </button>
-          </div>
+        <div className="mt-10 pt-8 border-t border-white/5 text-center">
+             <p className="text-xs text-white/40 font-medium">¿Ya formas parte de FPdoc?</p>
+             <Link href="/login" className="inline-block mt-1 text-[11px] font-black uppercase text-[var(--teal)] tracking-widest border-b-2 border-transparent hover:border-[var(--teal)] transition-all">
+                 Acceder a mi panel
+             </Link>
         </div>
 
-        <div className="mt-8 text-center text-sm text-gray-500">
-          ¿Ya tienes cuenta?{' '}
-          <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-            Inicia sesión
-          </Link>
+        <div className="mt-6">
+           <PWAInstallButton />
         </div>
-
-        <div className="pt-4 border-t border-white/5 mt-4">
-          <PWAInstallButton />
-        </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

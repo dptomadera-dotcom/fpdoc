@@ -13,6 +13,7 @@ export interface Evidence {
   studentId: string;
   fileName: string;
   fileUrl: string;
+  mimeType?: string; // Enhanced metadata for preview
   status: EvidenceStatus;
   submittedAt: string;
   student?: {

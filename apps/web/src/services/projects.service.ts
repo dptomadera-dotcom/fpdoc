@@ -50,6 +50,9 @@ export interface Project {
   progress?: number;
   startDate?: string;
   endDate?: string;
+  client?: string;
+  manager?: string;
+  budget?: string;
   course?: {
     year: number;
     cycle: {

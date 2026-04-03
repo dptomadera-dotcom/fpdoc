@@ -1,21 +1,34 @@
 import type { NextConfig } from "next";
+import withPWAInit from "@ducanh2912/next-pwa";
 
 const isProd = process.env.NODE_ENV === "production";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isProd ? "/FPDOC" : "");
+
+const withPWA = withPWAInit({
+  dest: "public",
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  disable: !isProd,
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
 
 const nextConfig: NextConfig = {
   output: "export",
   trailingSlash: true,
-  basePath: isProd ? "/TRANSVERSAL-FP" : "",
-  assetPrefix: isProd ? "/TRANSVERSAL-FP/" : "",
+  basePath,
+  assetPrefix: basePath ? `${basePath}/` : "",
   images: {
     unoptimized: true,
   },
   eslint: {
-    ignoreDuringBuilds: true, // ESLint se ejecuta por separado, no bloquea el build
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true,  // TypeScript checks se hacen en CI aparte
+    ignoreBuildErrors: true,
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

@@ -1,63 +1,113 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --ink: #1a1a24;
-  --ink2: #4a4a5e;
-  --ink3: #9494a8;
-  --bg: #f4f3ef;
-  --bg2: #eceae4;
-  --surface: #fff;
-  --teal: #0d6e6e;
-  --teal2: #e0f0f0;
-  --teal3: #b2dada;
-  --amber: #c47c1a;
-  --amber2: #fef3e2;
-  --red: #c0392b;
-  --red2: #fdecea;
-  --green: #1a7a4a;
-  --green2: #e3f5ec;
-  --blue: #1a3a8a;
-  --blue2: #e5eaf8;
-  --purple: #5c3a9a;
-  --purple2: #eee8f8;
-  --radius: 10px;
-  --radius-sm: 6px;
-  --shadow: 0 2px 12px rgba(0,0,0,.07);
+  /* FPdoc Premium Palette 3.0 - DARK THEME AS DEFAULT */
+  --ink: #f1f1f1;     /* Text Color */
+  --ink2: #a1a1aa;    /* Suppressed Text */
+  --ink3: #71717a;    /* Muted Text */
+  
+  /* Color Palette - Premium Dark */
+  --bg1: #09090b;
+  --bg2: #18181b;
+  --ink: #09090b;      /* Background alias for semantic support */
+  --text: #f1f1f1;     /* Primary text */
+  --ink3: #a1a1aa;     /* Muted text/icons */
+  
+  --teal: #14b8a6;
+  --teal2: #0d9488;
+  --teal3: #0f766e;
+  --amber: #f59e0b;
+  
+  /* Semantic Tokens */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
+  --glass: rgba(24, 24, 27, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.05);
+
   --font: 'DM Sans', sans-serif;
   --serif: 'DM Serif Display', serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
 }
 
 @layer base {
   * {
-    @apply border-brand-oak/20;
+    border-color: var(--border);
   }
   body {
-    @apply min-h-screen selection:bg-brand-oak selection:text-white;
+    @apply min-h-screen;
+    background-color: var(--bg1);
+    color: var(--text);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer components {
-  .glass-card {
-    @apply bg-white/70 dark:bg-black/40 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-premium rounded-xl;
+  .fp-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .fp-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    transform: translateY(-2px);
   }
   
-  .btn-primary {
-    @apply px-4 py-2 bg-brand-walnut text-brand-maple rounded-lg font-medium transition-all hover:bg-brand-mahogany active:scale-95 shadow-sm;
+  .fp-input {
+    width: 100%;
+    height: 3.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 0 1rem;
+    color: var(--text);
+    transition: all 0.2s ease;
+    outline: none;
   }
 
-  .btn-secondary {
-    @apply px-4 py-2 bg-brand-maple border border-brand-oak/30 text-brand-walnut rounded-lg font-medium transition-all hover:bg-brand-oak/10 active:scale-95 shadow-sm;
+  .fp-input:focus {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--teal);
+    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
   }
 
-  .nav-link {
-    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-brand-oak/10;
+  .fp-btn-primary {
+    @apply h-12 px-6 bg-white text-black font-bold text-xs uppercase tracking-widest rounded-xl transition-all;
+    @apply hover:bg-white/90 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5;
   }
 
-  .nav-link.active {
-    @apply bg-brand-walnut text-brand-maple shadow-md;
+  .fp-btn-teal {
+    @apply h-12 px-6 bg-[var(--teal)] text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all;
+    @apply hover:bg-[var(--teal2)] hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[var(--teal)]/20;
   }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg1);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink3);
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }

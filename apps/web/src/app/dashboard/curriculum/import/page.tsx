@@ -11,6 +11,8 @@ export default function ImportCurriculum() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ExtractionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [moduleId, setModuleId] = useState<string>(''); // For now, we'll ask for it if not found
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -41,6 +43,25 @@ export default function ImportCurriculum() {
   const clearData = () => {
     setData(null);
     setFile(null);
+    setSaveStatus('idle');
+  };
+
+  const handleSave = async () => {
+    if (!data) return;
+    
+    // In a real app we'd fetch the module ID from a selector or URL
+    // For now we'll use a placeholder or detect from the PDF if possible
+    const tempModuleId = moduleId || '67c80f4a-9a2c-4734-9721-6cbb01db5432'; // Placeholder for demonstration
+
+    setSaveStatus('saving');
+    try {
+      await extractionService.saveExtractedCurriculum(data, tempModuleId);
+      setSaveStatus('success');
+    } catch (err: any) {
+      console.error('Save error:', err);
+      setError('Error al guardar en la base de datos: ' + (err.message || 'Error desconocido'));
+      setSaveStatus('error');
+    }
   };
 
   return (
@@ -158,10 +179,36 @@ export default function ImportCurriculum() {
               </div>
 
               <div className="sticky bottom-0 pt-6 pb-2 bg-[var(--bg1)] bg-opacity-80 backdrop-blur-sm">
-                <button className="fp-button-secondary w-full h-14 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all">
-                  <Save className="w-5 h-5" />
-                  Sincronizar Programación en Base de Datos
+                <button 
+                  onClick={handleSave}
+                  disabled={saveStatus === 'saving' || saveStatus === 'success'}
+                  className={`fp-button-secondary w-full h-14 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all ${
+                    saveStatus === 'success' ? 'bg-[var(--teal)] text-white' : ''
+                  }`}
+                >
+                  {saveStatus === 'saving' ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Sincronizando con base de datos...
+                    </>
+                  ) : saveStatus === 'success' ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Programación Guardada Exitosamente
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5" />
+                      Sincronizar Programación en Base de Datos
+                    </>
+                  )}
                 </button>
+                
+                {saveStatus === 'success' && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-[11px] font-bold text-[var(--teal)] mt-3">
+                    Los datos ahora están disponibles en tu sección de Transversalidad.
+                  </motion.p>
+                )}
               </div>
             </motion.div>
           )}

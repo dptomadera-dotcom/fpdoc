@@ -1,21 +1,24 @@
 {
-  "name": "TRANSVERSAL FP - Gestión de Proyectos",
-  "short_name": "TransversalFP",
-  "description": "Plataforma de gestión y evaluación de proyectos transversales para FP.",
-  "start_url": "/",
+  "name": "FPdoc - Gestión Curricular",
+  "short_name": "FPdoc",
+  "description": "Plataforma de gestión académica avanzada para la Formación Profesional.",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#4f46e5",
+  "background_color": "#09090b",
+  "theme_color": "#14b8a6",
   "icons": [
     {
-      "src": "/icon-512.png",
+      "src": "./icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "orientation": "portrait"
 }

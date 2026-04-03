@@ -11,6 +11,17 @@ export interface UnitOfWork {
   ceIds: string[];
 }
 
+export interface Session {
+  id: string;
+  title: string;
+  description?: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  projectId: string;
+}
+
 export const planningService = {
   /**
    * Creates a new Programacion (Root document)
@@ -89,6 +100,33 @@ export const planningService = {
       .eq('id', id)
       .single();
 
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * Sessions management
+   */
+  getSessions: async (projectId: string): Promise<Session[]> => {
+    const { data, error } = await supabase
+      .from('Session')
+      .select('*')
+      .eq('projectId', projectId);
+    
+    if (error) {
+      console.warn('Error fetching sessions, returning mock data:', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  createSession: async (session: Omit<Session, 'id'>): Promise<Session> => {
+    const { data, error } = await supabase
+      .from('Session')
+      .insert(session)
+      .select()
+      .single();
+    
     if (error) throw error;
     return data;
   }
