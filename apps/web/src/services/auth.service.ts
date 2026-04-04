@@ -100,9 +100,12 @@ export const authService = {
     Cookies.remove('user');
     
     // Redirección robusta para GitHub Pages
-    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    const isProd = process.env.NODE_ENV === 'production';
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isProd ? '/fpdoc' : '');
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    window.location.href = `${origin}${basePath}/login`;
+    
+    // Si estamos en un subdirectorio (GitHub Pages), nos aseguramos de que el path sea correcto
+    window.location.href = `${origin}${basePath}/login/`;
   },
 
   getCurrentUser: () => {

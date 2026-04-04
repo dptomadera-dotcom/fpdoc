@@ -25,7 +25,6 @@ export default function Navbar() {
 
   const handleLogout = () => {
     authService.logout();
-    window.location.href = '/login';
   };
 
   const getInitials = (email: string) => {
@@ -155,4 +154,3 @@ export default function Navbar() {
     </>
   );
 }
-
