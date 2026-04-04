@@ -131,38 +131,53 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    const checkSession = async () => {
-      // 1. Si ya tenemos usuario persistido localmente, no procesamos OAuth de nuevo
-      const localUser = authService.getCurrentUser();
-      if (localUser && !window.location.hash) {
-        router.replace(getSmartRedirect(localUser));
-        return;
-      }
+    let mounted = true;
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setLoading(true);
+    // 1. Verificación inicial rápida para usuarios que ya tienen sesión local
+    const localUser = authService.getCurrentUser();
+    if (localUser && !window.location.hash) {
+      router.replace(getSmartRedirect(localUser));
+      return;
+    }
+
+    // 2. Suscribirse a los cambios de estado de Supabase para capturar el OAuth callback
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+        // Validar que no hayamos persistido ya a este usuario (para no repetir la lógica)
+        if (authService.getCurrentUser()?.id === session.user.id) {
+          if (mounted) router.replace(getSmartRedirect(authService.getCurrentUser() as any));
+          return;
+        }
+
+        if (mounted) setLoading(true);
         try {
           const storedRole = sessionStorage.getItem('selectedRole');
+          const finalRole = storedRole || 'ALUMNO';
+          
           const { user } = await authService.socialLogin({
             email: session.user.email!,
-            role: storedRole || undefined,
+            role: finalRole,
             firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name?.split(' ')[0] || '',
             lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.full_name?.split(' ')[1] || '',
           });
           
           sessionStorage.removeItem('selectedRole');
           
-          // Usamos replace para limpiar el hash de la URL y evitar re-procesamientos
-          router.replace(getSmartRedirect(user));
+          if (mounted) {
+            router.replace(getSmartRedirect(user));
+          }
         } catch (err: any) {
-          setError(extractErrorMessage(err));
+          if (mounted) setError(extractErrorMessage(err));
         } finally {
-          setLoading(false);
+          if (mounted) setLoading(false);
         }
       }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
     };
-    checkSession();
   }, [router]);
 
   const activeRoleData = ROLES.find(r => r.key === selectedRole);

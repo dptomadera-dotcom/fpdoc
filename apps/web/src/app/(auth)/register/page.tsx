@@ -75,30 +75,49 @@ export default function RegisterPage() {
   };
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setLoading(true);
+    let mounted = true;
+
+    // 1. Si ya tenemos usuario persistido localmente y no hay hash de OAuth, redirigimos
+    const localUser = authService.getCurrentUser();
+    if (localUser && !window.location.hash) {
+      router.replace('/onboarding');
+      return;
+    }
+
+    // 2. Usar onAuthStateChange para manejar el callback de forma robusta
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+        if (authService.getCurrentUser()?.id === session.user.id) {
+          if (mounted) router.replace('/onboarding');
+          return;
+        }
+
+        if (mounted) setLoading(true);
         try {
           const storedRole = sessionStorage.getItem('selectedRole');
-          const { user } = await authService.socialLogin({
+          await authService.socialLogin({
             email: session.user.email!,
-            role: storedRole || undefined,
+            role: storedRole || 'ALUMNO',
             firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name?.split(' ')[0] || '',
             lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.full_name?.split(' ')[1] || '',
           });
           sessionStorage.removeItem('selectedRole');
           
-          // Todos los roles pasan por el cuestionario inicial
-          router.push('/onboarding');
+          if (mounted) {
+            router.replace('/onboarding');
+          }
         } catch (err: any) {
-          setError(extractErrorMessage(err));
+          if (mounted) setError(extractErrorMessage(err));
         } finally {
-          setLoading(false);
+          if (mounted) setLoading(false);
         }
       }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
     };
-    checkSession();
   }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
