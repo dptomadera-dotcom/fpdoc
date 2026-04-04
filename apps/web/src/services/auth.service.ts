@@ -68,26 +68,9 @@ export const authService = {
     if (error) throw error;
     if (!data.user) throw new Error('No se pudo crear el usuario');
 
-    // Sincronizar con la tabla pública User (la que usa Prisma)
-    // Nota: Esto asume que el usuario tiene permisos de inserción en la tabla User
-    // En un entorno real, usaríamos un Trigger de Supabase
-    const { error: profileError } = await supabase
-      .from('User')
-      .insert({
-        id: data.user.id,
-        email: userData.email,
-        passwordHash: 'SUPABASE_AUTH', // No almacenamos el hash en nuestra tabla pública si usamos Supabase Auth
-        firstName: userData.nombre,
-        lastName: userData.apellido,
-        role: userData.role,
-      });
-
-    if (profileError) {
-      console.warn('Advertencia: El perfil público no pudo crearse automáticamente.', profileError);
-      // No lanzamos error para permitir que el registro de auth continúe,
-      // pero el desarrollador verá la advertencia con el detalle del RLS.
-    }
-
+    // Ahora la sincronización con la tabla pública User la hace el TRIGGER de Supabase
+    // Esto es mucho más robusto y evita errores de RLS/red en el cliente.
+    
     const finalUser = {
       id: data.user.id,
       email: data.user.email!,
