@@ -99,9 +99,10 @@ export const authService = {
     Cookies.remove('token');
     Cookies.remove('user');
     
-    // Redirección usando el basePath configurado en Next.js
+    // Redirección robusta para GitHub Pages
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-    window.location.href = `${basePath}/login`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    window.location.href = `${origin}${basePath}/login`;
   },
 
   getCurrentUser: () => {
