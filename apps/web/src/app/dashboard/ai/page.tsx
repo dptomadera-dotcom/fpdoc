@@ -1,48 +1,55 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Cpu, Send, Bot, User,
   Zap, BrainCircuit, History,
   Lightbulb, Wand2, FileSearch, Trash2,
-  ChevronRight, Brain, Loader2,
+  ChevronRight, Brain, AlertCircle, Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { aiService, loadLlmConfig } from '@/services/ai.service';
+import { aiService } from '@/services/ai.service';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  error?: boolean;
+  isError?: boolean;
 }
 
+function getUserRole(): string {
+  if (typeof window === 'undefined') return 'PROFESOR';
+  try {
+    const raw = localStorage.getItem('user');
+    if (raw) return JSON.parse(raw).role ?? 'PROFESOR';
+  } catch {}
+  return 'PROFESOR';
+}
+
+const WELCOME: Record<string, string> = {
+  ALUMNO:
+    'Hola. Soy tu asistente de FPdoc. Puedo ayudarte a entender tus tareas, organizar tus entregas y orientarte en tu progreso. ¿En qué te ayudo?',
+  DEFAULT:
+    'Hola. Soy el asistente IA de FPdoc. Puedo ayudarte a planificar proyectos, analizar brechas curriculares y apoyar el seguimiento del grupo. ¿En qué trabajamos hoy?',
+};
+
 export default function AIAssistantPage() {
+  const role = getUserRole();
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
-      content: 'Hola. Soy el motor de inteligencia de FPdoc. Puedo ayudarte a analizar tus programaciones, proponer actividades transversales o redactar criterios de evaluación. ¿En qué trabajamos hoy?',
+      content: WELCOME[role] ?? WELCOME.DEFAULT,
       timestamp: new Date(),
     },
   ]);
   const [input, setInput]       = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [providerLabel, setProviderLabel] = useState('Conectando…');
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Cargar etiqueta del proveedor activo
-  useEffect(() => {
-    loadLlmConfig().then(cfg => {
-      if (!cfg) { setProviderLabel('Servidor · Claude Sonnet'); return; }
-      if (cfg.provider === 'anthropic') setProviderLabel('Anthropic · Claude Sonnet');
-      else if (cfg.provider === 'openai') setProviderLabel(`OpenAI · ${cfg.model ?? 'gpt-4o-mini'}`);
-      else setProviderLabel(`Local · ${cfg.model ?? 'llama3.2'}`);
-    }).catch(() => setProviderLabel('Servidor · Claude Sonnet'));
-  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -50,7 +57,7 @@ export default function AIAssistantPage() {
     }
   }, [messages, isTyping]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!input.trim() || isTyping) return;
 
     const userMsg: Message = {
@@ -60,50 +67,74 @@ export default function AIAssistantPage() {
       timestamp: new Date(),
     };
 
-    const history = [...messages, userMsg]
-      .filter(m => !m.error)
-      .map(m => ({ role: m.role, content: m.content }));
-
-    setMessages(prev => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
 
     try {
-      const content = await aiService.chat(history);
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content,
-        timestamp: new Date(),
-      }]);
-    } catch (err: any) {
-      const errorMsg = err?.response?.data?.message ?? err.message ?? 'Error al conectar con el modelo';
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `⚠️ ${errorMsg}`,
-        timestamp: new Date(),
-        error: true,
-      }]);
+      let responseText: string;
+
+      if (role === 'ALUMNO') {
+        responseText = await aiService.askStudentAssistant({
+          message: input,
+          route: '/dashboard/ai',
+        });
+      } else {
+        responseText = await aiService.askTeacherAssistant({
+          message: input,
+          route: '/dashboard/ai',
+        });
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: responseText,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content:
+            'Ha ocurrido un error al conectar con el asistente. Comprueba la conexión e inténtalo de nuevo.',
+          timestamp: new Date(),
+          isError: true,
+        },
+      ]);
     } finally {
       setIsTyping(false);
     }
-  };
+  }, [input, isTyping, role]);
 
   const handleClear = () => {
-    setMessages([{
-      id: Date.now().toString(),
-      role: 'assistant',
-      content: 'Conversación reiniciada. ¿En qué puedo ayudarte?',
-      timestamp: new Date(),
-    }]);
+    setMessages([
+      {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: WELCOME[role] ?? WELCOME.DEFAULT,
+        timestamp: new Date(),
+      },
+    ]);
   };
 
-  const suggestions = [
-    { icon: Wand2,       label: 'Genera una actividad para RA2' },
-    { icon: FileSearch,  label: 'Analiza brechas en mi programación' },
-    { icon: Brain,       label: 'Vincula estos criterios de evaluación' },
-  ];
+  const suggestions =
+    role === 'ALUMNO'
+      ? [
+          { icon: Brain, label: '¿Qué tareas tengo pendientes?' },
+          { icon: Wand2, label: '¿Cómo organizo mi entrega?' },
+          { icon: FileSearch, label: '¿En qué fase estoy?' },
+        ]
+      : [
+          { icon: Wand2, label: 'Propón una actividad para el RA2' },
+          { icon: FileSearch, label: '¿Qué alumnos tienen tareas atrasadas?' },
+          { icon: Brain, label: 'Resumen del estado del grupo' },
+        ];
 
   return (
     <DashboardLayout>
@@ -121,17 +152,21 @@ export default function AIAssistantPage() {
                   <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-black uppercase tracking-widest text-[var(--ink)]">Asistente IA</h2>
+                  <h2 className="text-sm font-black uppercase tracking-widest text-[var(--ink)]">
+                    Asistente IA
+                  </h2>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-[var(--teal)] animate-pulse" />
-                    <span className="text-[10px] font-bold text-[var(--ink3)]">{providerLabel}</span>
+                    <span className="text-[10px] font-bold text-[var(--ink3)]">
+                      {role === 'ALUMNO' ? 'Asistente de alumno' : 'Asistente de profesorado'} · Claude Opus
+                    </span>
                   </div>
                 </div>
               </div>
               <button
                 onClick={handleClear}
                 className="p-2.5 bg-[var(--bg1)] hover:bg-[var(--bg2)] rounded-xl transition-all"
-                title="Reiniciar conversación"
+                title="Nueva conversación"
               >
                 <Trash2 className="w-4 h-4 text-[var(--ink3)]" />
               </button>
@@ -149,27 +184,42 @@ export default function AIAssistantPage() {
                     msg.role === 'user' ? 'ml-auto flex-row-reverse' : '',
                   )}
                 >
-                  <div className={cn(
-                    'w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm',
-                    msg.role === 'assistant'
-                      ? 'bg-[var(--bg1)] text-[var(--teal)] border border-[#f0eee8]'
-                      : 'bg-[var(--ink)] text-white',
-                  )}>
-                    {msg.role === 'assistant' ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
+                  <div
+                    className={cn(
+                      'w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm',
+                      msg.role === 'assistant'
+                        ? 'bg-[var(--bg1)] text-[var(--teal)] border border-[#f0eee8]'
+                        : 'bg-[var(--ink)] text-white',
+                    )}
+                  >
+                    {msg.role === 'assistant' ? (
+                      msg.isError ? (
+                        <AlertCircle className="w-5 h-5 text-red-400" />
+                      ) : (
+                        <Bot className="w-5 h-5" />
+                      )
+                    ) : (
+                      <User className="w-5 h-5" />
+                    )}
                   </div>
-                  <div className={cn(
-                    'p-5 rounded-[24px] text-[13px] leading-relaxed relative whitespace-pre-wrap',
-                    msg.error
-                      ? 'bg-red-50 text-red-800 border border-red-100'
-                      : msg.role === 'assistant'
-                        ? 'bg-[var(--bg1)] text-[var(--ink2)] border-b border-r border-[#f0eee8]'
+
+                  <div
+                    className={cn(
+                      'p-5 rounded-[24px] text-[13px] leading-relaxed whitespace-pre-wrap',
+                      msg.role === 'assistant'
+                        ? msg.isError
+                          ? 'bg-red-50 text-red-700 border border-red-100'
+                          : 'bg-[var(--bg1)] text-[var(--ink2)] border-b border-r border-[#f0eee8]'
                         : 'bg-[var(--teal)] text-white font-medium',
-                  )}>
+                    )}
+                  >
                     {msg.content}
-                    <span className={cn(
-                      'block mt-2 text-[9px] opacity-40 uppercase font-black tracking-widest',
-                      msg.role === 'user' ? 'text-right' : '',
-                    )}>
+                    <span
+                      className={cn(
+                        'block mt-2 text-[9px] opacity-40 uppercase font-black tracking-widest',
+                        msg.role === 'user' ? 'text-right' : '',
+                      )}
+                    >
                       {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -189,7 +239,7 @@ export default function AIAssistantPage() {
                       <span className="w-1.5 h-1.5 bg-[var(--teal)] rounded-full animate-bounce [animation-delay:0.2s]" />
                       <span className="w-1.5 h-1.5 bg-[var(--teal)] rounded-full animate-bounce [animation-delay:0.4s]" />
                     </div>
-                    Generando respuesta...
+                    Consultando a Claude Opus...
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -204,7 +254,11 @@ export default function AIAssistantPage() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
                   }}
-                  placeholder="Escribe tu consulta… (Enter para enviar)"
+                  placeholder={
+                    role === 'ALUMNO'
+                      ? 'Pregúntame sobre tus tareas o entregas...'
+                      : 'Dime qué quieres analizar o planificar...'
+                  }
                   className="w-full bg-[var(--bg1)] border border-transparent rounded-[24px] pl-6 pr-16 py-5 text-[13px] font-medium text-[var(--ink)] placeholder-[var(--ink3)]/50 focus:bg-white focus:border-[var(--teal)] focus:ring-4 focus:ring-[var(--teal)]/5 transition-all outline-none resize-none min-h-[70px] max-h-[200px]"
                 />
                 <button
@@ -218,9 +272,9 @@ export default function AIAssistantPage() {
                 </button>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <span className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest flex items-center gap-1.5">
-                  <Zap className="w-3 h-3 text-[var(--amber)]" /> Ideas rápidas:
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-6">
+                <span className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest flex items-center gap-2">
+                  <Zap className="w-3 h-3 text-[var(--amber)]" /> Preguntas rápidas:
                 </span>
                 {suggestions.map((s, i) => (
                   <button
@@ -235,43 +289,72 @@ export default function AIAssistantPage() {
             </div>
           </div>
 
-          {/* Panel lateral */}
-          <div className="w-full lg:w-[300px] space-y-4">
-            <div className="bg-white border border-[#f0eee8] rounded-[32px] p-6 shadow-sm">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--ink)] mb-4 flex items-center gap-2">
-                <History className="w-4 h-4 text-[var(--teal)]" /> Historial
+          {/* Sidebar */}
+          <div className="w-full lg:w-[320px] space-y-6">
+            <div className="bg-white border border-[#f0eee8] rounded-[40px] p-8 shadow-sm">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[var(--ink)] mb-6 flex items-center gap-3">
+                <History className="w-4 h-4 text-[var(--teal)]" /> Esta sesión
               </h3>
               <div className="space-y-3">
-                {[
-                  { date: 'Hace 2h', title: 'Propuesta RA2 Madera' },
-                  { date: 'Ayer',    title: 'Brechas Sostenibilidad' },
-                  { date: 'Lunes',   title: 'Vínculo CE 1.1' },
-                ].map((item, i) => (
-                  <div key={i} className="cursor-pointer group">
-                    <p className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-tighter">{item.date}</p>
-                    <p className="text-xs font-bold text-[var(--ink)] group-hover:text-[var(--teal)] transition-colors line-clamp-1">{item.title}</p>
-                  </div>
-                ))}
-                <button className="w-full h-10 border border-dashed border-[#f0eee8] rounded-2xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--ink3)] hover:text-[var(--teal)] hover:border-[var(--teal)] transition-all">
-                  Ver todo <ChevronRight className="w-3 h-3" />
+                {messages
+                  .filter((m) => m.role === 'user')
+                  .slice(-4)
+                  .reverse()
+                  .map((m) => (
+                    <div
+                      key={m.id}
+                      className="group cursor-pointer"
+                      onClick={() => setInput(m.content)}
+                    >
+                      <p className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-tighter">
+                        {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <p className="text-xs font-bold text-[var(--ink)] group-hover:text-[var(--teal)] transition-colors line-clamp-2">
+                        {m.content}
+                      </p>
+                    </div>
+                  ))}
+                {messages.filter((m) => m.role === 'user').length === 0 && (
+                  <p className="text-[11px] text-[var(--ink3)] italic">Aún no hay preguntas en esta sesión.</p>
+                )}
+                <button
+                  onClick={handleClear}
+                  className="w-full h-12 border border-dashed border-[#f0eee8] rounded-2xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--ink3)] hover:text-[var(--teal)] hover:border-[var(--teal)] transition-all"
+                >
+                  Nueva conversación <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-[var(--teal)] to-[var(--ink)] text-white rounded-[32px] p-6 shadow-2xl relative overflow-hidden">
-              <BrainCircuit className="w-8 h-8 text-[var(--teal2)] mb-3" />
-              <h4 className="text-base font-bold font-serif mb-1">Modelo activo</h4>
-              <p className="text-[11px] text-white/60 leading-relaxed mb-3">{providerLabel}</p>
-              <a href="/dashboard/settings?tab=ia" className="text-[9px] font-black uppercase tracking-widest text-[var(--teal2)] hover:text-white transition-colors">
-                Cambiar en Ajustes →
-              </a>
+            <div className="bg-gradient-to-br from-[var(--teal)] to-[var(--ink)] text-white rounded-[40px] p-8 shadow-2xl relative overflow-hidden group">
+              <div className="relative z-10">
+                <BrainCircuit className="w-10 h-10 text-[var(--teal2)] mb-4 group-hover:rotate-12 transition-transform" />
+                <h4 className="text-xl font-bold font-serif mb-2 leading-tight">Claude Opus 4.6</h4>
+                <p className="text-[11px] text-white/50 leading-relaxed mb-6">
+                  Modelo conectado con contexto real de tus proyectos, grupos y currículo de la plataforma.
+                </p>
+                <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest">
+                  <span>Estado</span>
+                  <span className="text-[var(--teal2)]">Activo</span>
+                </div>
+                <div className="w-full h-1.5 bg-white/10 rounded-full mt-2 overflow-hidden">
+                  <div className="w-full h-full bg-[var(--teal2)]" />
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full" />
             </div>
 
-            <div className="bg-amber-50 border border-amber-100 rounded-[32px] p-5 flex items-start gap-3">
-              <Lightbulb className="w-5 h-5 text-[var(--amber)] shrink-0 mt-0.5" />
+            <div className="bg-[var(--amber2)] border border-[var(--amber)]/10 rounded-[40px] p-8 flex items-start gap-4">
+              <Lightbulb className="w-6 h-6 text-[var(--amber)] shrink-0" />
               <div>
-                <p className="text-[10px] font-black text-[var(--amber)] uppercase tracking-widest mb-1">Consejo</p>
-                <p className="text-[11px] text-[var(--ink3)] leading-relaxed italic">"Adjunta el acta de tu última reunión para que pueda proponer una temporalización realista."</p>
+                <p className="text-[10px] font-black text-[var(--amber)] uppercase tracking-widest mb-1">
+                  Tip
+                </p>
+                <p className="text-[11px] text-[var(--ink3)] leading-relaxed italic">
+                  {role === 'ALUMNO'
+                    ? '"Pregúntame qué tienes que entregar esta semana para organizar tu tiempo."'
+                    : '"Pregúntame el estado del grupo en un proyecto específico para obtener un resumen inmediato."'}
+                </p>
               </div>
             </div>
           </div>
