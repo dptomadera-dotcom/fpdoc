@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { AnthropicAdapter } from '../shared/anthropic.adapter';
+import { ModelProviderAdapter } from '../shared/model-provider.interface';
 import { AiInteractionLogService } from '../shared/ai-interaction-log.service';
 import { buildStudentContext } from '../shared/context/build-student-context';
 
@@ -22,7 +22,7 @@ export class StudentAssistantService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly anthropic: AnthropicAdapter,
+    private readonly anthropic: ModelProviderAdapter,
     private readonly log: AiInteractionLogService,
   ) {}
 
