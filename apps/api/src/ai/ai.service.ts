@@ -1,6 +1,10 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { CurriculumService } from '../curriculum/curriculum.service';
-import { SupabaseService } from '../common/supabase.service';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { AnthropicAdapter } from './shared/anthropic.adapter';
+import { AiInteractionLogService } from './shared/ai-interaction-log.service';
+import { buildCurriculumContext } from './shared/context/build-curriculum-context';
+import { buildTeacherContext } from './shared/context/build-teacher-context';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -38,11 +42,24 @@ Tu función es ayudar al profesorado a:
 Responde siempre en español, de forma concisa y práctica.
 Cuando propongas actividades, ten en cuenta el contexto de taller y la familia profesional de Madera, Mueble y Corcho.`;
 
+const TEACHER_SYSTEM_PROMPT = `Eres un asistente pedagógico especializado en Formación Profesional (FP) en España.
+Ayudas al profesorado a planificar proyectos educativos transversales vinculados al currículo oficial.
+
+Reglas:
+- Responde siempre en español.
+- No inventes Resultados de Aprendizaje (RA) ni Criterios de Evaluación (CE) que no aparezcan en el contexto.
+- Proporciona propuestas concretas, prácticas y realizables en un taller/aula de FP.
+- No emitas calificaciones finales automáticas.
+- Usa el contexto curricular proporcionado para anclar tus sugerencias.`;
+
 @Injectable()
 export class AiService {
+  private readonly logger = new Logger(AiService.name);
+
   constructor(
-    private curriculum: CurriculumService,
-    private supabase: SupabaseService,
+    private readonly prisma: PrismaService,
+    private readonly anthropic: AnthropicAdapter,
+    private readonly log: AiInteractionLogService,
   ) {}
 
   async chat(
@@ -50,133 +67,184 @@ export class AiService {
     userId?: string,
     clientConfig?: LlmConfig,
   ): Promise<{ content: string; model: string; provider: string }> {
-    const userSettings = userId ? await this.supabase.getUserLlmSettings(userId) : null;
+    const provider = clientConfig?.provider ?? 'anthropic';
 
-    const provider = (userSettings?.provider ?? clientConfig?.provider ?? 'anthropic') as LlmConfig['provider'];
-    const apiKey   = userSettings?.api_key ?? clientConfig?.apiKey;
-    const endpoint = userSettings?.endpoint ?? clientConfig?.endpoint;
-    const model    = userSettings?.model    ?? clientConfig?.model;
-
-    if (provider === 'anthropic') {
-      return this.chatWithAnthropic(messages, apiKey);
-    } else if (provider === 'openai') {
-      return this.chatWithOpenAI(messages, apiKey, model);
-    } else {
-      return this.chatWithLocal(messages, endpoint, model);
+    if (provider !== 'anthropic') {
+      throw new BadRequestException(`Proveedor '${provider}' no soportado en esta versión. Usa 'anthropic'.`);
     }
-  }
 
-  private async chatWithAnthropic(messages: ChatMessage[], apiKey?: string) {
-    const key = apiKey || process.env.ANTHROPIC_API_KEY;
-    if (!key) throw new BadRequestException('No hay API key de Anthropic configurada. Añádela en Ajustes → Inteligencia Artificial.');
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        system: SYSTEM_PROMPT,
-        messages: messages.map(m => ({ role: m.role, content: m.content })),
-      }),
+    const aiResponse = await this.anthropic.ask({
+      system: SYSTEM_PROMPT,
+      messages,
+      maxTokens: 1024,
     });
 
-    if (!response.ok) {
-      const err = await response.text();
-      throw new BadRequestException(`Error de Anthropic: ${err}`);
-    }
-
-    const data: any = await response.json();
-    return { content: data.content[0].text, model: data.model, provider: 'anthropic' };
+    return { content: aiResponse.text, model: aiResponse.model, provider: 'anthropic' };
   }
 
-  private async chatWithOpenAI(messages: ChatMessage[], apiKey?: string, model?: string) {
-    const key = apiKey || process.env.OPENAI_API_KEY;
-    if (!key) throw new BadRequestException('No hay API key de OpenAI configurada. Añádela en Ajustes → Inteligencia Artificial.');
+  async suggestProjectStructure(
+    params: {
+      title: string;
+      description: string;
+      raIds: string[];
+      ceIds: string[];
+      route?: string;
+    },
+    userId: string,
+  ): Promise<GeneratedPhase[]> {
+    const curriculumCtx = await buildCurriculumContext(
+      this.prisma,
+      params.raIds,
+      params.ceIds,
+    );
 
-    const selectedModel = model ?? 'gpt-4o-mini';
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          ...messages.map(m => ({ role: m.role, content: m.content })),
-        ],
-      }),
-    });
+    const contextBlock = curriculumCtx.learningOutcomes.length
+      ? `\n\nCONTEXTO CURRICULAR:\n${JSON.stringify(curriculumCtx, null, 2)}`
+      : '';
 
-    if (!response.ok) {
-      const err = await response.text();
-      throw new BadRequestException(`Error de OpenAI: ${err}`);
+    const prompt = `Propón una estructura de fases y tareas para el siguiente proyecto de FP:
+
+Título: ${params.title}
+Descripción: ${params.description}${contextBlock}
+
+Responde ÚNICAMENTE con un JSON válido (sin texto adicional) con este esquema:
+[
+  {
+    "title": "Nombre de la fase",
+    "description": "Descripción breve",
+    "tasks": [
+      {
+        "title": "Nombre de la tarea",
+        "description": "Descripción detallada",
+        "estimatedHours": 2,
+        "ceIds": ["id-del-ce"]
+      }
+    ]
+  }
+]
+
+Usa los ceIds del contexto curricular cuando corresponda. Si no hay contexto, usa arrays vacíos para ceIds.`;
+
+    let model = 'claude-opus-4-6';
+
+    try {
+      const aiResponse = await this.anthropic.ask({
+        system: TEACHER_SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: prompt }],
+        maxTokens: 4096,
+      });
+
+      model = aiResponse.model;
+
+      await this.log.log({
+        userId,
+        role: UserRole.PROFESOR,
+        agentType: 'teacher-assistant',
+        prompt,
+        response: aiResponse.text,
+        model,
+        route: params.route,
+        entityType: 'project-structure',
+        status: 'success',
+        metadata: {
+          inputTokens: aiResponse.inputTokens,
+          outputTokens: aiResponse.outputTokens,
+          raIds: params.raIds,
+          ceIds: params.ceIds,
+        },
+      });
+
+      return this.parsePhases(aiResponse.text);
+    } catch (err) {
+      this.logger.error('Error calling AI for project structure:', err);
+      await this.log.log({
+        userId,
+        role: UserRole.PROFESOR,
+        agentType: 'teacher-assistant',
+        prompt,
+        response: String(err),
+        model,
+        route: params.route,
+        status: 'error',
+      });
+      throw err;
     }
-
-    const data: any = await response.json();
-    return { content: data.choices[0].message.content, model: data.model, provider: 'openai' };
   }
 
-  private async chatWithLocal(messages: ChatMessage[], endpoint?: string, model?: string) {
-    const url = (endpoint ?? 'http://localhost:11434/v1').replace(/\/$/, '');
-    const mdl = model ?? 'llama3.2';
+  async askTeacherAssistant(
+    params: {
+      message: string;
+      route?: string;
+      entityType?: string;
+      entityId?: string;
+    },
+    userId: string,
+  ): Promise<string> {
+    const teacherCtx = await buildTeacherContext(this.prisma, userId);
 
-    const response = await fetch(`${url}/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ollama' },
-      body: JSON.stringify({
-        model: mdl,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          ...messages.map(m => ({ role: m.role, content: m.content })),
-        ],
-        stream: false,
-      }),
-    });
+    const contextBlock = `CONTEXTO DEL PROFESOR:
+Proyectos activos: ${teacherCtx.projects.length}
+${teacherCtx.projects
+  .map(
+    (p) =>
+      `- ${p.name} (${p.status}, ${p.progress}% completado, ${p.phases.length} fases)`,
+  )
+  .join('\n')}
+Grupos: ${teacherCtx.groups.length} grupos`;
 
-    if (!response.ok) {
-      const err = await response.text();
-      throw new BadRequestException(`Error del modelo local: ${err}`);
+    let model = 'claude-opus-4-6';
+
+    try {
+      const aiResponse = await this.anthropic.ask({
+        system: `${TEACHER_SYSTEM_PROMPT}\n\n${contextBlock}`,
+        messages: [{ role: 'user', content: params.message }],
+        maxTokens: 2048,
+      });
+
+      model = aiResponse.model;
+
+      await this.log.log({
+        userId,
+        role: UserRole.PROFESOR,
+        agentType: 'teacher-assistant',
+        prompt: params.message,
+        response: aiResponse.text,
+        model,
+        route: params.route,
+        entityType: params.entityType,
+        entityId: params.entityId,
+        status: 'success',
+        metadata: {
+          inputTokens: aiResponse.inputTokens,
+          outputTokens: aiResponse.outputTokens,
+        },
+      });
+
+      return aiResponse.text;
+    } catch (err) {
+      this.logger.error('Error in teacher assistant:', err);
+      await this.log.log({
+        userId,
+        role: UserRole.PROFESOR,
+        agentType: 'teacher-assistant',
+        prompt: params.message,
+        response: String(err),
+        model,
+        route: params.route,
+        status: 'error',
+      });
+      throw err;
     }
-
-    const data: any = await response.json();
-    return { content: data.choices[0].message.content, model: data.model ?? mdl, provider: 'local' };
   }
 
-  async suggestProjectStructure(params: {
-    title: string;
-    description: string;
-    raIds: string[];
-    ceIds: string[];
-  }): Promise<GeneratedPhase[]> {
-    return [
-      {
-        title: 'Diseño y Planificación',
-        description: 'Fase inicial de croquizado y despiece.',
-        tasks: [
-          { title: 'Croquis a mano alzada', description: 'Dibujar la vista explosionada del mueble.', estimatedHours: 2, ceIds: params.ceIds.slice(0, 2) },
-          { title: 'Listado de materiales y herrajes', description: 'Generar el despiece para el pedido.', estimatedHours: 1, ceIds: params.ceIds.slice(0, 1) },
-        ],
-      },
-      {
-        title: 'Preparación de Material',
-        description: 'Corte y mecanizado de las piezas en el taller.',
-        tasks: [
-          { title: 'Corte de tableros', description: 'Uso de la escuadrilla de corte.', estimatedHours: 4, ceIds: params.ceIds.slice(2, 4) },
-          { title: 'Lijado y acabado base', description: 'Preparación superficial antes de montar.', estimatedHours: 2, ceIds: params.ceIds.slice(4, 6) },
-        ],
-      },
-      {
-        title: 'Montaje y Acabado',
-        description: 'Ensamble de piezas y aplicación de barniz/pintura.',
-        tasks: [
-          { title: 'Ensamble de la estructura', description: 'Encolado y prensado de las partes principales.', estimatedHours: 6, ceIds: params.ceIds.slice(6, 8) },
-          { title: 'Aplicación de recubrimiento', description: 'Barnizado o lacado del producto final.', estimatedHours: 3, ceIds: params.ceIds.slice(8, 10) },
-        ],
-      },
-    ];
+  private parsePhases(text: string): GeneratedPhase[] {
+    try {
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error('No JSON array found in response');
+      return JSON.parse(jsonMatch[0]) as GeneratedPhase[];
+    } catch (err) {
+      this.logger.warn('Failed to parse AI response as JSON, returning empty:', err);
+      return [];
+    }
   }
 }
