@@ -1,8 +1,9 @@
-import { 
-  Controller, 
-  Post, 
-  Body, 
-  UseGuards 
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -17,12 +18,32 @@ export class AiController {
 
   @Post('suggest')
   @Roles(UserRole.ADMIN, UserRole.PROFESOR)
-  async suggest(@Body() data: {
-    title: string;
-    description: string;
-    raIds: string[];
-    ceIds: string[];
-  }) {
-    return this.ai.suggestProjectStructure(data);
+  async suggest(
+    @Body()
+    data: {
+      title: string;
+      description: string;
+      raIds: string[];
+      ceIds: string[];
+      route?: string;
+    },
+    @Request() req: any,
+  ) {
+    return this.ai.suggestProjectStructure(data, req.user.userId);
+  }
+
+  @Post('teacher-assistant')
+  @Roles(UserRole.ADMIN, UserRole.PROFESOR)
+  async teacherAssistant(
+    @Body()
+    data: {
+      message: string;
+      route?: string;
+      entityType?: string;
+      entityId?: string;
+    },
+    @Request() req: any,
+  ) {
+    return { response: await this.ai.askTeacherAssistant(data, req.user.userId) };
   }
 }

@@ -11,6 +11,8 @@ import { ProjectsModule } from './projects/projects.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { PlanningModule } from './planning/planning.module';
 import { AiModule } from './ai/ai.module';
+import { CurriculumReviewModule } from './ai/curriculum-review/curriculum-review.module';
+import { StudentAssistantModule } from './ai/student-assistant/student-assistant.module';
 import { ReportsModule } from './reports/reports.module';
 
 @Module({
@@ -23,6 +25,8 @@ import { ReportsModule } from './reports/reports.module';
     MonitoringModule,
     PlanningModule,
     AiModule,
+    CurriculumReviewModule,
+    StudentAssistantModule,
     ReportsModule,
   ],
   controllers: [AppController],

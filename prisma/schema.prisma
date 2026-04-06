@@ -495,15 +495,21 @@ model webauthn_credentials {
 }
 
 model AIInteraction {
-  id        String   @id
-  userId    String
-  role      UserRole
-  prompt    String
-  response  String
-  context   Json?
-  model     String?
-  createdAt DateTime @default(now())
-  User      User     @relation(fields: [userId], references: [id])
+  id         String   @id
+  userId     String
+  role       UserRole
+  agentType  String?
+  prompt     String
+  response   String
+  context    Json?
+  model      String?
+  route      String?
+  entityType String?
+  entityId   String?
+  status     String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  User       User     @relation(fields: [userId], references: [id])
 
   @@schema("public")
 }
