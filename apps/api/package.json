@@ -27,6 +27,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/adapter-pg": "^6.7.0",
     "@prisma/client": "^6.7.0",
+    "openai": "^4.96.0",
     "@supabase/supabase-js": "^2.101.1",
     "@types/pdfkit": "^0.17.5",
     "class-transformer": "^0.5.1",
