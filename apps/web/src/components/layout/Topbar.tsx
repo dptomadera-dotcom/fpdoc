@@ -34,7 +34,6 @@ export default function Topbar() {
   const handleLogout = async () => {
     setMenuOpen(false);
     await authService.logout();
-    window.location.href = '/login';
   };
 
   const roleMeta = user ? (ROLE_META[user.role] || ROLE_META['PROFESOR']) : null;

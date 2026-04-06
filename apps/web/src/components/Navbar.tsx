@@ -25,7 +25,6 @@ export default function Navbar() {
 
   const handleLogout = () => {
     authService.logout();
-    window.location.href = '/login';
   };
 
   const getInitials = (email: string) => {
@@ -41,7 +40,7 @@ export default function Navbar() {
       }`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-10">
-            <Link href="/" className="flex items-center gap-3 group" onClick={() => setMobileOpen(false)}>
+            <Link href="/" prefetch={false} className="flex items-center gap-3 group" onClick={() => setMobileOpen(false)}>
               <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
                 <Cpu className="text-[var(--teal)] w-5 h-5" />
               </div>
@@ -55,10 +54,10 @@ export default function Navbar() {
 
             {user && (
               <div className="hidden md:flex items-center gap-8">
-                <Link href="/" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors flex items-center gap-2">
+                <Link href="/" prefetch={false} className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors flex items-center gap-2">
                   <LayoutDashboard className="w-4 h-4 text-[var(--teal)]" /> Inicio
                 </Link>
-                <Link href="/projects" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors flex items-center gap-2">
+                <Link href="/projects" prefetch={false} className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-[var(--teal)]" /> Mis Proyectos
                 </Link>
               </div>
@@ -89,8 +88,8 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-4">
-                <Link href="/login" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Acceder</Link>
-                <Link href="/register" className="h-11 px-6 bg-[var(--teal)] text-white text-[10px] font-black rounded-2xl transition-all shadow-xl shadow-[var(--teal)]/20 uppercase tracking-widest flex items-center">
+                <Link href="/login" prefetch={false} className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Acceder</Link>
+                <Link href="/register" prefetch={false} className="h-11 px-6 bg-[var(--teal)] text-white text-[10px] font-black rounded-2xl transition-all shadow-xl shadow-[var(--teal)]/20 uppercase tracking-widest flex items-center">
                   Empieza Gratis
                 </Link>
               </div>

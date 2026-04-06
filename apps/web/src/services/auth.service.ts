@@ -100,9 +100,12 @@ export const authService = {
     Cookies.remove('user');
     
     // Redirección robusta para GitHub Pages
-    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    const isProd = process.env.NODE_ENV === 'production';
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isProd ? '/fpdoc' : '');
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    window.location.href = `${origin}${basePath}/login`;
+    
+    // Si estamos en un subdirectorio (GitHub Pages), nos aseguramos de que el path sea correcto
+    window.location.href = `${origin}${basePath}/login/`;
   },
 
   getCurrentUser: () => {
@@ -146,22 +149,40 @@ export const authService = {
     }
   },
 
+  /**
+   * Sincroniza el login social (Google/Github) con el sistema de perfiles
+   */
   socialLogin: async (data: { email: string; firstName?: string; lastName?: string, id?: string, role?: string }): Promise<AuthResponse> => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) throw new Error('No hay sesión activa de Supabase');
 
-    // Lógica de rol simplificada y robusta
+    // 1. Lógica de rol simplificada
     let finalRole = data.role || 'ALUMNO';
     if (session.user.email?.toLowerCase() === 'departamento.madera@gmail.com') {
       finalRole = 'JEFATURA';
     }
 
-    // Obtener onboardingCompleted del perfil si existe
-    const { data: profile } = await supabase
-      .from('User')
-      .select('onboardingCompleted')
-      .eq('id', session.user.id)
-      .single();
+    // 2. Intentar obtener onboardingCompleted de forma SEGURA
+    let onboardingCompleted = false;
+    try {
+      const { data: profile, error } = await supabase
+        .from('User')
+        .select('onboardingCompleted, role')
+        .eq('id', session.user.id)
+        .maybeSingle(); // maybeSingle no arroja error si hay 0 filas
+
+      if (profile) {
+        onboardingCompleted = !!profile.onboardingCompleted;
+        if (profile.role) finalRole = profile.role;
+      }
+      
+      if (error) {
+        console.warn('Fallo no-crítico al obtener perfil (User table might 500):', error);
+        // NO relanzamos el error, permitimos que el usuario entre aunque sea sin perfil
+      }
+    } catch (e) {
+      console.error('Error catastrófico consultando tabla User:', e);
+    }
 
     const userData = {
       id: session.user.id,
@@ -169,7 +190,7 @@ export const authService = {
       role: finalRole as any,
       firstName: data.firstName || session.user.user_metadata?.full_name?.split(' ')[0] || '',
       lastName: data.lastName || session.user.user_metadata?.full_name?.split(' ')[1] || '',
-      onboardingCompleted: profile?.onboardingCompleted ?? false,
+      onboardingCompleted: onboardingCompleted,
     };
 
     localStorage.setItem('token', session.access_token);
