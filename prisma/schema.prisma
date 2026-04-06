@@ -911,14 +911,14 @@ model TaskSafetyLink {
 model User {
   id                   String                 @id
   email                String                 @unique
-  passwordHash         String
-  firstName            String
-  lastName             String
-  role                 UserRole
+  passwordHash         String?
+  firstName            String?
+  lastName             String?
+  role                 UserRole               @default(ALUMNO)
   isActive             Boolean                @default(true)
   centerId             String?
   createdAt            DateTime               @default(now())
-  updatedAt            DateTime
+  updatedAt            DateTime               @default(now()) @updatedAt
   onboardingCompleted  Boolean?               @default(false)
   AIInteraction        AIInteraction[]
   Alert                Alert[]
