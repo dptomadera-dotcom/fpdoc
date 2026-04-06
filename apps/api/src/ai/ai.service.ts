@@ -1,5 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { CurriculumService } from '../curriculum/curriculum.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { AnthropicAdapter } from './shared/anthropic.adapter';
+import { AiInteractionLogService } from './shared/ai-interaction-log.service';
+import { buildCurriculumContext } from './shared/context/build-curriculum-context';
+import { buildTeacherContext } from './shared/context/build-teacher-context';
 
 export interface GeneratedTask {
   title: string;
@@ -14,71 +19,189 @@ export interface GeneratedPhase {
   tasks: GeneratedTask[];
 }
 
+const TEACHER_SYSTEM_PROMPT = `Eres un asistente pedagógico especializado en Formación Profesional (FP) en España.
+Ayudas al profesorado a planificar proyectos educativos transversales vinculados al currículo oficial.
+
+Reglas:
+- Responde siempre en español.
+- No inventes Resultados de Aprendizaje (RA) ni Criterios de Evaluación (CE) que no aparezcan en el contexto.
+- Proporciona propuestas concretas, prácticas y realizables en un taller/aula de FP.
+- No emitas calificaciones finales automáticas.
+- Usa el contexto curricular proporcionado para anclar tus sugerencias.`;
+
 @Injectable()
 export class AiService {
-  constructor(private curriculum: CurriculumService) {}
+  private readonly logger = new Logger(AiService.name);
 
-  async suggestProjectStructure(params: {
-    title: string;
-    description: string;
-    raIds: string[];
-    ceIds: string[];
-  }): Promise<GeneratedPhase[]> {
-    return [
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly anthropic: AnthropicAdapter,
+    private readonly log: AiInteractionLogService,
+  ) {}
+
+  async suggestProjectStructure(
+    params: {
+      title: string;
+      description: string;
+      raIds: string[];
+      ceIds: string[];
+      route?: string;
+    },
+    userId: string,
+  ): Promise<GeneratedPhase[]> {
+    const curriculumCtx = await buildCurriculumContext(
+      this.prisma,
+      params.raIds,
+      params.ceIds,
+    );
+
+    const contextBlock = curriculumCtx.learningOutcomes.length
+      ? `\n\nCONTEXTO CURRICULAR:\n${JSON.stringify(curriculumCtx, null, 2)}`
+      : '';
+
+    const prompt = `Propón una estructura de fases y tareas para el siguiente proyecto de FP:
+
+Título: ${params.title}
+Descripción: ${params.description}${contextBlock}
+
+Responde ÚNICAMENTE con un JSON válido (sin texto adicional) con este esquema:
+[
+  {
+    "title": "Nombre de la fase",
+    "description": "Descripción breve",
+    "tasks": [
       {
-        title: 'Diseño y Planificación',
-        description: 'Fase inicial de croquizado y despiece.',
-        tasks: [
-          {
-            title: 'Croquis a mano alzada',
-            description: 'Dibujar la vista explosionada del mueble.',
-            estimatedHours: 2,
-            ceIds: params.ceIds.slice(0, 2),
-          },
-          {
-            title: 'Listado de materiales y herrajes',
-            description: 'Generar el despiece para el pedido.',
-            estimatedHours: 1,
-            ceIds: params.ceIds.slice(0, 1),
-          }
-        ]
-      },
-      {
-        title: 'Preparación de Material',
-        description: 'Corte y mecanizado de las piezas en el taller.',
-        tasks: [
-          {
-            title: 'Corte de tableros',
-            description: 'Uso de la escuadrilla de corte.',
-            estimatedHours: 4,
-            ceIds: params.ceIds.slice(2, 4),
-          },
-          {
-            title: 'Lijado y acabado base',
-            description: 'Preparación superficial antes de montar.',
-            estimatedHours: 2,
-            ceIds: params.ceIds.slice(4, 6),
-          }
-        ]
-      },
-      {
-        title: 'Montaje y Acabado',
-        description: 'Ensamble de piezas y aplicación de barniz/pintura.',
-        tasks: [
-          {
-            title: 'Ensamble de la estructura',
-            description: 'Encolado y prensado de las partes principales.',
-            estimatedHours: 6,
-            ceIds: params.ceIds.slice(6, 8),
-          },
-          {
-            title: 'Aplicación de recubrimiento',
-            description: 'Barnizado o lacado del producto final.',
-            estimatedHours: 3,
-            ceIds: params.ceIds.slice(8, 10),
-          }
-        ]
+        "title": "Nombre de la tarea",
+        "description": "Descripción detallada",
+        "estimatedHours": 2,
+        "ceIds": ["id-del-ce"]
       }
-    ];
+    ]
+  }
+]
+
+Usa los ceIds del contexto curricular cuando corresponda. Si no hay contexto, usa arrays vacíos para ceIds.`;
+
+    let model = 'claude-opus-4-6';
+
+    try {
+      const aiResponse = await this.anthropic.ask({
+        system: TEACHER_SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: prompt }],
+        maxTokens: 4096,
+      });
+
+      model = aiResponse.model;
+
+      await this.log.log({
+        userId,
+        role: UserRole.PROFESOR,
+        agentType: 'teacher-assistant',
+        prompt,
+        response: aiResponse.text,
+        model,
+        route: params.route,
+        entityType: 'project-structure',
+        status: 'success',
+        metadata: {
+          inputTokens: aiResponse.inputTokens,
+          outputTokens: aiResponse.outputTokens,
+          raIds: params.raIds,
+          ceIds: params.ceIds,
+        },
+      });
+
+      return this.parsePhases(aiResponse.text);
+    } catch (err) {
+      this.logger.error('Error calling AI for project structure:', err);
+      await this.log.log({
+        userId,
+        role: UserRole.PROFESOR,
+        agentType: 'teacher-assistant',
+        prompt,
+        response: String(err),
+        model,
+        route: params.route,
+        status: 'error',
+      });
+      throw err;
+    }
+  }
+
+  async askTeacherAssistant(
+    params: {
+      message: string;
+      route?: string;
+      entityType?: string;
+      entityId?: string;
+    },
+    userId: string,
+  ): Promise<string> {
+    const teacherCtx = await buildTeacherContext(this.prisma, userId);
+
+    const contextBlock = `CONTEXTO DEL PROFESOR:
+Proyectos activos: ${teacherCtx.projects.length}
+${teacherCtx.projects
+  .map(
+    (p) =>
+      `- ${p.name} (${p.status}, ${p.progress}% completado, ${p.phases.length} fases)`,
+  )
+  .join('\n')}
+Grupos: ${teacherCtx.groups.length} grupos`;
+
+    let model = 'claude-opus-4-6';
+
+    try {
+      const aiResponse = await this.anthropic.ask({
+        system: `${TEACHER_SYSTEM_PROMPT}\n\n${contextBlock}`,
+        messages: [{ role: 'user', content: params.message }],
+        maxTokens: 2048,
+      });
+
+      model = aiResponse.model;
+
+      await this.log.log({
+        userId,
+        role: UserRole.PROFESOR,
+        agentType: 'teacher-assistant',
+        prompt: params.message,
+        response: aiResponse.text,
+        model,
+        route: params.route,
+        entityType: params.entityType,
+        entityId: params.entityId,
+        status: 'success',
+        metadata: {
+          inputTokens: aiResponse.inputTokens,
+          outputTokens: aiResponse.outputTokens,
+        },
+      });
+
+      return aiResponse.text;
+    } catch (err) {
+      this.logger.error('Error in teacher assistant:', err);
+      await this.log.log({
+        userId,
+        role: UserRole.PROFESOR,
+        agentType: 'teacher-assistant',
+        prompt: params.message,
+        response: String(err),
+        model,
+        route: params.route,
+        status: 'error',
+      });
+      throw err;
+    }
+  }
+
+  private parsePhases(text: string): GeneratedPhase[] {
+    try {
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error('No JSON array found in response');
+      return JSON.parse(jsonMatch[0]) as GeneratedPhase[];
+    } catch (err) {
+      this.logger.warn('Failed to parse AI response as JSON, returning empty:', err);
+      return [];
+    }
   }
 }
