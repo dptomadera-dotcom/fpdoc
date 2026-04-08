@@ -42,3 +42,8 @@ prisma/migrations/
 
 # Testing
 coverage/
+
+# Supabase Local Development
+supabase/.branches/
+supabase/.temp/
+.env*
