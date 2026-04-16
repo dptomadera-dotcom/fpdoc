@@ -1,10 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dsoxbghnlnlpztjnmpak.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy_key_for_build';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (process.env.NODE_ENV === 'production' && supabaseAnonKey === 'dummy_key_for_build') {
-  console.error('CRITICAL: NEXT_PUBLIC_SUPABASE_ANON_KEY is missing in production environment!');
+if (!supabaseUrl || !supabaseAnonKey) {
+  const missing = [
+    !supabaseUrl && 'NEXT_PUBLIC_SUPABASE_URL',
+    !supabaseAnonKey && 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  ].filter(Boolean).join(', ');
+  throw new Error(`Missing required environment variables: ${missing}`);
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
