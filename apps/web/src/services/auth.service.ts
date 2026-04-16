@@ -117,7 +117,7 @@ export const authService = {
         // 🔥 REFUERZO DE SEGURIDAD: Override de correo institucional
         const userEmail = user?.email?.toLowerCase();
         const isDeptEmail = userEmail === 'departamento.madera@gmail.com';
-        user.role = isDeptEmail ? 'JEFATURA' : (user?.role || 'PROFESOR');
+        user.role = isDeptEmail ? 'JEFATURA' : (user?.role || 'ALUMNO');
         // Persistimos el override para evitar desincronizaciones
         localStorage.setItem('user', JSON.stringify(user));
         return user;
