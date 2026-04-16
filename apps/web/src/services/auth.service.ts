@@ -116,7 +116,7 @@ export const authService = {
         const user = JSON.parse(userStr);
         // 🔥 REFUERZO DE SEGURIDAD: Override de correo institucional
         const userEmail = user?.email?.toLowerCase();
-        const isDeptEmail = userEmail === 'departamento.madera@gmail.com';
+        const isDeptEmail = userEmail === 'dpto.madera@gmail.com';
         user.role = isDeptEmail ? 'JEFATURA' : (user?.role || 'ALUMNO');
         // Persistimos el override para evitar desincronizaciones
         localStorage.setItem('user', JSON.stringify(user));
@@ -155,7 +155,7 @@ export const authService = {
 
     // Lógica de rol simplificada y robusta
     let finalRole = data.role || 'ALUMNO';
-    if (session.user.email?.toLowerCase() === 'departamento.madera@gmail.com') {
+    if (session.user.email?.toLowerCase() === 'dpto.madera@gmail.com') {
       finalRole = 'JEFATURA';
     }
 
