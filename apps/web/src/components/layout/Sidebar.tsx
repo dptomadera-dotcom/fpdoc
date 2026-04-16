@@ -80,9 +80,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     setUser(authService.getCurrentUser());
   }, []);
 
-  // Cerrar sidebar al navegar en móvil
+  // Cerrar sidebar al navegar en móvil — SOLO si está abierto
   useEffect(() => {
-    onClose();
+    if (isOpen) onClose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const handleLogout = async () => {
@@ -112,11 +113,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <aside className={cn(
         'w-[280px] flex flex-col bg-[var(--ink)] text-white h-screen overflow-hidden z-40',
         'transition-transform duration-300 ease-in-out',
-        // Móvil: posición fija, entra/sale por la izquierda
         'fixed top-0 left-0',
-        // Escritorio: sticky, siempre visible
         'lg:sticky lg:translate-x-0',
-        // Estado abierto/cerrado en móvil
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}>
 
