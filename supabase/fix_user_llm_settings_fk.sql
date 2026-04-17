@@ -10,23 +10,25 @@
 -- Ejecutar en Supabase SQL Editor (una sola vez).
 -- ============================================================
 
--- 1. Eliminar la FK existente
+-- 1. Borrar la política RLS antes de alterar el tipo (Postgres lo exige)
+DROP POLICY IF EXISTS "user_own_llm_settings" ON public.user_llm_settings;
+
+-- 2. Eliminar la FK existente
 ALTER TABLE public.user_llm_settings
   DROP CONSTRAINT IF EXISTS user_llm_settings_user_id_fkey;
 
--- 2. Convertir la columna user_id de TEXT a UUID
+-- 3. Convertir la columna user_id de TEXT a UUID
 ALTER TABLE public.user_llm_settings
   ALTER COLUMN user_id TYPE uuid USING user_id::uuid;
 
--- 3. Añadir nueva FK apuntando a auth.users
+-- 4. Añadir nueva FK apuntando a auth.users
 ALTER TABLE public.user_llm_settings
   ADD CONSTRAINT user_llm_settings_user_id_fkey
   FOREIGN KEY (user_id)
   REFERENCES auth.users(id)
   ON DELETE CASCADE;
 
--- 4. Actualizar la política RLS (ya no necesita ::text porque user_id es uuid)
-DROP POLICY IF EXISTS "user_own_llm_settings" ON public.user_llm_settings;
+-- 5. Recrear la política RLS con tipo uuid (sin ::text)
 CREATE POLICY "user_own_llm_settings" ON public.user_llm_settings
   FOR ALL TO authenticated
   USING  (user_id = auth.uid())
