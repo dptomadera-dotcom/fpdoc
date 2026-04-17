@@ -113,7 +113,7 @@ importers:
         specifier: latest
         version: 3.3.5
       '@eslint/js':
-        specifier: latest
+        specifier: ^9.18.0
         version: 9.39.4
       '@nestjs/cli':
         specifier: ^11.0.0
