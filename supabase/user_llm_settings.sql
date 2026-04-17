@@ -4,7 +4,7 @@
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS public.user_llm_settings (
-  user_id   TEXT PRIMARY KEY REFERENCES public."User"(id) ON DELETE CASCADE,
+  user_id   TEXT PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   provider  TEXT NOT NULL DEFAULT 'anthropic'
               CHECK (provider IN ('anthropic', 'openai', 'local')),
   api_key   TEXT,          -- clave del usuario (anthropic / openai)
