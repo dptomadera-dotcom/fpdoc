@@ -2,15 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Cpu, Sparkles, Send, Bot, User,
-  Zap, BrainCircuit, History, PlusCircle,
+  Cpu, Send, Bot, User,
+  Zap, BrainCircuit, History,
   Lightbulb, Wand2, FileSearch, Trash2,
-  ChevronRight, Brain, Loader2
+  ChevronRight, Brain, Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { aiService, getLlmConfig } from '@/services/ai.service';
+import { aiService, loadLlmConfig } from '@/services/ai.service';
 
 interface Message {
   id: string;
@@ -27,12 +27,22 @@ export default function AIAssistantPage() {
       role: 'assistant',
       content: 'Hola. Soy el motor de inteligencia de FPdoc. Puedo ayudarte a analizar tus programaciones, proponer actividades transversales o redactar criterios de evaluación. ¿En qué trabajamos hoy?',
       timestamp: new Date(),
-    }
+    },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput]       = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [providerLabel, setProviderLabel] = useState('Conectando…');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const config = getLlmConfig();
+
+  // Cargar etiqueta del proveedor activo
+  useEffect(() => {
+    loadLlmConfig().then(cfg => {
+      if (!cfg) { setProviderLabel('Servidor · Claude Sonnet'); return; }
+      if (cfg.provider === 'anthropic') setProviderLabel('Anthropic · Claude Sonnet');
+      else if (cfg.provider === 'openai') setProviderLabel(`OpenAI · ${cfg.model ?? 'gpt-4o-mini'}`);
+      else setProviderLabel(`Local · ${cfg.model ?? 'llama3.2'}`);
+    }).catch(() => setProviderLabel('Servidor · Claude Sonnet'));
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -90,14 +100,10 @@ export default function AIAssistantPage() {
   };
 
   const suggestions = [
-    { icon: Wand2, label: 'Genera una actividad para RA2' },
-    { icon: FileSearch, label: 'Analiza brechas en mi programación' },
-    { icon: Brain, label: 'Vincula estos criterios de evaluación' },
+    { icon: Wand2,       label: 'Genera una actividad para RA2' },
+    { icon: FileSearch,  label: 'Analiza brechas en mi programación' },
+    { icon: Brain,       label: 'Vincula estos criterios de evaluación' },
   ];
-
-  const providerLabel = config.provider === 'anthropic'
-    ? 'Claude · Anthropic'
-    : `Local · ${config.model ?? 'modelo local'}`;
 
   return (
     <DashboardLayout>
@@ -122,7 +128,11 @@ export default function AIAssistantPage() {
                   </div>
                 </div>
               </div>
-              <button onClick={handleClear} className="p-2.5 bg-[var(--bg1)] hover:bg-[var(--bg2)] rounded-xl transition-all">
+              <button
+                onClick={handleClear}
+                className="p-2.5 bg-[var(--bg1)] hover:bg-[var(--bg2)] rounded-xl transition-all"
+                title="Reiniciar conversación"
+              >
                 <Trash2 className="w-4 h-4 text-[var(--ink3)]" />
               </button>
             </div>
@@ -136,12 +146,14 @@ export default function AIAssistantPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
                     'flex items-start gap-4 max-w-[85%]',
-                    msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''
+                    msg.role === 'user' ? 'ml-auto flex-row-reverse' : '',
                   )}
                 >
                   <div className={cn(
                     'w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm',
-                    msg.role === 'assistant' ? 'bg-[var(--bg1)] text-[var(--teal)] border border-[#f0eee8]' : 'bg-[var(--ink)] text-white'
+                    msg.role === 'assistant'
+                      ? 'bg-[var(--bg1)] text-[var(--teal)] border border-[#f0eee8]'
+                      : 'bg-[var(--ink)] text-white',
                   )}>
                     {msg.role === 'assistant' ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
                   </div>
@@ -151,12 +163,12 @@ export default function AIAssistantPage() {
                       ? 'bg-red-50 text-red-800 border border-red-100'
                       : msg.role === 'assistant'
                         ? 'bg-[var(--bg1)] text-[var(--ink2)] border-b border-r border-[#f0eee8]'
-                        : 'bg-[var(--teal)] text-white font-medium'
+                        : 'bg-[var(--teal)] text-white font-medium',
                   )}>
                     {msg.content}
                     <span className={cn(
                       'block mt-2 text-[9px] opacity-40 uppercase font-black tracking-widest',
-                      msg.role === 'user' ? 'text-right' : ''
+                      msg.role === 'user' ? 'text-right' : '',
                     )}>
                       {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
@@ -200,7 +212,9 @@ export default function AIAssistantPage() {
                   disabled={!input.trim() || isTyping}
                   className="absolute right-4 bottom-4 w-10 h-10 bg-[var(--ink)] text-white rounded-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[var(--ink)]/20 disabled:opacity-50 disabled:scale-100 disabled:shadow-none"
                 >
-                  {isTyping ? <Loader2 className="w-4 h-4 animate-spin text-[var(--teal2)]" /> : <Send className="w-4 h-4 text-[var(--teal2)]" />}
+                  {isTyping
+                    ? <Loader2 className="w-4 h-4 animate-spin text-[var(--teal2)]" />
+                    : <Send className="w-4 h-4 text-[var(--teal2)]" />}
                 </button>
               </div>
 
@@ -230,14 +244,17 @@ export default function AIAssistantPage() {
               <div className="space-y-3">
                 {[
                   { date: 'Hace 2h', title: 'Propuesta RA2 Madera' },
-                  { date: 'Ayer', title: 'Brechas Sostenibilidad' },
-                  { date: 'Lunes', title: 'Vínculo CE 1.1' },
+                  { date: 'Ayer',    title: 'Brechas Sostenibilidad' },
+                  { date: 'Lunes',   title: 'Vínculo CE 1.1' },
                 ].map((item, i) => (
                   <div key={i} className="cursor-pointer group">
                     <p className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-tighter">{item.date}</p>
                     <p className="text-xs font-bold text-[var(--ink)] group-hover:text-[var(--teal)] transition-colors line-clamp-1">{item.title}</p>
                   </div>
                 ))}
+                <button className="w-full h-10 border border-dashed border-[#f0eee8] rounded-2xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--ink3)] hover:text-[var(--teal)] hover:border-[var(--teal)] transition-all">
+                  Ver todo <ChevronRight className="w-3 h-3" />
+                </button>
               </div>
             </div>
 

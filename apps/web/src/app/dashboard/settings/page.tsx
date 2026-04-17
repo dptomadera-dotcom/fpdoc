@@ -2,56 +2,121 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import { Save, Building2, Bell, Shield, Palette, CheckCircle2, Cpu, Loader2, Wifi, WifiOff } from 'lucide-react';
+import {
+  Save, Building2, Bell, Shield, Palette, CheckCircle2,
+  BrainCircuit, Key, Loader2, Wifi, WifiOff, Eye, EyeOff,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getLlmConfig, saveLlmConfig, aiService, LlmConfig } from '@/services/ai.service';
+import { loadLlmConfig, saveLlmConfig, aiService, LlmConfig } from '@/services/ai.service';
+import { applyTheme, getSavedTheme } from '@/components/theme-provider';
+
+// ─────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('centro');
   const [isSaving, setIsSaving] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: 'ok' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
-  // ── LLM config state ──
-  const [llmConfig, setLlmConfig] = useState<LlmConfig>({ provider: 'anthropic' });
-  const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; model?: string; error?: string } | null>(null);
+  // ── Tema ──
+  const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
-    setLlmConfig(getLlmConfig());
+    setSelectedTheme(getSavedTheme());
   }, []);
 
-  const showToast = (msg: string, type: 'ok' | 'error' = 'ok') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
+  const handleThemeChange = (theme: 'light' | 'dark') => {
+    setSelectedTheme(theme);
+    applyTheme(theme);
+    showToast(theme === 'light' ? 'Tema Oak & Ink activado' : 'Tema Dark Walnut activado');
+  };
+
+  // ── IA state ──
+  const [llmProvider, setLlmProvider] = useState<'anthropic' | 'openai' | 'local'>('anthropic');
+  const [llmApiKey, setLlmApiKey]     = useState('');
+  const [llmEndpoint, setLlmEndpoint] = useState('');
+  const [llmModel, setLlmModel]       = useState('');
+  const [showKey, setShowKey]         = useState(false);
+  const [llmLoading, setLlmLoading]   = useState(false);
+  const [testStatus, setTestStatus]   = useState<'idle' | 'ok' | 'error'>('idle');
+  const [testMsg, setTestMsg]         = useState('');
+
+  // Cargar config guardada al entrar en la pestaña IA
+  useEffect(() => {
+    if (activeTab !== 'ia') return;
+    loadLlmConfig().then(cfg => {
+      if (!cfg) return;
+      setLlmProvider(cfg.provider);
+      setLlmApiKey(cfg.apiKey ?? '');
+      setLlmEndpoint(cfg.endpoint ?? '');
+      setLlmModel(cfg.model ?? '');
+    });
+  }, [activeTab]);
+
+  const showToast = (msg: string, ok = true) => {
+    setToast({ msg, ok });
+    setTimeout(() => setToast(null), 3500);
   };
 
   const handleSave = () => {
     setIsSaving(true);
-    if (activeTab === 'ia') {
-      saveLlmConfig(llmConfig);
-    }
     setTimeout(() => {
       setIsSaving(false);
       showToast('Configuración guardada correctamente');
-    }, 600);
+    }, 1000);
   };
 
-  const handleTestConnection = async () => {
-    setTesting(true);
-    setTestResult(null);
-    const result = await aiService.testConnection(llmConfig);
-    setTestResult(result);
-    setTesting(false);
-    if (result.ok) showToast(`Conexión OK · ${result.model}`, 'ok');
-    else showToast(`Error: ${result.error}`, 'error');
+  // Guardar config IA en Supabase
+  const handleSaveIa = async () => {
+    setLlmLoading(true);
+    try {
+      const cfg: LlmConfig = {
+        provider: llmProvider,
+        apiKey: llmApiKey.trim() || undefined,
+        endpoint: llmEndpoint.trim() || undefined,
+        model: llmModel.trim() || undefined,
+      };
+      await saveLlmConfig(cfg);
+      showToast('Configuración de IA guardada');
+    } catch (err: any) {
+      showToast(err.message ?? 'Error al guardar', false);
+    } finally {
+      setLlmLoading(false);
+    }
+  };
+
+  // Probar conexión
+  const handleTest = async () => {
+    setLlmLoading(true);
+    setTestStatus('idle');
+    try {
+      const cfg: LlmConfig = {
+        provider: llmProvider,
+        apiKey: llmApiKey.trim() || undefined,
+        endpoint: llmEndpoint.trim() || undefined,
+        model: llmModel.trim() || undefined,
+      };
+      const result = await aiService.testConnection(cfg);
+      if (result.ok) {
+        setTestStatus('ok');
+        setTestMsg(result.model ? `Conectado · ${result.model}` : 'Conexión exitosa');
+      } else {
+        setTestStatus('error');
+        setTestMsg(result.error ?? 'Error desconocido');
+      }
+    } catch (err: any) {
+      setTestStatus('error');
+      setTestMsg(err.message ?? 'Error al conectar');
+    } finally {
+      setLlmLoading(false);
+    }
   };
 
   const tabs = [
-    { id: 'centro',         label: 'Centro Educativo', icon: Building2 },
-    { id: 'ia',             label: 'Inteligencia Artificial', icon: Cpu },
-    { id: 'notificaciones', label: 'Notificaciones',   icon: Bell },
-    { id: 'seguridad',      label: 'Seguridad y RLS',  icon: Shield },
-    { id: 'apariencia',     label: 'Apariencia',        icon: Palette },
+    { id: 'centro',         label: 'Centro Educativo',    icon: Building2 },
+    { id: 'notificaciones', label: 'Notificaciones',       icon: Bell },
+    { id: 'seguridad',      label: 'Seguridad y RLS',      icon: Shield },
+    { id: 'apariencia',     label: 'Apariencia (Tema)',    icon: Palette },
+    { id: 'ia',             label: 'Inteligencia Artificial', icon: BrainCircuit },
   ];
 
   return (
@@ -65,12 +130,12 @@ export default function SettingsPage() {
             exit={{ opacity: 0, y: -16, scale: 0.96 }}
             transition={{ duration: 0.2 }}
             className={`fixed top-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border ${
-              toast.type === 'error'
-                ? 'bg-red-950 border-red-800 text-red-200'
-                : 'bg-[var(--ink)] border-white/10 text-white'
+              toast.ok
+                ? 'bg-[var(--ink)] text-white border-white/10'
+                : 'bg-red-700 text-white border-red-500'
             }`}
           >
-            <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${toast.type === 'error' ? 'text-red-400' : 'text-[var(--teal)]'}`} />
+            <CheckCircle2 className="w-4 h-4 text-[var(--teal)] flex-shrink-0" />
             <span className="text-sm font-bold">{toast.msg}</span>
           </motion.div>
         )}
@@ -82,18 +147,20 @@ export default function SettingsPage() {
             <h1 className="text-2xl font-bold font-serif text-[var(--ink)] tracking-tight">Ajustes del Sistema</h1>
             <p className="text-[var(--ink3)] text-sm">Configura los parámetros globales de la plataforma FPdoc.</p>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[var(--teal)] text-white rounded-xl font-bold shadow-lg shadow-[var(--teal2)]/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-          >
-            <Save className="w-4 h-4" />
-            {isSaving ? 'Guardando...' : 'Guardar Cambios'}
-          </button>
+          {activeTab !== 'ia' && (
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-6 py-2.5 bg-[var(--teal)] text-white rounded-xl font-bold shadow-lg shadow-[var(--teal2)]/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+            </button>
+          )}
         </div>
 
         <div className="flex gap-8">
-          {/* Tabs */}
+          {/* Tabs Sidebar */}
           <div className="w-64 space-y-1">
             {tabs.map((tab) => (
               <button
@@ -111,7 +178,7 @@ export default function SettingsPage() {
             ))}
           </div>
 
-          {/* Content */}
+          {/* Form Content */}
           <div className="flex-1 space-y-6">
 
             {/* ── Centro ── */}
@@ -121,16 +188,19 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Nombre del Centro</label>
-                    <input type="text" defaultValue="IES Antigravity Tech" className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium" />
+                    <input type="text" defaultValue="IES Antigravity Tech"
+                      className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Código de Centro</label>
-                      <input type="text" defaultValue="28012345" className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium" />
+                      <input type="text" defaultValue="28012345"
+                        className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Localidad</label>
-                      <input type="text" defaultValue="Madrid" className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium" />
+                      <input type="text" defaultValue="Madrid"
+                        className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium" />
                     </div>
                   </div>
                   <div>
@@ -144,147 +214,43 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* ── IA ── */}
-            {activeTab === 'ia' && (
-              <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-
-                {/* Selector de proveedor */}
-                <div className="fp-card">
-                  <h3 className="font-bold text-sm mb-1 flex items-center gap-2">
-                    <Cpu className="w-4 h-4 text-[var(--teal)]" /> Proveedor de IA
-                  </h3>
-                  <p className="text-[11px] text-[var(--ink3)] mb-5">Elige entre la API de Claude (Anthropic) o un modelo instalado localmente en tu servidor.</p>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Claude */}
-                    <button
-                      onClick={() => { setLlmConfig(c => ({ ...c, provider: 'anthropic' })); setTestResult(null); }}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                        llmConfig.provider === 'anthropic'
-                          ? 'border-[var(--teal)] bg-[var(--teal)]/5'
-                          : 'border-[#e5e3dc] hover:border-[var(--ink3)]/30'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">☁️</div>
-                      <div className="text-[12px] font-black text-[var(--ink)]">Claude · Anthropic</div>
-                      <div className="text-[10px] text-[var(--ink3)] mt-1 leading-relaxed">API cloud. Mayor calidad. Requiere clave API en el servidor.</div>
-                      {llmConfig.provider === 'anthropic' && (
-                        <div className="mt-2 text-[9px] font-black uppercase tracking-widest text-[var(--teal)]">Seleccionado</div>
-                      )}
-                    </button>
-
-                    {/* Local */}
-                    <button
-                      onClick={() => { setLlmConfig(c => ({ ...c, provider: 'local', endpoint: c.endpoint ?? 'http://localhost:11434/v1', model: c.model ?? 'llama3.2' })); setTestResult(null); }}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                        llmConfig.provider === 'local'
-                          ? 'border-[var(--teal)] bg-[var(--teal)]/5'
-                          : 'border-[#e5e3dc] hover:border-[var(--ink3)]/30'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">🏠</div>
-                      <div className="text-[12px] font-black text-[var(--ink)]">Local · OpenAI-compatible</div>
-                      <div className="text-[10px] text-[var(--ink3)] mt-1 leading-relaxed">Ollama, LM Studio, Jan.ai. Sin coste. Datos no salen del centro.</div>
-                      {llmConfig.provider === 'local' && (
-                        <div className="mt-2 text-[9px] font-black uppercase tracking-widest text-[var(--teal)]">Seleccionado</div>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Config local */}
-                {llmConfig.provider === 'local' && (
-                  <div className="fp-card animate-in fade-in slide-in-from-top-2 duration-200">
-                    <h3 className="font-bold text-sm mb-5 pb-2 border-b border-[#f0eee8]">Configuración del modelo local</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Endpoint (URL base)</label>
-                        <input
-                          type="url"
-                          value={llmConfig.endpoint ?? 'http://localhost:11434/v1'}
-                          onChange={e => setLlmConfig(c => ({ ...c, endpoint: e.target.value }))}
-                          placeholder="http://servidor-ollama:11434/v1"
-                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium font-mono"
-                        />
-                        <p className="text-[10px] text-[var(--ink3)] mt-1 ml-1">Para Ollama el endpoint es <code className="bg-[var(--bg2)] px-1 rounded">http://HOST:11434/v1</code></p>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Nombre del modelo</label>
-                        <input
-                          type="text"
-                          value={llmConfig.model ?? 'llama3.2'}
-                          onChange={e => setLlmConfig(c => ({ ...c, model: e.target.value }))}
-                          placeholder="llama3.2 / mistral / gemma2"
-                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium font-mono"
-                        />
-                        <p className="text-[10px] text-[var(--ink3)] mt-1 ml-1">Ejecuta <code className="bg-[var(--bg2)] px-1 rounded">ollama list</code> para ver los modelos instalados.</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Info Anthropic */}
-                {llmConfig.provider === 'anthropic' && (
-                  <div className="fp-card animate-in fade-in slide-in-from-top-2 duration-200">
-                    <h3 className="font-bold text-sm mb-3 pb-2 border-b border-[#f0eee8]">Configuración de Anthropic</h3>
-                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 text-[11px] text-blue-800 leading-relaxed">
-                      La clave de API de Anthropic (<code className="bg-blue-100 px-1 rounded">ANTHROPIC_API_KEY</code>) se configura como variable de entorno en el servidor backend, no aquí. Si no está configurada, el chat mostrará un error.
-                    </div>
-                  </div>
-                )}
-
-                {/* Test de conexión */}
-                <div className="fp-card">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-sm">Probar conexión</h3>
-                      <p className="text-[11px] text-[var(--ink3)] mt-0.5">Envía una petición de prueba con la configuración actual.</p>
-                    </div>
-                    <button
-                      onClick={handleTestConnection}
-                      disabled={testing}
-                      className="flex items-center gap-2 px-4 py-2 bg-[var(--ink)] text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[var(--ink)]/80 transition-all disabled:opacity-50"
-                    >
-                      {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5" />}
-                      {testing ? 'Probando...' : 'Probar'}
-                    </button>
-                  </div>
-
-                  {testResult && (
-                    <div className={`mt-4 p-3 rounded-xl flex items-center gap-3 text-[11px] font-bold ${
-                      testResult.ok ? 'bg-green-50 text-green-800 border border-green-100' : 'bg-red-50 text-red-800 border border-red-100'
-                    }`}>
-                      {testResult.ok ? <Wifi className="w-4 h-4 text-green-600" /> : <WifiOff className="w-4 h-4 text-red-500" />}
-                      {testResult.ok ? `Conexión OK · Modelo: ${testResult.model}` : `Error: ${testResult.error}`}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* ── Seguridad ── */}
             {activeTab === 'seguridad' && (
               <div className="fp-card animate-in fade-in slide-in-from-right-4 duration-300">
-                <h3 className="font-bold text-sm mb-6 pb-2 border-b border-[#f0eee8]">Configuración de Seguridad</h3>
+                <h3 className="font-bold text-sm mb-6 pb-2 border-b border-[#f0eee8]">Configuración de Seguridad (Supabase)</h3>
+                <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4 mb-6">
+                  <div className="text-xl">⚠️</div>
+                  <div>
+                    <h4 className="text-[11px] font-bold text-amber-900 uppercase">Alerta de Permisos</h4>
+                    <p className="text-[11px] text-amber-700/80 leading-relaxed mt-1">
+                      Se han detectado errores de esquema (42501). Asegúrese de que las políticas RLS de Supabase permiten el acceso al rol 'anon'.
+                    </p>
+                  </div>
+                </div>
                 <div className="space-y-4">
-                  {[
-                    { label: 'Modo Estricto de Datos', desc: 'Forzar validación curricular en cada guardado.' },
-                    { label: 'Auditoría de Cambios', desc: 'Registrar cada modificación en la tabla de auditoría.' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-[var(--bg)] rounded-xl border border-[#e5e3dc]">
-                      <div>
-                        <div className="text-xs font-bold text-[var(--ink)]">{item.label}</div>
-                        <div className="text-[10px] text-[var(--ink3)]">{item.desc}</div>
-                      </div>
-                      <div className="w-10 h-5 bg-[var(--teal)] rounded-full relative cursor-pointer">
-                        <div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full" />
-                      </div>
+                  <div className="flex items-center justify-between p-4 bg-[var(--bg)] rounded-xl border border-[#e5e3dc]">
+                    <div>
+                      <div className="text-xs font-bold text-[var(--ink)]">Modo Estricto de Datos</div>
+                      <div className="text-[10px] text-[var(--ink3)]">Forzar validación curricular en cada guardado.</div>
                     </div>
-                  ))}
+                    <div className="w-10 h-5 bg-[var(--teal)] rounded-full relative cursor-pointer">
+                      <div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-[var(--bg)] rounded-xl border border-[#e5e3dc]">
+                    <div>
+                      <div className="text-xs font-bold text-[var(--ink)]">Auditoría de Cambios</div>
+                      <div className="text-[10px] text-[var(--ink3)]">Registrar cada modificación en la tabla de justificación.</div>
+                    </div>
+                    <div className="w-10 h-5 bg-[var(--teal)] rounded-full relative cursor-pointer">
+                      <div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* ── Notificaciones ── */}
             {activeTab === 'notificaciones' && (
               <div className="fp-card text-center py-12">
                 <div className="text-3xl mb-2">🔔</div>
@@ -292,30 +258,238 @@ export default function SettingsPage() {
               </div>
             )}
 
+            {/* ── Apariencia ── */}
             {activeTab === 'apariencia' && (
-              <div className="fp-card animate-in fade-in slide-in-from-right-4 duration-300">
-                <h3 className="font-bold text-sm mb-6 pb-2 border-b border-[#f0eee8]">Tema Visual</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl border-2 border-[var(--teal)] bg-white">
-                    <div className="flex gap-2 mb-3">
-                      <div className="w-4 h-4 rounded-full bg-[#1a1a24]" />
-                      <div className="w-4 h-4 rounded-full bg-[#0d6e6e]" />
-                      <div className="w-4 h-4 rounded-full bg-[#f9faf8]" />
-                    </div>
-                    <div className="text-xs font-bold">Oak & Ink (Actual)</div>
+              <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="fp-card">
+                  <h3 className="font-bold text-sm mb-2 pb-2 border-b border-[#f0eee8] flex items-center gap-2">
+                    <Palette className="w-4 h-4 text-[var(--teal)]" /> Tema Visual
+                  </h3>
+                  <p className="text-[11px] text-[var(--ink3)] mb-5">El tema se aplica instantáneamente y se guarda en este dispositivo.</p>
+
+                  <div className="grid grid-cols-2 gap-4">
+
+                    {/* Oak & Ink — claro */}
+                    <button
+                      onClick={() => handleThemeChange('light')}
+                      className={`p-5 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                        selectedTheme === 'light'
+                          ? 'border-[var(--teal)] shadow-lg shadow-[var(--teal)]/10'
+                          : 'border-[#e5e3dc] hover:border-[var(--teal)]/40'
+                      }`}
+                    >
+                      {/* Preview */}
+                      <div className="w-full h-16 rounded-xl bg-[#f5f3ee] mb-3 overflow-hidden relative border border-[#e5e3dc]">
+                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-[#1a1a24]" />
+                        <div className="absolute left-10 top-3 right-2 h-2.5 bg-[#1a1a24]/15 rounded-full" />
+                        <div className="absolute left-10 top-7 right-6 h-2 bg-[#0d6e6e]/20 rounded-full" />
+                        <div className="absolute left-10 top-11 w-10 h-2 bg-[#0d6e6e] rounded-full" />
+                      </div>
+                      <div className="flex gap-1.5 mb-2">
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#1a1a24]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#0d6e6e]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#f5f3ee] border border-[#e5e3dc]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#d97706]" />
+                      </div>
+                      <div className="text-xs font-black text-[#1a1a24]">Oak & Ink</div>
+                      <div className="text-[10px] text-[#8a8a9a]">Claro · Cálido</div>
+                      {selectedTheme === 'light' && (
+                        <div className="mt-2 text-[9px] font-black uppercase tracking-widest text-[var(--teal)]">● Activo</div>
+                      )}
+                    </button>
+
+                    {/* Dark Walnut — oscuro */}
+                    <button
+                      onClick={() => handleThemeChange('dark')}
+                      className={`p-5 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                        selectedTheme === 'dark'
+                          ? 'border-[#14b8a6] shadow-lg shadow-[#14b8a6]/15'
+                          : 'border-[#2a2a35] hover:border-[#14b8a6]/40'
+                      } bg-[#111118]`}
+                    >
+                      {/* Preview */}
+                      <div className="w-full h-16 rounded-xl bg-[#0a0a0d] mb-3 overflow-hidden relative border border-[#2a2a35]">
+                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-[#1c1c26]" />
+                        <div className="absolute left-10 top-3 right-2 h-2.5 bg-white/10 rounded-full" />
+                        <div className="absolute left-10 top-7 right-6 h-2 bg-[#14b8a6]/20 rounded-full" />
+                        <div className="absolute left-10 top-11 w-10 h-2 bg-[#14b8a6] rounded-full" />
+                      </div>
+                      <div className="flex gap-1.5 mb-2">
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#e8e8ee]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#14b8a6]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#111118] border border-[#2a2a35]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#f59e0b]" />
+                      </div>
+                      <div className="text-xs font-black text-[#e8e8ee]">Dark Walnut</div>
+                      <div className="text-[10px] text-[#6b6b78]">Oscuro · Nocturno</div>
+                      {selectedTheme === 'dark' && (
+                        <div className="mt-2 text-[9px] font-black uppercase tracking-widest text-[#14b8a6]">● Activo</div>
+                      )}
+                    </button>
                   </div>
-                  <div className="p-4 rounded-xl border border-[#e5e3dc] bg-[#0d0d12] text-white opacity-50 grayscale cursor-not-allowed">
-                    <div className="flex gap-2 mb-3">
-                      <div className="w-4 h-4 rounded-full bg-[#000]" />
-                      <div className="w-4 h-4 rounded-full bg-[#333]" />
-                      <div className="w-4 h-4 rounded-full bg-[#0d6e6e]" />
-                    </div>
-                    <div className="text-xs font-bold">Dark Walnut (Próximamente)</div>
-                  </div>
+                </div>
+
+                <div className="p-5 bg-[var(--bg1)] border border-[var(--border)] rounded-2xl text-[11px] text-[var(--ink3)] leading-relaxed">
+                  <strong className="text-[var(--ink)] block mb-1">Nota</strong>
+                  El tema se aplica en este navegador. Las partes del interfaz con colores directos mejorarán progresivamente con futuras actualizaciones.
                 </div>
               </div>
             )}
 
+            {/* ── Inteligencia Artificial ── */}
+            {activeTab === 'ia' && (
+              <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+
+                {/* Proveedor */}
+                <div className="fp-card">
+                  <h3 className="font-bold text-sm mb-5 pb-2 border-b border-[#f0eee8] flex items-center gap-2">
+                    <BrainCircuit className="w-4 h-4 text-[var(--teal)]" /> Proveedor de IA
+                  </h3>
+
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    {([
+                      { id: 'anthropic', label: 'Anthropic', sub: 'Claude Sonnet' },
+                      { id: 'openai',   label: 'OpenAI',    sub: 'GPT-4o / GPT-4o-mini' },
+                      { id: 'local',    label: 'Local',     sub: 'Ollama / LM Studio' },
+                    ] as const).map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => { setLlmProvider(p.id); setTestStatus('idle'); }}
+                        className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                          llmProvider === p.id
+                            ? 'border-[var(--teal)] bg-[var(--teal)]/5'
+                            : 'border-[#e5e3dc] hover:border-[var(--teal)]/40'
+                        }`}
+                      >
+                        <div className="text-xs font-black text-[var(--ink)] mb-0.5">{p.label}</div>
+                        <div className="text-[10px] text-[var(--ink3)]">{p.sub}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* API Key — solo Anthropic y OpenAI */}
+                  {(llmProvider === 'anthropic' || llmProvider === 'openai') && (
+                    <div className="mb-4">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1 flex items-center gap-1.5">
+                        <Key className="w-3 h-3" />
+                        API Key de {llmProvider === 'anthropic' ? 'Anthropic' : 'OpenAI'}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showKey ? 'text' : 'password'}
+                          value={llmApiKey}
+                          onChange={e => setLlmApiKey(e.target.value)}
+                          placeholder={llmProvider === 'anthropic' ? 'sk-ant-api03-...' : 'sk-proj-...'}
+                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 pr-12 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowKey(v => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ink3)] hover:text-[var(--ink)] transition-colors"
+                        >
+                          {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-[var(--ink3)] mt-1 ml-1">
+                        La clave se guarda cifrada en tu perfil. Solo la usa el servidor al procesar tus peticiones.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Modelo — OpenAI */}
+                  {llmProvider === 'openai' && (
+                    <div className="mb-4">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Modelo</label>
+                      <select
+                        value={llmModel}
+                        onChange={e => setLlmModel(e.target.value)}
+                        className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium"
+                      >
+                        <option value="">gpt-4o-mini (por defecto)</option>
+                        <option value="gpt-4o">gpt-4o</option>
+                        <option value="gpt-4o-mini">gpt-4o-mini</option>
+                        <option value="gpt-4-turbo">gpt-4-turbo</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Endpoint + Modelo — Local */}
+                  {llmProvider === 'local' && (
+                    <div className="space-y-4 mb-4">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">URL del servidor</label>
+                        <input
+                          type="text"
+                          value={llmEndpoint}
+                          onChange={e => setLlmEndpoint(e.target.value)}
+                          placeholder="http://localhost:11434/v1"
+                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Nombre del modelo</label>
+                        <input
+                          type="text"
+                          value={llmModel}
+                          onChange={e => setLlmModel(e.target.value)}
+                          placeholder="llama3.2"
+                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Estado del test */}
+                  <AnimatePresence>
+                    {testStatus !== 'idle' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className={`flex items-center gap-2 text-[11px] font-bold px-4 py-3 rounded-xl mb-4 ${
+                          testStatus === 'ok'
+                            ? 'bg-green-50 text-green-700 border border-green-100'
+                            : 'bg-red-50 text-red-700 border border-red-100'
+                        }`}
+                      >
+                        {testStatus === 'ok'
+                          ? <Wifi className="w-4 h-4 shrink-0" />
+                          : <WifiOff className="w-4 h-4 shrink-0" />}
+                        {testMsg}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Botones */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleTest}
+                      disabled={llmLoading}
+                      className="flex items-center gap-2 px-5 py-2.5 border border-[#e5e3dc] rounded-xl text-[12px] font-bold text-[var(--ink2)] hover:border-[var(--teal)] hover:text-[var(--teal)] transition-all disabled:opacity-50"
+                    >
+                      {llmLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
+                      Probar conexión
+                    </button>
+                    <button
+                      onClick={handleSaveIa}
+                      disabled={llmLoading}
+                      className="flex items-center gap-2 px-6 py-2.5 bg-[var(--teal)] text-white rounded-xl text-[12px] font-bold shadow-lg shadow-[var(--teal2)]/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                    >
+                      {llmLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                      Guardar configuración
+                    </button>
+                  </div>
+                </div>
+
+                {/* Info box */}
+                <div className="p-5 bg-[var(--bg1)] border border-[#f0eee8] rounded-2xl text-[11px] text-[var(--ink3)] leading-relaxed">
+                  <strong className="text-[var(--ink)] block mb-1">¿Cómo funciona?</strong>
+                  Tu API key se almacena de forma segura en tu perfil de Supabase con cifrado RLS.
+                  El asistente IA la usa automáticamente en cada conversación sin necesidad de introducirla de nuevo.
+                  Si no configuras ninguna, el sistema usará la clave compartida del servidor (si está disponible).
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

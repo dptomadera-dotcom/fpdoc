@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import ThemeProvider from "@/components/theme-provider";
 
 export const viewport = {
   themeColor: '#0d6e6e',
@@ -26,7 +27,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        {/* Aplica el tema antes de pintar para evitar parpadeo */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('fpdoc_theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();`,
+          }}
+        />
+      </head>
       <body className="antialiased min-h-screen">
+        <ThemeProvider />
         <ServiceWorkerRegister />
         {children}
       </body>
