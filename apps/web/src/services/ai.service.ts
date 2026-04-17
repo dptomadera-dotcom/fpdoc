@@ -1,4 +1,5 @@
 import api from '../lib/api-client';
+import { supabase } from '../lib/supabase';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -6,31 +7,66 @@ export interface ChatMessage {
 }
 
 export interface LlmConfig {
-  provider: 'anthropic' | 'local';
+  provider: 'anthropic' | 'openai' | 'local';
+  apiKey?: string;
   endpoint?: string;
   model?: string;
 }
 
-export const LLM_CONFIG_KEY = 'fpdoc_llm_config';
-
-export function getLlmConfig(): LlmConfig {
-  if (typeof window === 'undefined') return { provider: 'anthropic' };
-  try {
-    const stored = localStorage.getItem(LLM_CONFIG_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch {}
-  return { provider: 'anthropic' };
+export interface GeneratedTask {
+  title: string;
+  description: string;
+  estimatedHours: number;
+  ceIds: string[];
 }
 
-export function saveLlmConfig(config: LlmConfig): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(LLM_CONFIG_KEY, JSON.stringify(config));
+export interface GeneratedPhase {
+  title: string;
+  description: string;
+  tasks: GeneratedTask[];
+}
+
+export async function loadLlmConfig(): Promise<LlmConfig | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from('user_llm_settings')
+    .select('provider, api_key, endpoint, model')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    provider: data.provider as LlmConfig['provider'],
+    apiKey: data.api_key ?? undefined,
+    endpoint: data.endpoint ?? undefined,
+    model: data.model ?? undefined,
+  };
+}
+
+export async function saveLlmConfig(config: LlmConfig): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Usuario no autenticado');
+
+  const { error } = await supabase
+    .from('user_llm_settings')
+    .upsert({
+      user_id: user.id,
+      provider: config.provider,
+      api_key: config.apiKey ?? null,
+      endpoint: config.endpoint ?? null,
+      model: config.model ?? null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' });
+
+  if (error) throw new Error(error.message);
 }
 
 export const aiService = {
   chat: async (messages: ChatMessage[]): Promise<string> => {
-    const config = getLlmConfig();
-    const response = await api.post('/ai/chat', { messages, config });
+    const response = await api.post('/ai/chat', { messages });
     return response.data.content;
   },
 
@@ -51,7 +87,7 @@ export const aiService = {
     description: string;
     raIds: string[];
     ceIds: string[];
-  }) => {
+  }): Promise<GeneratedPhase[]> => {
     const response = await api.post('/ai/suggest', data);
     return response.data;
   },
