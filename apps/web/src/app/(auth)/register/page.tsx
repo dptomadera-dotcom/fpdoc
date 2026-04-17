@@ -47,11 +47,23 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      const { user } = await authService.register(formData);
-      setSuccess(true);
+      // 🏗️ Validación: Email institucional (opcional pero forzamos JEFATURA)
+      let finalData = { ...formData };
+      if (formData.email.endsWith('departamento.madera@gmail.com')) {
+        finalData.role = 'JEFATURA';
+      }
+
+      const { user, token } = await authService.register(finalData);
       
-      // Todos los roles pasan por el cuestionario inicial
-      setTimeout(() => router.push('/onboarding'), 1500);
+      if (!token) {
+        // El usuario se ha creado pero requiere confirmación por email (Supabase default)
+        setSuccess(true);
+        // No redirigimos a onboarding porque aún no tiene sesión
+      } else {
+        setSuccess(true);
+        // Redirigimos tras un breve delay para que vea el mensaje de éxito
+        setTimeout(() => router.push('/onboarding'), 1500);
+      }
     } catch (err: any) {
       setError(extractErrorMessage(err));
     } finally {
@@ -165,7 +177,10 @@ export default function RegisterPage() {
               className="mb-8 p-4 bg-[var(--teal)]/10 border border-[var(--teal)]/20 text-[var(--teal)] text-xs font-black rounded-2xl flex items-center gap-3 overflow-hidden"
             >
               <CheckCircle2 className="w-4 h-4 shrink-0" />
-              Cuenta creada con éxito. Redirigiendo...
+              {authService.getCurrentUser() 
+                ? 'Cuenta creada con éxito. Redirigiendo a onboarding...'
+                : 'Registro realizado con éxito. Por favor, revisa tu email para confirmar tu cuenta y poder iniciar sesión.'
+              }
             </motion.div>
           )}
         </AnimatePresence>
