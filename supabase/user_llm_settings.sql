@@ -4,7 +4,7 @@
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS public.user_llm_settings (
-  user_id   TEXT PRIMARY KEY REFERENCES public."User"(id) ON DELETE CASCADE,
+  user_id   UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   provider  TEXT NOT NULL DEFAULT 'anthropic'
               CHECK (provider IN ('anthropic', 'openai', 'local')),
   api_key   TEXT,          -- clave del usuario (anthropic / openai)
@@ -19,8 +19,8 @@ ALTER TABLE public.user_llm_settings ENABLE ROW LEVEL SECURITY;
 -- Cada usuario solo puede ver y modificar su propia fila
 CREATE POLICY "user_own_llm_settings" ON public.user_llm_settings
   FOR ALL TO authenticated
-  USING  (user_id = auth.uid()::text)
-  WITH CHECK (user_id = auth.uid()::text);
+  USING  (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
 
 -- Índice (opcional, la PK ya indexa)
 -- No se necesita índice adicional
