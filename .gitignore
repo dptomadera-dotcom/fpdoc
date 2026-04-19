@@ -47,3 +47,4 @@ coverage/
 supabase/.branches/
 supabase/.temp/
 .env*
+package-lock.json
