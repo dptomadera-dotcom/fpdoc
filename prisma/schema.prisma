@@ -494,6 +494,7 @@ model webauthn_credentials {
   @@schema("auth")
 }
 
+
 model AIInteraction {
   id         String   @id
   userId     String
@@ -545,6 +546,7 @@ model AssessmentRecord {
   learningOutcomeId     String
   evaluationCriterionId String?
   instrumentId          String?
+  trimesterId           String?
   score                 Float?
   qualitativeNote       String?
   assessedAt            DateTime              @default(now())
@@ -554,19 +556,26 @@ model AssessmentRecord {
   LearningOutcome       LearningOutcome       @relation(fields: [learningOutcomeId], references: [id])
   User                  User                  @relation(fields: [studentId], references: [id])
   Task                  Task                  @relation(fields: [taskId], references: [id])
+  Trimester             Trimester?            @relation(fields: [trimesterId], references: [id])
 
   @@schema("public")
 }
 
 model AuditLog {
-  id        String   @id
-  userId    String?
-  action    String
-  entity    String
-  entityId  String?
-  details   Json?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  before     Json?
+  after      Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  Actor      User?    @relation("AuditActor", fields: [actorId], references: [id])
 
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
   @@schema("public")
 }
 
@@ -587,6 +596,7 @@ model Center {
   createdAt  DateTime     @default(now())
   Department Department[]
   User       User[]
+  CCPMeeting CCPMeeting[]
 
   @@schema("public")
 }
@@ -618,23 +628,26 @@ model Cycle {
 }
 
 model Department {
-  id       String   @id
-  name     String
-  centerId String
-  Center   Center   @relation(fields: [centerId], references: [id])
-  Family   Family[]
+  id               String             @id
+  name             String
+  centerId         String
+  Center           Center             @relation(fields: [centerId], references: [id])
+  Family           Family[]
+  DepartmentReport DepartmentReport[]
+  CCPAgendaItem    CCPAgendaItem[]
 
   @@schema("public")
 }
 
 model EvaluationCriterion {
-  id                 String               @id
-  code               String
-  description        String
-  learningOutcomeId  String
-  AssessmentRecord   AssessmentRecord[]
-  LearningOutcome    LearningOutcome      @relation(fields: [learningOutcomeId], references: [id])
-  TaskCurriculumLink TaskCurriculumLink[]
+  id                       String                     @id
+  code                     String
+  description              String
+  learningOutcomeId        String
+  AssessmentRecord         AssessmentRecord[]
+  LearningOutcome          LearningOutcome            @relation(fields: [learningOutcomeId], references: [id])
+  TaskCurriculumLink       TaskCurriculumLink[]
+  ProjectCurriculumMapping ProjectCurriculumMapping[]
 
   @@schema("public")
 }
@@ -668,37 +681,44 @@ model EvidenceComment {
 }
 
 model Family {
-  id           String     @id
-  name         String
-  code         String     @unique
-  departmentId String
-  Cycle        Cycle[]
-  Department   Department @relation(fields: [departmentId], references: [id])
+  id               String             @id
+  name             String
+  code             String             @unique
+  departmentId     String
+  Cycle            Cycle[]
+  Department       Department         @relation(fields: [departmentId], references: [id])
+  ProjectPhaseType ProjectPhaseType[]
 
   @@schema("public")
 }
 
 model Group {
-  id           String         @id
-  name         String
-  courseId     String
-  Course       Course         @relation(fields: [courseId], references: [id])
-  Session      Session[]
-  StudentGroup StudentGroup[]
+  id                  String                @id
+  name                String
+  courseId            String
+  Course              Course                @relation(fields: [courseId], references: [id])
+  Session             Session[]
+  StudentGroup        StudentGroup[]
+  TeachingAssignment  TeachingAssignment[]
+  DidacticProgramming DidacticProgramming[]
+  InternshipAgreement InternshipAgreement[]
+  IntermodularProject IntermodularProject[]
 
   @@schema("public")
 }
 
 model LearningOutcome {
-  id                  String                @id
-  code                String
-  description         String
-  moduleId            String
-  AssessmentRecord    AssessmentRecord[]
-  EvaluationCriterion EvaluationCriterion[]
-  Module              Module                @relation(fields: [moduleId], references: [id])
-  StudentProgress     StudentProgress[]
-  TaskCurriculumLink  TaskCurriculumLink[]
+  id                       String                     @id
+  code                     String
+  description              String
+  moduleId                 String
+  AssessmentRecord         AssessmentRecord[]
+  EvaluationCriterion      EvaluationCriterion[]
+  Module                   Module                     @relation(fields: [moduleId], references: [id])
+  StudentProgress          StudentProgress[]
+  TaskCurriculumLink       TaskCurriculumLink[]
+  Topic                    Topic[]
+  ProjectCurriculumMapping ProjectCurriculumMapping[]
 
   @@schema("public")
 }
@@ -718,16 +738,21 @@ model MachineAuthorization {
 }
 
 model Module {
-  id              String            @id
-  name            String
-  code            String            @unique
-  hours           Int
-  year            Int
-  cycleId         String
-  LearningOutcome LearningOutcome[]
-  Cycle           Cycle             @relation(fields: [cycleId], references: [id])
-  ModuleTeacher   ModuleTeacher[]
-  ProjectModule   ProjectModule[]
+  id                       String                     @id
+  name                     String
+  code                     String                     @unique
+  hours                    Int
+  year                     Int
+  cycleId                  String
+  LearningOutcome          LearningOutcome[]
+  Cycle                    Cycle                      @relation(fields: [cycleId], references: [id])
+  ModuleTeacher            ModuleTeacher[]
+  ProjectModule            ProjectModule[]
+  TeachingAssignment       TeachingAssignment[]
+  DidacticProgramming      DidacticProgramming[]
+  Topic                    Topic[]
+  ProjectCurriculumMapping ProjectCurriculumMapping[]
+  ProjectPhase_responsible ProjectPhase[]             @relation("PhaseResponsibleModule")
 
   @@schema("public")
 }
@@ -758,21 +783,22 @@ model Observation {
 }
 
 model Project {
-  id               String            @id
-  name             String
-  description      String?
-  status           ProjectStatus     @default(BORRADOR)
-  courseId         String
-  evaluationPeriod EvaluationPeriod?
-  toolLevel        ToolLevel?
-  estimatedHours   Int?
-  startDate        DateTime?
-  endDate          DateTime?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime
-  Course           Course            @relation(fields: [courseId], references: [id])
-  ProjectModule    ProjectModule[]
-  ProjectPhase     ProjectPhase[]
+  id                       String                     @id
+  name                     String
+  description              String?
+  status                   ProjectStatus              @default(BORRADOR)
+  courseId                 String
+  evaluationPeriod         EvaluationPeriod?
+  toolLevel                ToolLevel?
+  estimatedHours           Int?
+  startDate                DateTime?
+  endDate                  DateTime?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime
+  Course                   Course                     @relation(fields: [courseId], references: [id])
+  ProjectModule            ProjectModule[]
+  ProjectPhase             ProjectPhase[]
+  ProjectCurriculumMapping ProjectCurriculumMapping[]
 
   @@schema("public")
 }
@@ -789,15 +815,24 @@ model ProjectModule {
 }
 
 model ProjectPhase {
-  id          String    @id
-  name        String
-  description String?
-  order       Int
-  projectId   String
-  startDate   DateTime?
-  endDate     DateTime?
-  Project     Project   @relation(fields: [projectId], references: [id])
-  Task        Task[]
+  id                   String            @id
+  name                 String
+  description          String?
+  order                Int
+  projectId            String
+  startDate            DateTime?
+  endDate              DateTime?
+  phaseTypeId          String?
+  responsibleModuleId  String?
+  responsibleTeacherId String?
+  dependsOnPhaseId     String?
+  Project              Project           @relation(fields: [projectId], references: [id])
+  Task                 Task[]
+  PhaseType            ProjectPhaseType? @relation(fields: [phaseTypeId], references: [id])
+  ResponsibleModule    Module?           @relation("PhaseResponsibleModule", fields: [responsibleModuleId], references: [id])
+  ResponsibleTeacher   User?             @relation("PhaseResponsibleTeacher", fields: [responsibleTeacherId], references: [id])
+  DependsOn            ProjectPhase?     @relation("PhaseDependency", fields: [dependsOnPhaseId], references: [id])
+  DependentPhases      ProjectPhase[]    @relation("PhaseDependency")
 
   @@schema("public")
 }
@@ -864,6 +899,8 @@ model Task {
   startDate                                              DateTime?
   dueDate                                                DateTime?
   estimatedHours                                         Int?
+  deliveryMode                                           DeliveryMode         @default(INDIVIDUAL)
+  collectiveOwnerGroupId                                 String?
   createdAt                                              DateTime             @default(now())
   updatedAt                                              DateTime
   AssessmentRecord                                       AssessmentRecord[]
@@ -915,27 +952,44 @@ model TaskSafetyLink {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model User {
-  id                   String                 @id
-  email                String                 @unique
-  passwordHash         String
-  firstName            String
-  lastName             String
-  role                 UserRole
-  isActive             Boolean                @default(true)
-  centerId             String?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime
-  onboardingCompleted  Boolean?               @default(false)
-  AIInteraction        AIInteraction[]
-  Alert                Alert[]
-  AssessmentRecord     AssessmentRecord[]
-  Evidence             Evidence[]
-  MachineAuthorization MachineAuthorization[]
-  ModuleTeacher        ModuleTeacher[]
-  Observation          Observation[]
-  StudentGroup         StudentGroup[]
-  StudentProgress      StudentProgress[]
-  Center               Center?                @relation(fields: [centerId], references: [id])
+  id                             String                              @id
+  email                          String                              @unique
+  passwordHash                   String
+  firstName                      String
+  lastName                       String
+  role                           UserRole
+  isActive                       Boolean                             @default(true)
+  centerId                       String?
+  createdAt                      DateTime                            @default(now())
+  updatedAt                      DateTime
+  onboardingCompleted            Boolean?                            @default(false)
+  AIInteraction                  AIInteraction[]
+  Alert                          Alert[]
+  AssessmentRecord               AssessmentRecord[]
+  Evidence                       Evidence[]
+  MachineAuthorization           MachineAuthorization[]
+  ModuleTeacher                  ModuleTeacher[]
+  Observation                    Observation[]
+  StudentGroup                   StudentGroup[]
+  StudentProgress                StudentProgress[]
+  Center                         Center?                             @relation(fields: [centerId], references: [id])
+  TeachingAssignment             TeachingAssignment[]
+  DidacticProgramming_teacher    DidacticProgramming[]               @relation("ProgrammingTeacher")
+  DidacticProgramming_approver   DidacticProgramming[]               @relation("ProgrammingApprover")
+  ProgrammingReviewNote          ProgrammingReviewNote[]
+  ProgrammingFollowUp            ProgrammingFollowUp[]
+  DepartmentReport               DepartmentReport[]
+  InternshipAgreement_student    InternshipAgreement[]               @relation("InternshipStudent")
+  InternshipAgreement_tutor      InternshipAgreement[]               @relation("InternshipCenterTutor")
+  IntermodularProject_student    IntermodularProject[]               @relation("IntermodularStudent")
+  IntermodularProject_supervisor IntermodularProject[]               @relation("IntermodularSupervisor")
+  EvalBoard_president            IntermodularProjectEvaluationBoard[] @relation("BoardPresident")
+  EvalBoard_secretary            IntermodularProjectEvaluationBoard[] @relation("BoardSecretary")
+  EvalBoard_member               IntermodularProjectEvaluationBoard[] @relation("BoardMember")
+  ProjectCurriculumMapping       ProjectCurriculumMapping[]
+  QuestionnaireResponse          QuestionnaireResponse[]
+  AuditLog                       AuditLog[]                          @relation("AuditActor")
+  ProjectPhase_responsible       ProjectPhase[]                      @relation("PhaseResponsibleTeacher")
 
   @@schema("public")
 }
@@ -954,6 +1008,435 @@ model onboarding_responses {
   @@schema("public")
 }
 
+// ============================================================================
+// NUEVAS ENTIDADES — delta auditoría 2026-04-19
+// ============================================================================
+
+model AcademicYear {
+  id                  String                @id @default(cuid())
+  label               String                @unique
+  startDate           DateTime
+  endDate             DateTime
+  isCurrent           Boolean               @default(false)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  Trimester           Trimester[]
+  TeachingAssignment  TeachingAssignment[]
+  DidacticProgramming DidacticProgramming[]
+  ProgrammingFollowUp ProgrammingFollowUp[]
+  DepartmentReport    DepartmentReport[]
+  CCPMeeting          CCPMeeting[]
+  InternshipAgreement InternshipAgreement[]
+  IntermodularProject IntermodularProject[]
+  Questionnaire       Questionnaire[]
+
+  @@schema("public")
+}
+
+model Trimester {
+  id                    String                @id @default(cuid())
+  academicYearId        String
+  number                Int
+  startDate             DateTime
+  endDate               DateTime
+  evaluationSessionDate DateTime?
+  isClosed              Boolean               @default(false)
+  AcademicYear          AcademicYear          @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  ProgrammingFollowUp   ProgrammingFollowUp[]
+  DepartmentReport      DepartmentReport[]
+  CCPMeeting            CCPMeeting[]
+  AssessmentRecord      AssessmentRecord[]
+
+  @@unique([academicYearId, number])
+  @@index([academicYearId])
+  @@schema("public")
+}
+
+model TeachingAssignment {
+  id             String       @id @default(cuid())
+  academicYearId String
+  teacherId      String
+  moduleId       String
+  groupId        String
+  weeklyHours    Int?
+  isCoordinator  Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  AcademicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  Teacher        User         @relation(fields: [teacherId], references: [id])
+  Module         Module       @relation(fields: [moduleId], references: [id])
+  Group          Group        @relation(fields: [groupId], references: [id])
+
+  @@unique([academicYearId, teacherId, moduleId, groupId])
+  @@index([teacherId, academicYearId])
+  @@index([groupId, academicYearId])
+  @@schema("public")
+}
+
+model DidacticProgramming {
+  id                    String                  @id @default(cuid())
+  academicYearId        String
+  moduleId              String
+  groupId               String
+  teacherId             String
+  status                ProgrammingStatus       @default(DRAFT)
+  version               Int                     @default(1)
+  content               Json                    @default("{}")
+  submittedAt           DateTime?
+  approvedById          String?
+  approvedAt            DateTime?
+  inspectionSubmittedAt DateTime?
+  exportedPdfUrl        String?
+  notes                 String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  AcademicYear          AcademicYear            @relation(fields: [academicYearId], references: [id])
+  Module                Module                  @relation(fields: [moduleId], references: [id])
+  Group                 Group                   @relation(fields: [groupId], references: [id])
+  Teacher               User                    @relation("ProgrammingTeacher", fields: [teacherId], references: [id])
+  ApprovedBy            User?                   @relation("ProgrammingApprover", fields: [approvedById], references: [id])
+  ProgrammingReviewNote ProgrammingReviewNote[]
+  ProgrammingFollowUp   ProgrammingFollowUp[]
+
+  @@unique([academicYearId, moduleId, groupId, teacherId, version])
+  @@index([teacherId, academicYearId])
+  @@index([status])
+  @@schema("public")
+}
+
+model ProgrammingReviewNote {
+  id            String                @id @default(cuid())
+  programmingId String
+  authorId      String
+  kind          ProgrammingReviewKind
+  targetSection String?
+  text          String
+  createdAt     DateTime              @default(now())
+  Programming   DidacticProgramming   @relation(fields: [programmingId], references: [id], onDelete: Cascade)
+  Author        User                  @relation(fields: [authorId], references: [id])
+
+  @@index([programmingId])
+  @@schema("public")
+}
+
+model ProgrammingFollowUp {
+  id              String              @id @default(cuid())
+  programmingId   String
+  trimesterId     String
+  teacherId       String
+  academicYearId  String
+  progressSummary String
+  completedRaIds  String[]
+  pendingRaIds    String[]
+  incidentsText   String?
+  nextSteps       String?
+  submittedAt     DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  Programming     DidacticProgramming @relation(fields: [programmingId], references: [id], onDelete: Cascade)
+  Trimester       Trimester           @relation(fields: [trimesterId], references: [id])
+  Teacher         User                @relation(fields: [teacherId], references: [id])
+  AcademicYear    AcademicYear        @relation(fields: [academicYearId], references: [id])
+
+  @@unique([programmingId, trimesterId])
+  @@index([trimesterId])
+  @@schema("public")
+}
+
+model CCPMeeting {
+  id               String             @id @default(cuid())
+  centerId         String
+  academicYearId   String
+  trimesterId      String?
+  scheduledAt      DateTime
+  heldAt           DateTime?
+  agenda           String?
+  minutesUrl       String?
+  createdAt        DateTime           @default(now())
+  Center           Center             @relation(fields: [centerId], references: [id])
+  AcademicYear     AcademicYear       @relation(fields: [academicYearId], references: [id])
+  Trimester        Trimester?         @relation(fields: [trimesterId], references: [id])
+  CCPAgendaItem    CCPAgendaItem[]
+  DepartmentReport DepartmentReport[]
+
+  @@index([centerId, academicYearId])
+  @@schema("public")
+}
+
+model DepartmentReport {
+  id                  String          @id @default(cuid())
+  departmentId        String
+  academicYearId      String
+  trimesterId         String
+  authorId            String
+  consolidatedSummary String
+  overallStatus       String
+  ccpMeetingId        String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  Department          Department      @relation(fields: [departmentId], references: [id])
+  AcademicYear        AcademicYear    @relation(fields: [academicYearId], references: [id])
+  Trimester           Trimester       @relation(fields: [trimesterId], references: [id])
+  Author              User            @relation(fields: [authorId], references: [id])
+  CCPMeeting          CCPMeeting?     @relation(fields: [ccpMeetingId], references: [id])
+  CCPAgendaItem       CCPAgendaItem[]
+
+  @@unique([departmentId, trimesterId])
+  @@index([academicYearId, trimesterId])
+  @@schema("public")
+}
+
+model CCPAgendaItem {
+  id                 String            @id @default(cuid())
+  meetingId          String
+  departmentId       String
+  departmentReportId String?
+  topic              String
+  outcome            String?
+  orderIndex         Int               @default(0)
+  Meeting            CCPMeeting        @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  Department         Department        @relation(fields: [departmentId], references: [id])
+  DepartmentReport   DepartmentReport? @relation(fields: [departmentReportId], references: [id])
+
+  @@index([meetingId])
+  @@schema("public")
+}
+
+model Company {
+  id                   String                @id @default(cuid())
+  taxId                String                @unique
+  name                 String
+  address              String?
+  contactEmail         String?
+  contactPhone         String?
+  agreementTemplateUrl String?
+  notes                String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  InternshipAgreement  InternshipAgreement[]
+
+  @@schema("public")
+}
+
+model InternshipAgreement {
+  id                   String               @id @default(cuid())
+  studentId            String
+  companyId            String
+  academicYearId       String
+  groupId              String
+  startDate            DateTime
+  endDate              DateTime
+  totalHours           Int
+  status               InternshipStatus     @default(DRAFT)
+  companyTutorName     String?
+  companyTutorEmail    String?
+  centerTutorId        String?
+  signedDocumentUrl    String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  Student              User                 @relation("InternshipStudent", fields: [studentId], references: [id])
+  Company              Company              @relation(fields: [companyId], references: [id])
+  AcademicYear         AcademicYear         @relation(fields: [academicYearId], references: [id])
+  Group                Group                @relation(fields: [groupId], references: [id])
+  CenterTutor          User?                @relation("InternshipCenterTutor", fields: [centerTutorId], references: [id])
+  InternshipLog        InternshipLog[]
+  InternshipEvaluation InternshipEvaluation?
+
+  @@unique([studentId, academicYearId])
+  @@index([companyId])
+  @@index([groupId, academicYearId])
+  @@schema("public")
+}
+
+model InternshipLog {
+  id                  String              @id @default(cuid())
+  agreementId         String
+  date                DateTime
+  hours               Float
+  activityDescription String
+  validatedByTutor    Boolean             @default(false)
+  validatedAt         DateTime?
+  createdAt           DateTime            @default(now())
+  Agreement           InternshipAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  @@index([agreementId, date])
+  @@schema("public")
+}
+
+model InternshipEvaluation {
+  id                String              @id @default(cuid())
+  agreementId       String              @unique
+  companyTutorScore Int?
+  centerTutorScore  Int?
+  overallStatus     String?
+  finalReportUrl    String?
+  evaluatedAt       DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  Agreement         InternshipAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  @@schema("public")
+}
+
+model IntermodularProject {
+  id                   String                              @id @default(cuid())
+  studentId            String
+  academicYearId       String
+  groupId              String
+  supervisingTeacherId String?
+  title                String
+  abstract             String?
+  status               IntermodularStatus                  @default(IN_PROGRESS)
+  dossierUrl           String?
+  memoryUrl            String?
+  presentationUrl      String?
+  grade                Float?
+  gradeReport          String?
+  createdAt            DateTime                            @default(now())
+  updatedAt            DateTime                            @updatedAt
+  Student              User                                @relation("IntermodularStudent", fields: [studentId], references: [id])
+  AcademicYear         AcademicYear                        @relation(fields: [academicYearId], references: [id])
+  Group                Group                               @relation(fields: [groupId], references: [id])
+  SupervisingTeacher   User?                               @relation("IntermodularSupervisor", fields: [supervisingTeacherId], references: [id])
+  Section              IntermodularProjectSection[]
+  EvaluationBoard      IntermodularProjectEvaluationBoard?
+
+  @@unique([studentId, academicYearId])
+  @@index([groupId, academicYearId])
+  @@schema("public")
+}
+
+model IntermodularProjectSection {
+  id             String              @id @default(cuid())
+  projectId      String
+  orderIndex     Int
+  title          String
+  description    String?
+  deliverableUrl String?
+  Project        IntermodularProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, orderIndex])
+  @@index([projectId])
+  @@schema("public")
+}
+
+model IntermodularProjectEvaluationBoard {
+  id          String              @id @default(cuid())
+  projectId   String              @unique
+  presidentId String
+  secretaryId String
+  memberId    String?
+  sessionDate DateTime?
+  createdAt   DateTime            @default(now())
+  Project     IntermodularProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  President   User                @relation("BoardPresident", fields: [presidentId], references: [id])
+  Secretary   User                @relation("BoardSecretary", fields: [secretaryId], references: [id])
+  Member      User?               @relation("BoardMember", fields: [memberId], references: [id])
+
+  @@schema("public")
+}
+
+model ProjectCurriculumMapping {
+  id                  String              @id @default(cuid())
+  projectId           String
+  moduleId            String
+  raId                String
+  ceId                String
+  confidence          Float?
+  source              MappingSource       @default(AI_SUGGESTED)
+  confirmedById       String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  Project             Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  Module              Module              @relation(fields: [moduleId], references: [id])
+  LearningOutcome     LearningOutcome     @relation(fields: [raId], references: [id])
+  EvaluationCriterion EvaluationCriterion @relation(fields: [ceId], references: [id])
+  ConfirmedBy         User?               @relation(fields: [confirmedById], references: [id])
+
+  @@unique([projectId, moduleId, raId, ceId])
+  @@index([projectId])
+  @@index([moduleId])
+  @@schema("public")
+}
+
+model ProjectPhaseType {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  label        String
+  description  String?
+  orderHint    Int           @default(0)
+  familyId     String?
+  isActive     Boolean       @default(true)
+  Family       Family?       @relation(fields: [familyId], references: [id])
+  ProjectPhase ProjectPhase[]
+
+  @@index([familyId])
+  @@schema("public")
+}
+
+model Topic {
+  id              String           @id @default(cuid())
+  moduleId        String
+  raId            String?
+  title           String
+  description     String?
+  externalUrl     String?
+  orderIndex      Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  Module          Module           @relation(fields: [moduleId], references: [id])
+  LearningOutcome LearningOutcome? @relation(fields: [raId], references: [id])
+
+  @@index([moduleId])
+  @@index([raId])
+  @@schema("public")
+}
+
+model Questionnaire {
+  id             String                  @id @default(cuid())
+  academicYearId String
+  title          String
+  description    String?
+  scope          QuestionnaireScope      @default(ALL)
+  editableByRole String?
+  isActive       Boolean                 @default(true)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  AcademicYear   AcademicYear            @relation(fields: [academicYearId], references: [id])
+  Question       QuestionnaireQuestion[]
+  Response       QuestionnaireResponse[]
+
+  @@index([academicYearId])
+  @@schema("public")
+}
+
+model QuestionnaireQuestion {
+  id              String        @id @default(cuid())
+  questionnaireId String
+  orderIndex      Int
+  text            String
+  inputType       String
+  options         Json?
+  isRequired      Boolean       @default(false)
+  Questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+
+  @@unique([questionnaireId, orderIndex])
+  @@schema("public")
+}
+
+model QuestionnaireResponse {
+  id              String        @id @default(cuid())
+  questionnaireId String
+  respondentId    String
+  answers         Json
+  submittedAt     DateTime      @default(now())
+  Questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+  Respondent      User          @relation(fields: [respondentId], references: [id])
+
+  @@unique([questionnaireId, respondentId])
+  @@index([questionnaireId])
+  @@schema("public")
+}
 enum aal_level {
   aal1
   aal2
@@ -1076,6 +1559,70 @@ enum UserRole {
   JEFATURA
   PROFESOR
   ALUMNO
+
+  @@schema("public")
+}
+
+enum ProgrammingStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  NEEDS_CHANGES
+  APPROVED
+  SUBMITTED_TO_INSPECTION
+  ARCHIVED
+
+  @@schema("public")
+}
+
+enum ProgrammingReviewKind {
+  COMMENT
+  CHANGE_REQUEST
+  APPROVAL
+  REJECTION
+
+  @@schema("public")
+}
+
+enum InternshipStatus {
+  DRAFT
+  SIGNED
+  ACTIVE
+  COMPLETED
+  TERMINATED
+
+  @@schema("public")
+}
+
+enum IntermodularStatus {
+  IN_PROGRESS
+  SUBMITTED
+  UNDER_EVALUATION
+  GRADED
+
+  @@schema("public")
+}
+
+enum MappingSource {
+  AI_SUGGESTED
+  TEACHER_CONFIRMED
+  MANUAL
+
+  @@schema("public")
+}
+
+enum QuestionnaireScope {
+  ALL
+  BY_ROLE
+  BY_GROUP
+
+  @@schema("public")
+}
+
+enum DeliveryMode {
+  INDIVIDUAL
+  GROUP
+  WHOLE_CLASS
 
   @@schema("public")
 }
