@@ -2,6 +2,8 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ModelProviderAdapter } from './shared/model-provider.interface';
+import { OpenAiAdapter } from './shared/openai.adapter';
+import { OllamaAdapter } from './shared/ollama.adapter';
 import { AiInteractionLogService } from './shared/ai-interaction-log.service';
 import { buildCurriculumContext } from './shared/context/build-curriculum-context';
 import { buildTeacherContext } from './shared/context/build-teacher-context';
@@ -68,18 +70,35 @@ export class AiService {
     clientConfig?: LlmConfig,
   ): Promise<{ content: string; model: string; provider: string }> {
     const provider = clientConfig?.provider ?? 'anthropic';
+    const adapter = this.resolveAdapter(provider, clientConfig);
 
-    if (provider !== 'anthropic') {
-      throw new BadRequestException(`Proveedor '${provider}' no soportado en esta versión. Usa 'anthropic'.`);
-    }
-
-    const aiResponse = await this.anthropic.ask({
+    const aiResponse = await adapter.ask({
       system: SYSTEM_PROMPT,
       messages,
       maxTokens: 1024,
     });
 
-    return { content: aiResponse.text, model: aiResponse.model, provider: 'anthropic' };
+    return { content: aiResponse.text, model: aiResponse.model, provider };
+  }
+
+  private resolveAdapter(provider: string, config?: LlmConfig): ModelProviderAdapter {
+    switch (provider) {
+      case 'openai': {
+        const apiKey = config?.apiKey ?? process.env.OPENAI_API_KEY;
+        const model = config?.model ?? 'gpt-4o-mini';
+        const baseURL = config?.endpoint ?? process.env.OPENAI_BASE_URL;
+        if (!apiKey) throw new BadRequestException('Se requiere API Key para OpenAI/Cloud.');
+        return new OpenAiAdapter(apiKey, model, baseURL);
+      }
+      case 'local': {
+        const baseUrl = config?.endpoint ?? process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434';
+        const model = config?.model ?? 'llama3';
+        return new OllamaAdapter(baseUrl, model);
+      }
+      case 'anthropic':
+      default:
+        return this.anthropic;
+    }
   }
 
   async suggestProjectStructure(

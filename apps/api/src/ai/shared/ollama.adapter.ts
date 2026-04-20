@@ -11,10 +11,10 @@ export class OllamaAdapter extends ModelProviderAdapter {
   private readonly model: string;
   private readonly logger = new Logger(OllamaAdapter.name);
 
-  constructor() {
+  constructor(baseUrl?: string, model?: string) {
     super();
-    this.baseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434';
-    this.model = process.env.OLLAMA_MODEL ?? 'llama3';
+    this.baseUrl = baseUrl ?? process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434';
+    this.model = model ?? process.env.OLLAMA_MODEL ?? 'llama3';
   }
 
   async ask(options: AiRequestOptions): Promise<AiResponse> {

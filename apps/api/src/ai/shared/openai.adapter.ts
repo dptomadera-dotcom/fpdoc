@@ -12,14 +12,14 @@ export class OpenAiAdapter extends ModelProviderAdapter {
   private readonly model: string;
   private readonly logger = new Logger(OpenAiAdapter.name);
 
-  constructor() {
+  constructor(apiKey?: string, model?: string, baseURL?: string) {
     super();
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error('OPENAI_API_KEY environment variable is not set');
-    this.model = process.env.OPENAI_MODEL ?? 'gpt-4o';
+    const key = apiKey ?? process.env.OPENAI_API_KEY;
+    if (!key) throw new Error('OPENAI_API_KEY is required');
+    this.model = model ?? process.env.OPENAI_MODEL ?? 'gpt-4o';
     this.client = new OpenAI({
-      apiKey,
-      baseURL: process.env.OPENAI_BASE_URL, // allows Groq, Azure, Together, etc.
+      apiKey: key,
+      baseURL: baseURL ?? process.env.OPENAI_BASE_URL,
     });
   }
 

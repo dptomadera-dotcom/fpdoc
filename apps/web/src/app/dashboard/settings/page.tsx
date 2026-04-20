@@ -35,6 +35,7 @@ export default function SettingsPage() {
   const [llmApiKey, setLlmApiKey]     = useState('');
   const [llmEndpoint, setLlmEndpoint] = useState('');
   const [llmModel, setLlmModel]       = useState('');
+  const [llmModelCustom, setLlmModelCustom] = useState('');
   const [showKey, setShowKey]         = useState(false);
   const [llmLoading, setLlmLoading]   = useState(false);
   const [testStatus, setTestStatus]   = useState<'idle' | 'ok' | 'error'>('idle');
@@ -65,6 +66,9 @@ export default function SettingsPage() {
     }, 1000);
   };
 
+  // Resolver modelo real (soporta modelo personalizado en local)
+  const resolveModel = () => llmModel === '__custom__' ? llmModelCustom.trim() : llmModel.trim();
+
   // Guardar config IA en Supabase
   const handleSaveIa = async () => {
     setLlmLoading(true);
@@ -73,7 +77,7 @@ export default function SettingsPage() {
         provider: llmProvider,
         apiKey: llmApiKey.trim() || undefined,
         endpoint: llmEndpoint.trim() || undefined,
-        model: llmModel.trim() || undefined,
+        model: resolveModel() || undefined,
       };
       await saveLlmConfig(cfg);
       showToast('Configuración de IA guardada');
@@ -93,7 +97,7 @@ export default function SettingsPage() {
         provider: llmProvider,
         apiKey: llmApiKey.trim() || undefined,
         endpoint: llmEndpoint.trim() || undefined,
-        model: llmModel.trim() || undefined,
+        model: resolveModel() || undefined,
       };
       const result = await aiService.testConnection(cfg);
       if (result.ok) {
@@ -367,19 +371,30 @@ export default function SettingsPage() {
                     ))}
                   </div>
 
-                  {/* API Key — solo Anthropic y OpenAI */}
+                  {/* API Key — Anthropic, OpenAI y Cloud */}
                   {(llmProvider === 'anthropic' || llmProvider === 'openai') && (
                     <div className="mb-4">
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1 flex items-center gap-1.5">
                         <Key className="w-3 h-3" />
-                        API Key de {llmProvider === 'anthropic' ? 'Anthropic' : 'OpenAI'}
+                        {llmProvider === 'anthropic'
+                          ? 'API Key de Anthropic'
+                          : llmModel === 'glm-5.1:cloud'
+                            ? 'API Key de GLM (Zhipu AI)'
+                            : llmModel === 'minimax-m2.7:cloud'
+                              ? 'API Key de MiniMax'
+                              : 'API Key de OpenAI'}
                       </label>
                       <div className="relative">
                         <input
                           type={showKey ? 'text' : 'password'}
                           value={llmApiKey}
                           onChange={e => setLlmApiKey(e.target.value)}
-                          placeholder={llmProvider === 'anthropic' ? 'sk-ant-api03-...' : 'sk-proj-...'}
+                          placeholder={
+                            llmProvider === 'anthropic' ? 'sk-ant-api03-...'
+                              : llmModel === 'glm-5.1:cloud' ? 'zhipuai-...'
+                              : llmModel === 'minimax-m2.7:cloud' ? 'mm-...'
+                              : 'sk-proj-...'
+                          }
                           className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 pr-12 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
                         />
                         <button
@@ -396,20 +411,43 @@ export default function SettingsPage() {
                     </div>
                   )}
 
-                  {/* Modelo — OpenAI */}
+                  {/* Modelo — OpenAI / Cloud */}
                   {llmProvider === 'openai' && (
-                    <div className="mb-4">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Modelo</label>
-                      <select
-                        value={llmModel}
-                        onChange={e => setLlmModel(e.target.value)}
-                        className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium"
-                      >
-                        <option value="">gpt-4o-mini (por defecto)</option>
-                        <option value="gpt-4o">gpt-4o</option>
-                        <option value="gpt-4o-mini">gpt-4o-mini</option>
-                        <option value="gpt-4-turbo">gpt-4-turbo</option>
-                      </select>
+                    <div className="space-y-4 mb-4">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Modelo</label>
+                        <select
+                          value={llmModel}
+                          onChange={e => setLlmModel(e.target.value)}
+                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium"
+                        >
+                          <optgroup label="OpenAI">
+                            <option value="">gpt-4o-mini (por defecto)</option>
+                            <option value="gpt-4o">gpt-4o</option>
+                            <option value="gpt-4o-mini">gpt-4o-mini</option>
+                            <option value="gpt-4-turbo">gpt-4-turbo</option>
+                          </optgroup>
+                          <optgroup label="Cloud (OpenAI-compatible)">
+                            <option value="glm-5.1:cloud">GLM-5.1 Cloud</option>
+                            <option value="minimax-m2.7:cloud">MiniMax-M2.7 Cloud</option>
+                          </optgroup>
+                        </select>
+                      </div>
+                      {(llmModel === 'glm-5.1:cloud' || llmModel === 'minimax-m2.7:cloud') && (
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">URL del servidor (endpoint)</label>
+                          <input
+                            type="text"
+                            value={llmEndpoint}
+                            onChange={e => setLlmEndpoint(e.target.value)}
+                            placeholder={llmModel === 'glm-5.1:cloud' ? 'https://open.bigmodel.cn/api/paas/v4' : 'https://api.minimax.chat/v1'}
+                            className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
+                          />
+                          <p className="text-[10px] text-[var(--ink3)] mt-1 ml-1">
+                            Endpoint base de la API compatible con OpenAI del proveedor.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -422,19 +460,38 @@ export default function SettingsPage() {
                           type="text"
                           value={llmEndpoint}
                           onChange={e => setLlmEndpoint(e.target.value)}
-                          placeholder="http://localhost:11434/v1"
+                          placeholder="http://localhost:11434"
                           className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
                         />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Nombre del modelo</label>
-                        <input
-                          type="text"
+                        <select
                           value={llmModel}
                           onChange={e => setLlmModel(e.target.value)}
-                          placeholder="llama3.2"
-                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
-                        />
+                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium"
+                        >
+                          <optgroup label="Gemma 4 (recomendados)">
+                            <option value="gemma4:e4b">Gemma 4 4B</option>
+                            <option value="gemma4:e2b">Gemma 4 2B</option>
+                          </optgroup>
+                          <optgroup label="Otros modelos populares">
+                            <option value="llama3.2">Llama 3.2</option>
+                            <option value="llama3.1">Llama 3.1</option>
+                            <option value="mistral">Mistral</option>
+                            <option value="phi3">Phi-3</option>
+                          </optgroup>
+                          <option value="__custom__">Otro (especificar manualmente)</option>
+                        </select>
+                        {llmModel === '__custom__' && (
+                          <input
+                            type="text"
+                            value={llmModelCustom}
+                            onChange={e => setLlmModelCustom(e.target.value)}
+                            placeholder="nombre-del-modelo"
+                            className="w-full mt-2 bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
+                          />
+                        )}
                       </div>
                     </div>
                   )}
