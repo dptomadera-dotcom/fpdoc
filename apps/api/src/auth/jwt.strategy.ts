@@ -8,11 +8,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'super-secret-industrial-key-2024',
+      // Usar Supabase JWT Secret para validar tokens de Supabase
+      secretOrKey: process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET || 'super-secret-industrial-key-2024',
     });
   }
 
   async validate(payload: any) {
-    return { userId: payload.sub, email: payload.email, role: payload.role };
+    // Supabase tokens tienen estructura: { sub: user_id, email, user_metadata, ... }
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      role: payload.user_metadata?.role || 'ALUMNO'
+    };
   }
 }
