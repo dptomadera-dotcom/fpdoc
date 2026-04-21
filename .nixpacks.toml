@@ -1,2 +1,4 @@
 [phases.setup]
 nixpkgs = ["nodejs_20"]
+
+# Forzar redeploy - cambio 2
