@@ -7,6 +7,7 @@ import { OpenAiAdapter } from './shared/openai.adapter';
 import { GlmAdapter } from './shared/glm.adapter';
 import { MinimaxAdapter } from './shared/minimax.adapter';
 import { OllamaAdapter } from './shared/ollama.adapter';
+import { OllamaCloudAdapter } from './shared/ollama-cloud.adapter';
 import { AiInteractionLogService } from './shared/ai-interaction-log.service';
 import { buildCurriculumContext } from './shared/context/build-curriculum-context';
 import { buildTeacherContext } from './shared/context/build-teacher-context';
@@ -18,7 +19,7 @@ export interface ChatMessage {
 }
 
 export interface LlmConfig {
-  provider: 'anthropic' | 'openai' | 'glm' | 'minimax' | 'local' | 'groq';
+  provider: 'anthropic' | 'openai' | 'glm' | 'minimax' | 'local' | 'groq' | 'ollama-cloud';
   apiKey?: string;
   endpoint?: string;
   model?: string;
@@ -143,6 +144,14 @@ export class AiService {
         const baseUrl = config?.endpoint ?? process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434';
         const model = config?.model ?? DEFAULT_MODELS.ollama;
         return new OllamaAdapter(baseUrl, model);
+      }
+
+      case 'ollama-cloud': {
+        const apiKey = config?.apiKey ?? process.env.OLLAMA_CLOUD_API_KEY;
+        const model = config?.model ?? DEFAULT_MODELS['ollama-cloud'];
+        if (!apiKey) throw new BadRequestException('Se requiere API Key para Ollama Cloud.');
+        const adapter = new OllamaCloudAdapter(apiKey, model);
+        return adapter;
       }
 
       case 'anthropic':

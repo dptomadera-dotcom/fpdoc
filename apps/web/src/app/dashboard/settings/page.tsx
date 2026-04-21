@@ -359,6 +359,7 @@ export default function SettingsPage() {
                       { id: 'minimax' as ModelProvider,   label: 'MiniMax',   sub: 'Cloud' },
                       { id: 'ollama' as ModelProvider,    label: 'Local',     sub: 'Ollama' },
                       { id: 'groq' as ModelProvider,      label: 'Groq',      sub: 'Mixtral' },
+                      { id: 'ollama-cloud' as ModelProvider, label: 'Ollama Cloud', sub: 'Multi-modelo' },
                     ]).map(p => (
                       <button
                         key={p.id}

@@ -3,7 +3,7 @@
  * Consumido por backend (resolveAdapter) y frontend (selector).
  */
 
-export type ModelProvider = 'anthropic' | 'openai' | 'glm' | 'minimax' | 'ollama' | 'groq';
+export type ModelProvider = 'anthropic' | 'openai' | 'glm' | 'minimax' | 'ollama' | 'groq' | 'ollama-cloud';
 
 export interface AiModel {
   id: string; // ej: 'claude-opus-4-7', 'gpt-4o', 'glm-5.1', etc
@@ -138,6 +138,50 @@ export const AI_MODELS_REGISTRY: Record<string, AiModel> = {
     family: 'cloud',
     maxTokens: 32768,
     supportedIn: ['chat', 'suggest']
+  },
+
+  // ═════════════════════════════════════════════════════════
+  // OLLAMA CLOUD (suscripción ollama.com)
+  // ═════════════════════════════════════════════════════════
+  'minimax-m2.7:cloud': {
+    id: 'minimax-m2.7:cloud',
+    name: 'MiniMax-M2.7 (Ollama Cloud)',
+    provider: 'ollama-cloud',
+    family: 'cloud',
+    maxTokens: 8192,
+    supportedIn: ['chat', 'suggest']
+  },
+  'glm-5.1:cloud': {
+    id: 'glm-5.1:cloud',
+    name: 'GLM-5.1 (Ollama Cloud)',
+    provider: 'ollama-cloud',
+    family: 'cloud',
+    maxTokens: 8192,
+    supportedIn: ['chat', 'suggest']
+  },
+  'llama2-70b:cloud': {
+    id: 'llama2-70b:cloud',
+    name: 'Llama 2 70B (Ollama Cloud)',
+    provider: 'ollama-cloud',
+    family: 'cloud',
+    maxTokens: 4096,
+    supportedIn: ['chat', 'suggest']
+  },
+  'mistral-8x7b:cloud': {
+    id: 'mistral-8x7b:cloud',
+    name: 'Mistral 8x7B (Ollama Cloud)',
+    provider: 'ollama-cloud',
+    family: 'cloud',
+    maxTokens: 32768,
+    supportedIn: ['chat', 'suggest']
+  },
+  'neural-chat:cloud': {
+    id: 'neural-chat:cloud',
+    name: 'Neural Chat (Ollama Cloud)',
+    provider: 'ollama-cloud',
+    family: 'cloud',
+    maxTokens: 4096,
+    supportedIn: ['chat', 'suggest']
   }
 };
 
@@ -161,7 +205,8 @@ export const DEFAULT_MODELS: Record<ModelProvider, string> = {
   glm: 'glm-5.1',
   minimax: 'minimax-m2.7',
   ollama: 'gemma:4b',
-  groq: 'mixtral-8x7b-32768'
+  groq: 'mixtral-8x7b-32768',
+  'ollama-cloud': 'minimax-m2.7:cloud'
 };
 
 export function getModel(modelId: string): AiModel | undefined {
