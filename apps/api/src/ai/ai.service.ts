@@ -2,11 +2,15 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ModelProviderAdapter } from './shared/model-provider.interface';
+import { AnthropicAdapter } from './shared/anthropic.adapter';
 import { OpenAiAdapter } from './shared/openai.adapter';
+import { GlmAdapter } from './shared/glm.adapter';
+import { MinimaxAdapter } from './shared/minimax.adapter';
 import { OllamaAdapter } from './shared/ollama.adapter';
 import { AiInteractionLogService } from './shared/ai-interaction-log.service';
 import { buildCurriculumContext } from './shared/context/build-curriculum-context';
 import { buildTeacherContext } from './shared/context/build-teacher-context';
+import { DEFAULT_MODELS, getModel } from '@fpdoc/ai-models';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -14,7 +18,7 @@ export interface ChatMessage {
 }
 
 export interface LlmConfig {
-  provider: 'anthropic' | 'openai' | 'local';
+  provider: 'anthropic' | 'openai' | 'glm' | 'minimax' | 'local' | 'groq';
   apiKey?: string;
   endpoint?: string;
   model?: string;
@@ -70,6 +74,18 @@ export class AiService {
     clientConfig?: LlmConfig,
   ): Promise<{ content: string; model: string; provider: string }> {
     const provider = clientConfig?.provider ?? 'anthropic';
+    const modelId = clientConfig?.model;
+
+    if (modelId) {
+      const modelMeta = getModel(modelId);
+      if (!modelMeta) {
+        throw new BadRequestException(`Modelo desconocido: ${modelId}`);
+      }
+      if (modelMeta.maxTokens < 1024) {
+        this.logger.warn(`${modelId} soporta solo ${modelMeta.maxTokens} tokens max; reduciendo request`);
+      }
+    }
+
     const adapter = this.resolveAdapter(provider, clientConfig);
 
     const aiResponse = await adapter.ask({
@@ -81,23 +97,61 @@ export class AiService {
     return { content: aiResponse.text, model: aiResponse.model, provider };
   }
 
+  private validateApiKeyFormat(provider: string, apiKey: string): void {
+    const patterns: Record<string, RegExp> = {
+      openai: /^sk-/,
+      anthropic: /^sk-ant-/,
+      glm: /^zhipuai-/i,
+      minimax: /^mm-/i,
+    };
+    const pattern = patterns[provider];
+    if (pattern && !pattern.test(apiKey)) {
+      this.logger.warn(`Formato de API Key sospechoso para ${provider}`);
+    }
+  }
+
   private resolveAdapter(provider: string, config?: LlmConfig): ModelProviderAdapter {
-    switch (provider) {
+    const selectedProvider = provider || 'anthropic';
+
+    switch (selectedProvider) {
       case 'openai': {
         const apiKey = config?.apiKey ?? process.env.OPENAI_API_KEY;
-        const model = config?.model ?? 'gpt-4o-mini';
+        const model = config?.model ?? DEFAULT_MODELS.openai;
         const baseURL = config?.endpoint ?? process.env.OPENAI_BASE_URL;
-        if (!apiKey) throw new BadRequestException('Se requiere API Key para OpenAI/Cloud.');
+        if (!apiKey) throw new BadRequestException('Se requiere API Key para OpenAI.');
+        this.validateApiKeyFormat('openai', apiKey);
         return new OpenAiAdapter(apiKey, model, baseURL);
       }
+
+      case 'glm': {
+        const apiKey = config?.apiKey ?? process.env.GLM_API_KEY;
+        const model = config?.model ?? DEFAULT_MODELS.glm;
+        if (!apiKey) throw new BadRequestException('Se requiere API Key para GLM (Zhipu).');
+        this.validateApiKeyFormat('glm', apiKey);
+        return new GlmAdapter(apiKey, model);
+      }
+
+      case 'minimax': {
+        const apiKey = config?.apiKey ?? process.env.MINIMAX_API_KEY;
+        const model = config?.model ?? DEFAULT_MODELS.minimax;
+        if (!apiKey) throw new BadRequestException('Se requiere API Key para MiniMax.');
+        this.validateApiKeyFormat('minimax', apiKey);
+        return new MinimaxAdapter(apiKey, model);
+      }
+
       case 'local': {
         const baseUrl = config?.endpoint ?? process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434';
-        const model = config?.model ?? 'llama3';
+        const model = config?.model ?? DEFAULT_MODELS.ollama;
         return new OllamaAdapter(baseUrl, model);
       }
+
       case 'anthropic':
-      default:
-        return this.anthropic;
+      default: {
+        const apiKey = config?.apiKey ?? process.env.ANTHROPIC_API_KEY;
+        const model = config?.model ?? DEFAULT_MODELS.anthropic;
+        if (apiKey) this.validateApiKeyFormat('anthropic', apiKey);
+        return new AnthropicAdapter(apiKey, model);
+      }
     }
   }
 
