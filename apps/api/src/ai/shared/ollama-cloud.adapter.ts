@@ -32,8 +32,15 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.apiKey}`,
     };
+
+    // Intentar diferentes formatos de autorización
+    const authHeaders = [
+      { 'Authorization': `Bearer ${this.apiKey}` },  // Standard OAuth
+      { 'Authorization': this.apiKey },               // Direct API key
+      { 'X-API-Key': this.apiKey },                   // API key header
+      { 'X-Ollama-Auth': this.apiKey },               // Ollama custom header
+    ];
 
     const body = JSON.stringify({
       model: this.model,
@@ -45,46 +52,53 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
       max_tokens: maxTokens,
     });
 
-    // Intentar con api.ollama.com primero, luego fallback a api.ollama.ai
+    // Intentar con diferentes endpoints y formatos de autenticación
     const endpoints = [
       `https://api.ollama.com/v1/chat/completions`,
       `https://api.ollama.ai/v1/chat/completions`,
+      `https://ollama.com/api/v1/chat/completions`,
     ];
 
     let lastError: string = '';
-    for (const endpoint of endpoints) {
-      try {
-        this.logger.debug(`Attempting endpoint: ${endpoint}`);
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers,
-          body,
-        });
 
-        if (!response.ok) {
-          const error = await response.text();
-          this.logger.warn(`Endpoint ${endpoint} returned ${response.status}: ${error}`);
-          lastError = `${response.status}: ${error}`;
-          continue; // Try next endpoint
+    for (const authHeader of authHeaders) {
+      for (const endpoint of endpoints) {
+        try {
+          const currentHeaders = { ...headers, ...authHeader };
+          const authType = Object.keys(authHeader)[0];
+          this.logger.debug(`Attempting ${endpoint} with ${authType}`);
+
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: currentHeaders,
+            body,
+          });
+
+          if (!response.ok) {
+            const error = await response.text();
+            this.logger.warn(`${endpoint} (${authType}) returned ${response.status}`);
+            lastError = `${response.status}: ${error.substring(0, 100)}`;
+            continue;
+          }
+
+          const data = (await response.json()) as any;
+          const text = data.choices?.[0]?.message?.content ?? data.message?.content ?? '';
+
+          this.logger.log(`✓ Success with ${endpoint} using ${authType}`);
+          return {
+            text,
+            model: data.model ?? this.model,
+            inputTokens: data.usage?.prompt_tokens ?? 0,
+            outputTokens: data.usage?.completion_tokens ?? 0,
+          };
+        } catch (err) {
+          this.logger.warn(`${endpoint} failed: ${String(err).substring(0, 50)}`);
+          lastError = String(err);
         }
-
-        const data = (await response.json()) as any;
-        const text = data.choices?.[0]?.message?.content ?? data.message?.content ?? '';
-
-        this.logger.debug(`Success with endpoint: ${endpoint}`);
-        return {
-          text,
-          model: data.model ?? this.model,
-          inputTokens: data.usage?.prompt_tokens ?? 0,
-          outputTokens: data.usage?.completion_tokens ?? 0,
-        };
-      } catch (err) {
-        this.logger.warn(`Endpoint ${endpoint} failed: ${err}`);
-        lastError = String(err);
       }
     }
 
-    // All endpoints failed
-    throw new Error(`Ollama Cloud connection failed. Last error: ${lastError}`);
+    // All combinations failed
+    throw new Error(`Ollama Cloud: ningún endpoint/auth funcionó. Verifica tu API key.`);
   }
 }
