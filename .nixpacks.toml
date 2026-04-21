@@ -1,2 +1,5 @@
 [build]
 nodeVersion = "20.19.0"
+
+# Trigger rebuild - ensure Node.js 20.19+ for Prisma compatibility
+# Public endpoint /ai/test-connection now available for AI provider testing
