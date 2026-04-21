@@ -30,12 +30,21 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
 
     this.logger.debug(`Calling Ollama Cloud ${this.model} with ${messages.length} messages`);
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Ollama Cloud usa formato Bearer token en Authorization header
+    if (this.apiKey.startsWith('sk-') || this.apiKey.startsWith('ollama-cloud-sk-')) {
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
+    } else {
+      // O como X-Ollama-Auth header si es necesario
+      headers['X-Ollama-Auth'] = this.apiKey;
+    }
+
     const response = await fetch(`${this.baseUrl}/chat`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
         model: this.model,
         messages: [
@@ -48,8 +57,8 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
 
     if (!response.ok) {
       const error = await response.text();
-      this.logger.error(`Ollama Cloud API error: ${response.status} ${error}`);
-      throw new Error(`Ollama Cloud request failed: ${response.status}`);
+      this.logger.error(`Ollama Cloud API error: ${response.status} ${error} (key starts with: ${this.apiKey.substring(0, 20)}...)`);
+      throw new Error(`Ollama Cloud request failed: ${response.status} - ${error}`);
     }
 
     const data = (await response.json()) as any;
