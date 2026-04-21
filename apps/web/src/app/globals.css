@@ -86,6 +86,14 @@
   background-color: var(--bg1);
 }
 
+/* Superficies "premium" (bg-[var(--ink)] text-white): --ink está pensado como
+   color de texto (claro en dark, oscuro en light), pero se usa como fondo
+   invertido en muchos botones/cards. Forzar siempre un fondo oscuro para que
+   text-white encima sea legible en ambos temas. */
+.bg-\[var\(--ink\)\] {
+  background-color: #1a1a24 !important;
+}
+
 /* ════════════════════════════════════════════════════════════
    BASE
 ════════════════════════════════════════════════════════════ */
@@ -116,7 +124,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  [data-theme="light"] .fp-card {
+  :where([data-theme="light"]) .fp-card {
     background: #ffffff;
     border: 1px solid var(--border);
   }

@@ -6,6 +6,7 @@ import { authService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import ThemeToggle from '@/components/theme-toggle';
 
 interface TopbarProps {
   onMenuToggle: () => void;
@@ -44,12 +45,12 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
   const initials = user?.email ? user.email.substring(0, 2).toUpperCase() : '??';
 
   return (
-    <header className="h-16 border-b border-white/5 bg-[#09090b]/90 backdrop-blur-xl px-4 md:px-10 flex items-center justify-between sticky top-0 z-20 gap-4">
+    <header className="h-16 border-b border-[var(--border)] bg-[var(--glass)] backdrop-blur-xl px-4 md:px-10 flex items-center justify-between sticky top-0 z-20 gap-4">
 
       {/* Hamburger — solo móvil */}
       <button
         onClick={onMenuToggle}
-        className="lg:hidden w-10 h-10 flex items-center justify-center text-white/40 hover:text-white rounded-xl hover:bg-white/5 transition-colors flex-shrink-0"
+        className="lg:hidden w-10 h-10 flex items-center justify-center text-[var(--ink3)] hover:text-[var(--ink)] rounded-xl hover:bg-[var(--bg2)] transition-colors flex-shrink-0"
         aria-label="Abrir menú"
       >
         <Menu className="w-5 h-5" />
@@ -58,11 +59,11 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
       {/* Búsqueda */}
       <div className="flex-1 max-w-md">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--ink3)] pointer-events-none" />
           <input
             type="text"
             placeholder="Búsqueda rápida…"
-            className="w-full h-11 pl-11 pr-4 bg-white/5 border border-white/5 rounded-xl text-[13px] text-white placeholder-white/20 focus:bg-white/10 focus:border-[var(--teal)]/40 transition-all outline-none"
+            className="w-full h-11 pl-11 pr-4 bg-[var(--bg2)] border border-[var(--border)] rounded-xl text-[13px] text-[var(--ink)] placeholder-[var(--ink3)] focus:bg-[var(--bg)] focus:border-[var(--teal)]/40 transition-all outline-none"
           />
         </div>
       </div>
@@ -70,8 +71,11 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
       {/* Zona derecha */}
       <div className="flex items-center gap-3">
 
+        {/* Toggle de tema */}
+        <ThemeToggle />
+
         {/* Notificaciones */}
-        <button className="relative w-10 h-10 flex items-center justify-center text-white/30 hover:text-white/70 transition-colors rounded-xl hover:bg-white/5">
+        <button className="relative w-10 h-10 flex items-center justify-center text-[var(--ink3)] hover:text-[var(--ink)] transition-colors rounded-xl hover:bg-[var(--bg2)]">
           <Bell className="w-4 h-4" />
           <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[var(--teal)] rounded-full" />
         </button>
@@ -91,7 +95,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
             <div className="relative" onClick={e => e.stopPropagation()}>
               <button
                 onClick={() => setMenuOpen(v => !v)}
-                className="flex items-center gap-2.5 h-10 pl-1 pr-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group"
+                className="flex items-center gap-2.5 h-10 pl-1 pr-3 rounded-xl bg-[var(--bg2)] border border-[var(--border)] hover:bg-[var(--bg1)] hover:border-[var(--border-hover)] transition-all group"
               >
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black flex-shrink-0"
@@ -99,10 +103,10 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
                 >
                   {initials}
                 </div>
-                <span className="hidden md:block text-[11px] font-medium text-white/50 max-w-[120px] truncate">
+                <span className="hidden md:block text-[11px] font-medium text-[var(--ink2)] max-w-[120px] truncate">
                   {user.email?.split('@')[0]}
                 </span>
-                <ChevronDown className={`w-3.5 h-3.5 text-white/30 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-[var(--ink3)] transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -112,9 +116,9 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full right-0 mt-2 w-72 bg-[#18181b] border border-white/10 rounded-[24px] shadow-2xl shadow-black/50 overflow-hidden z-50"
+                    className="absolute top-full right-0 mt-2 w-72 bg-[var(--bg1)] border border-[var(--border)] rounded-[24px] shadow-2xl shadow-black/20 overflow-hidden z-50"
                   >
-                    <div className="px-5 py-4 border-b border-white/5">
+                    <div className="px-5 py-4 border-b border-[var(--border)]">
                       <div className="flex items-center gap-3 mb-2">
                         <div
                           className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black"
@@ -123,7 +127,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
                           {initials}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-white truncate">{user.email}</p>
+                          <p className="text-sm font-bold text-[var(--ink)] truncate">{user.email}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <RoleIcon className="w-3 h-3" style={{ color: roleMeta.color }} />
                             <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: roleMeta.color }}>
@@ -138,13 +142,13 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
                       <Link
                         href="/dashboard/settings"
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-[var(--ink2)] hover:text-[var(--ink)] hover:bg-[var(--bg2)] transition-all"
                       >
-                        <Settings className="w-4 h-4 text-white/30" />
+                        <Settings className="w-4 h-4 text-[var(--ink3)]" />
                         Ajustes de perfil
                       </Link>
 
-                      <div className="my-1 h-px bg-white/5 mx-2" />
+                      <div className="my-1 h-px bg-[var(--border)] mx-2" />
 
                       <button
                         onClick={handleLogout}
@@ -155,7 +159,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
                         </div>
                         <div className="text-left">
                           <div className="text-[12px] font-black uppercase tracking-widest text-red-400">Cambiar de rol</div>
-                          <div className="text-[10px] text-white/30 font-normal mt-0.5">Cerrar sesión e ir al acceso</div>
+                          <div className="text-[10px] text-[var(--ink3)] font-normal mt-0.5">Cerrar sesión e ir al acceso</div>
                         </div>
                       </button>
                     </div>
@@ -166,7 +170,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
           </>
         ) : (
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+            <Link href="/login" className="text-[11px] font-black uppercase tracking-widest text-[var(--ink3)] hover:text-[var(--ink)] transition-colors">
               Iniciar sesión
             </Link>
           </div>

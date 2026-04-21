@@ -7,7 +7,7 @@ export interface ChatMessage {
 }
 
 export interface LlmConfig {
-  provider: 'anthropic' | 'openai' | 'local';
+  provider: 'anthropic' | 'openai' | 'glm' | 'minimax' | 'local' | 'groq' | 'ollama-cloud';
   apiKey?: string;
   endpoint?: string;
   model?: string;

@@ -61,13 +61,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-[#111] border border-white/10 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-blue-600/10 to-transparent">
+      <div className="bg-[var(--bg1)] border border-[var(--border)] w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="p-6 border-b border-[var(--border)] flex items-center justify-between bg-gradient-to-r from-blue-600/10 to-transparent">
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Nuevo Proyecto Transversal</h2>
-            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Configuración Industrial de Cursos</p>
+            <h2 className="text-2xl font-black text-[var(--ink)] tracking-tighter uppercase">Nuevo Proyecto Transversal</h2>
+            <p className="text-[var(--ink3)] text-xs font-bold uppercase tracking-widest mt-1">Configuración Industrial de Cursos</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--bg2)] rounded-xl transition-colors text-[var(--ink3)] hover:text-[var(--ink)]">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -75,79 +75,79 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
         <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Nombre del Proyecto</label>
+              <label className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest pl-1">Nombre del Proyecto</label>
               <input
                 required
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-blue-500/50 focus:ring-0 transition-all outline-none font-medium"
+                className="w-full bg-[var(--bg2)] border border-[var(--border)] rounded-2xl px-4 py-3 text-[var(--ink)] focus:border-blue-500/50 focus:ring-0 transition-all outline-none font-medium"
                 placeholder="Ej: ERP Sostenible 2025"
               />
             </div>
             
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Ciclo Formativo</label>
+              <label className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest pl-1">Ciclo Formativo</label>
               <select
                 required
                 value={formData.cycleId}
                 onChange={e => setFormData({ ...formData, cycleId: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-blue-500/50 transition-all outline-none"
+                className="w-full bg-[var(--bg2)] border border-[var(--border)] rounded-2xl px-4 py-3 text-[var(--ink)] focus:border-blue-500/50 transition-all outline-none"
               >
-                <option value="" className="bg-[#111]">Seleccionar Ciclo</option>
-                {cycles.map(c => <option key={c.id} value={c.id} className="bg-[#111]">{c.name}</option>)}
+                <option value="" className="bg-[var(--bg1)]">Seleccionar Ciclo</option>
+                {cycles.map(c => <option key={c.id} value={c.id} className="bg-[var(--bg1)]">{c.name}</option>)}
               </select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Descripción del Objetivo</label>
+            <label className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest pl-1">Descripción del Objetivo</label>
             <textarea
               required
               rows={3}
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-blue-500/50 transition-all outline-none resize-none font-medium text-sm"
+              className="w-full bg-[var(--bg2)] border border-[var(--border)] rounded-2xl px-4 py-3 text-[var(--ink)] focus:border-blue-500/50 transition-all outline-none resize-none font-medium text-sm"
               placeholder="Describe el alcance y los objetivos industriales del proyecto..."
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
              <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Grupo / Sección</label>
+              <label className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest pl-1">Grupo / Sección</label>
               <select
                 required
                 value={formData.groupId}
                 onChange={e => setFormData({ ...formData, groupId: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-blue-500/50 transition-all outline-none text-sm"
+                className="w-full bg-[var(--bg2)] border border-[var(--border)] rounded-2xl px-4 py-3 text-[var(--ink)] focus:border-blue-500/50 transition-all outline-none text-sm"
               >
-                <option value="" className="bg-[#111]">Grupo</option>
-                {groups.map(g => <option key={g.id} value={g.id} className="bg-[#111]">{g.name}</option>)}
+                <option value="" className="bg-[var(--bg1)]">Grupo</option>
+                {groups.map(g => <option key={g.id} value={g.id} className="bg-[var(--bg1)]">{g.name}</option>)}
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Fecha Inicio</label>
+              <label className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest pl-1">Fecha Inicio</label>
               <input
                 required
                 type="date"
                 value={formData.startDate}
                 onChange={e => setFormData({ ...formData, startDate: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-blue-500/50 transition-all outline-none text-sm"
+                className="w-full bg-[var(--bg2)] border border-[var(--border)] rounded-2xl px-4 py-3 text-[var(--ink)] focus:border-blue-500/50 transition-all outline-none text-sm"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Fecha Fin</label>
+              <label className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest pl-1">Fecha Fin</label>
               <input
                 required
                 type="date"
                 value={formData.endDate}
                 onChange={e => setFormData({ ...formData, endDate: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white focus:border-blue-500/50 transition-all outline-none text-sm"
+                className="w-full bg-[var(--bg2)] border border-[var(--border)] rounded-2xl px-4 py-3 text-[var(--ink)] focus:border-blue-500/50 transition-all outline-none text-sm"
               />
             </div>
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Módulos Implicados</label>
+            <label className="text-[10px] font-black text-[var(--ink3)] uppercase tracking-widest pl-1">Módulos Implicados</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {modules.map(module => (
                 <button
@@ -157,7 +157,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
                   className={`flex items-center justify-between p-3 rounded-xl border transition-all text-left group ${
                     formData.moduleIds.includes(module.id)
                       ? 'bg-blue-600/20 border-blue-500/50 text-white'
-                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                      : 'bg-[var(--bg2)] border-[var(--border)] text-[var(--ink3)] hover:border-white/20'
                   }`}
                 >
                   <div className="flex flex-col">
@@ -174,7 +174,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, 
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-4 rounded-2xl border border-white/10 text-gray-400 font-bold hover:bg-white/5 transition-all uppercase tracking-widest text-[10px]"
+              className="flex-1 px-6 py-4 rounded-2xl border border-[var(--border)] text-[var(--ink3)] font-bold hover:bg-[var(--bg2)] transition-all uppercase tracking-widest text-[10px]"
             >
               Cancelar
             </button>

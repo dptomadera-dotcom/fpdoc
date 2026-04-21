@@ -111,7 +111,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       <aside className={cn(
-        'w-[280px] flex flex-col bg-[var(--ink)] text-white h-screen overflow-hidden z-40',
+        'w-[280px] flex flex-col bg-[var(--bg)] text-[var(--ink)] h-screen overflow-hidden z-40 border-r border-[var(--border)]',
         'transition-transform duration-300 ease-in-out',
         'fixed top-0 left-0',
         'lg:sticky lg:translate-x-0',
@@ -119,7 +119,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}>
 
         {/* Brand */}
-        <div className="p-8 pb-6 flex flex-col gap-1 items-start border-b border-white/5">
+        <div className="p-8 pb-6 flex flex-col gap-1 items-start border-b border-[var(--border)]">
           <div className="flex items-center justify-between w-full">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 bg-gradient-to-br from-[var(--teal)] to-[var(--teal3)] rounded-[16px] flex items-center justify-center shadow-xl shadow-[var(--teal)]/20 transition-transform group-hover:rotate-6">
@@ -129,14 +129,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <h1 className="text-xl font-bold font-serif tracking-tighter leading-none">
                   FP<span className="text-[var(--teal)] italic">doc</span>
                 </h1>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">v3.0 Production</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--ink3)]">v3.0 Production</span>
               </div>
             </Link>
 
             {/* Botón cerrar — solo visible en móvil */}
             <button
               onClick={onClose}
-              className="lg:hidden w-8 h-8 flex items-center justify-center text-white/30 hover:text-white rounded-xl hover:bg-white/5 transition-colors"
+              className="lg:hidden w-8 h-8 flex items-center justify-center text-[var(--ink3)] hover:text-[var(--ink)] rounded-xl hover:bg-[var(--bg2)] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -160,7 +160,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             const items = filteredNavigation.filter(i => i.group === group);
             return (
               <div key={group}>
-                <h3 className="px-3 text-[9px] font-black uppercase tracking-[0.25em] text-white/20 mb-2">
+                <h3 className="px-3 text-[9px] font-black uppercase tracking-[0.25em] text-[var(--ink3)] mb-2">
                   {GROUP_LABELS[group] || group}
                 </h3>
                 <div className="space-y-1">
@@ -173,8 +173,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         className={cn(
                           'group relative h-11 px-4 rounded-xl text-[13px] font-medium transition-all duration-200 flex items-center gap-3',
                           isActive
-                            ? 'bg-white/10 text-white'
-                            : 'text-white/40 hover:text-white hover:bg-white/5'
+                            ? 'bg-[var(--bg2)] text-[var(--ink)]'
+                            : 'text-[var(--ink2)] hover:text-[var(--ink)] hover:bg-[var(--bg2)]'
                         )}
                       >
                         {isActive && (
@@ -187,7 +187,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         <item.icon
                           className={cn(
                             'w-4 h-4 flex-shrink-0 transition-transform group-hover:scale-110',
-                            isActive ? 'text-white' : 'text-white/30 group-hover:text-white/60'
+                            isActive ? 'text-[var(--ink)]' : 'text-[var(--ink3)] group-hover:text-[var(--ink2)]'
                           )}
                           style={isActive ? { color: roleMeta.color } : {}}
                         />
@@ -207,19 +207,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
           {/* Herramientas */}
           <div>
-            <h3 className="px-3 text-[9px] font-black uppercase tracking-[0.25em] text-white/20 mb-2">Herramientas</h3>
+            <h3 className="px-3 text-[9px] font-black uppercase tracking-[0.25em] text-[var(--ink3)] mb-2">Herramientas</h3>
             <div className="space-y-1">
               <Link
                 href="/dashboard/settings"
-                className="group h-11 px-4 rounded-xl text-[13px] font-medium flex items-center gap-3 text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                className="group h-11 px-4 rounded-xl text-[13px] font-medium flex items-center gap-3 text-[var(--ink2)] hover:text-[var(--ink)] hover:bg-[var(--bg2)] transition-all"
               >
-                <Settings className="w-4 h-4 group-hover:rotate-45 transition-transform text-white/30 group-hover:text-white/60" />
+                <Settings className="w-4 h-4 group-hover:rotate-45 transition-transform text-[var(--ink3)] group-hover:text-[var(--ink2)]" />
                 Ajustes
               </Link>
               {(role === 'PROFESOR' || role === 'JEFATURA') && (
                 <Link
                   href="/dashboard/curriculum/import"
-                  className="group h-11 px-4 rounded-xl text-[13px] font-medium flex items-center gap-3 text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                  className="group h-11 px-4 rounded-xl text-[13px] font-medium flex items-center gap-3 text-[var(--ink2)] hover:text-[var(--ink)] hover:bg-[var(--bg2)] transition-all"
                 >
                   <Plus className="w-4 h-4 text-[var(--teal)]" />
                   Nueva Programación
@@ -230,8 +230,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Perfil / Footer */}
-        <div className="p-5 border-t border-white/5">
-          <div className="bg-white/[0.04] hover:bg-white/[0.07] rounded-2xl p-4 transition-all group relative overflow-hidden">
+        <div className="p-5 border-t border-[var(--border)]">
+          <div className="bg-[var(--bg2)] hover:bg-[var(--bg1)] rounded-2xl p-4 transition-all group relative overflow-hidden">
             <div
               className="absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl translate-x-8 -translate-y-4"
               style={{ background: `${roleMeta.color}30` }}
@@ -244,7 +244,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 {user?.email?.[0].toUpperCase() || 'U'}
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="text-xs font-bold truncate text-white">{user?.email?.split('@')[0] || 'Usuario'}</p>
+                <p className="text-xs font-bold truncate text-[var(--ink)]">{user?.email?.split('@')[0] || 'Usuario'}</p>
                 <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: roleMeta.color }}>
                   {roleMeta.label}
                 </p>
@@ -252,7 +252,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
             <button
               onClick={handleLogout}
-              className="w-full h-10 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/40 hover:text-red-400 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+              className="w-full h-10 rounded-xl bg-[var(--bg1)] hover:bg-red-500/10 text-[var(--ink3)] hover:text-red-400 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
             >
               <LogOut className="w-3.5 h-3.5" /> Cerrar Sesión
             </button>

@@ -41,12 +41,12 @@ function DashboardAlumno({ user }: { user: any }) {
               { name: 'Bases de Datos', progress: 60, ra: '3/5 RA' },
               { name: 'Programación', progress: 45, ra: '2/5 RA' },
             ].map((mod, i) => (
-              <div key={i} className="py-2 border-b border-white/5 last:border-none">
+              <div key={i} className="py-2 border-b border-[var(--border)] last:border-none">
                 <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-sm font-medium text-white">{mod.name}</span>
-                  <span className="text-[10px] font-bold text-white/40">{mod.ra}</span>
+                  <span className="text-sm font-medium text-[var(--ink)]">{mod.name}</span>
+                  <span className="text-[10px] font-bold text-[var(--ink3)]">{mod.ra}</span>
                 </div>
-                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-[var(--bg2)] rounded-full overflow-hidden">
                   <div className="h-full bg-[var(--teal)] rounded-full transition-all" style={{ width: `${mod.progress}%` }} />
                 </div>
               </div>
@@ -111,10 +111,10 @@ function DashboardDocente({ user }: { user: any }) {
               { mod: 'Bases de Datos', estado: 'En revisión', color: 'blue', ra: '5/5' },
               { mod: 'Redes Locales', estado: 'Publicado', color: 'teal', ra: '5/5' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-none">
+              <div key={i} className="flex items-center gap-3 py-2 border-b border-[var(--border)] last:border-none">
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-white">{item.mod}</div>
-                  <div className="text-[10px] text-white/40 mt-0.5">RA cubiertos: {item.ra}</div>
+                  <div className="text-sm font-medium text-[var(--ink)]">{item.mod}</div>
+                  <div className="text-[10px] text-[var(--ink3)] mt-0.5">RA cubiertos: {item.ra}</div>
                 </div>
                 <span className={`px-2 py-1 rounded text-[10px] font-bold ${
                   item.color === 'amber' ? 'bg-amber-500/10 text-amber-500' : 
@@ -188,7 +188,7 @@ function DashboardJefe({ user }: { user: any }) {
         ].map((s, i) => (
           <div key={i} className="fp-card">
             <div className="text-[28px] font-bold leading-none mb-1" style={{ color: s.color }}>{s.val}</div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-white/40">{s.label}</div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink3)]">{s.label}</div>
           </div>
         ))}
       </div>
@@ -318,17 +318,17 @@ export default function DashboardPage() {
     <DashboardLayout>
       {loading ? (
         <div className="space-y-4">
-          {[1, 2, 3].map(i => <div key={i} className="h-24 bg-white border border-[#f0eee8] rounded-3xl animate-pulse" />)}
+          {[1, 2, 3].map(i => <div key={i} className="h-24 bg-[var(--bg2)] border border-[var(--border)] rounded-3xl animate-pulse" />)}
         </div>
       ) : (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
           {/* Header de bienvenida */}
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold font-serif text-white">{header.title}</h1>
-              <p className="text-sm text-white/40 mt-1">{header.sub}</p>
+              <h1 className="text-2xl font-bold font-serif text-[var(--ink)]">{header.title}</h1>
+              <p className="text-sm text-[var(--ink3)] mt-1">{header.sub}</p>
             </div>
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white/5 text-white/40 border border-white/5">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[var(--bg2)] text-[var(--ink3)] border border-[var(--border)]">
               {user?.email?.split('@')[0] || 'Usuario'}
             </div>
           </div>
