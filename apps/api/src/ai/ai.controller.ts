@@ -59,7 +59,6 @@ export class AiController {
   }
 
   @Post('test-connection')
-  @SkipAuth()
   async testConnection(@Body() config: LlmConfig) {
     if (config.provider === 'ollama-cloud') {
       return await this.testOllamaCloud(config);
