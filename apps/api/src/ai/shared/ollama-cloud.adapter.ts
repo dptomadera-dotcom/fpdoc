@@ -9,7 +9,7 @@ import {
 export class OllamaCloudAdapter extends ModelProviderAdapter {
   private readonly apiKey: string;
   private model: string = 'minimax-m2.7:cloud';
-  private readonly baseUrl = 'https://api.ollama.com/api';
+  private readonly baseUrl = 'https://api.ollama.com';
   private readonly logger = new Logger(OllamaCloudAdapter.name);
 
   constructor(apiKey?: string, model?: string) {
@@ -32,17 +32,10 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.apiKey}`,
     };
 
-    // Ollama Cloud usa formato Bearer token en Authorization header
-    if (this.apiKey.startsWith('sk-') || this.apiKey.startsWith('ollama-cloud-sk-')) {
-      headers['Authorization'] = `Bearer ${this.apiKey}`;
-    } else {
-      // O como X-Ollama-Auth header si es necesario
-      headers['X-Ollama-Auth'] = this.apiKey;
-    }
-
-    const response = await fetch(`${this.baseUrl}/chat`, {
+    const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -51,7 +44,8 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
           { role: 'system', content: system },
           ...messages.map(m => ({ role: m.role, content: m.content })),
         ],
-        stream: false,
+        temperature: 0.7,
+        max_tokens: maxTokens,
       }),
     });
 
@@ -62,13 +56,13 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
     }
 
     const data = (await response.json()) as any;
-    const text = data.message?.content ?? '';
+    const text = data.choices?.[0]?.message?.content ?? data.message?.content ?? '';
 
     return {
       text,
       model: data.model ?? this.model,
-      inputTokens: data.prompt_eval_count ?? 0,
-      outputTokens: data.eval_count ?? 0,
+      inputTokens: data.usage?.prompt_tokens ?? 0,
+      outputTokens: data.usage?.completion_tokens ?? 0,
     };
   }
 }
