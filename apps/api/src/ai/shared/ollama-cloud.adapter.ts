@@ -8,7 +8,7 @@ import {
 @Injectable()
 export class OllamaCloudAdapter extends ModelProviderAdapter {
   private readonly apiKey: string;
-  private model: string = 'hermes';  // Cambiar a hermes ya que funciona en tu cuenta
+  private model: string = 'minimax-m2.7:cloud';
   private readonly baseUrl = 'https://api.ollama.com';
   private readonly logger = new Logger(OllamaCloudAdapter.name);
 
