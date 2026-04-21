@@ -6,10 +6,10 @@
 CREATE TABLE IF NOT EXISTS public.user_llm_settings (
   user_id   UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   provider  TEXT NOT NULL DEFAULT 'anthropic'
-              CHECK (provider IN ('anthropic', 'openai', 'local')),
-  api_key   TEXT,          -- clave del usuario (anthropic / openai)
+              CHECK (provider IN ('anthropic', 'openai', 'glm', 'minimax', 'local', 'groq', 'ollama-cloud')),
+  api_key   TEXT,          -- clave del usuario (anthropic / openai / glm / minimax / groq / ollama-cloud)
   endpoint  TEXT,          -- solo para modelos locales (ej: http://host:11434/v1)
-  model     TEXT,          -- nombre del modelo (ej: gpt-4o, llama3.2)
+  model     TEXT,          -- nombre del modelo (ej: gpt-4o, llama3.2, glm-5.1, minimax-m2.7)
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
