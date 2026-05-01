@@ -991,6 +991,7 @@ model User {
   QuestionnaireResponse          QuestionnaireResponse[]
   AuditLog                       AuditLog[]                          @relation("AuditActor")
   ProjectPhase_responsible       ProjectPhase[]                      @relation("PhaseResponsibleTeacher")
+  UserLlmSettings                UserLlmSettings?
 
   @@schema("public")
 }
@@ -1625,5 +1626,20 @@ enum DeliveryMode {
   GROUP
   WHOLE_CLASS
 
+  @@schema("public")
+}
+
+model UserLlmSettings {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  provider  String   @default("anthropic")
+  model     String   @default("claude-opus-4-7")
+  apiKey    String?
+  baseUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   @@schema("public")
 }

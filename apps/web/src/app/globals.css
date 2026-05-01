@@ -13,8 +13,6 @@
   --ink2:  #b0b0bc;
   --ink3:  #6b6b78;
 
-  --sidebar: #111118;
-
   --bg:    #0a0a0d;
   --bg1:   #111118;
   --bg2:   #1c1c26;
@@ -46,8 +44,6 @@
   --ink2:  #3d3d50;
   --ink3:  #8a8a9a;
 
-  --sidebar: #1a1a24;
-
   --bg:    #f9faf8;
   --bg1:   #f5f3ee;
   --bg2:   #ede8e0;
@@ -67,25 +63,7 @@
   --glass-border: rgba(0, 0, 0, 0.06);
 }
 
-/* ── Overrides para elementos con clases Tailwind hardcoded ── */
-
-/* Dark mode: --ink is light (#e8e8ee) but used as dark surface. Override all ink-based
-   background utilities so dark surfaces stay dark in both themes. */
-[data-theme="dark"] .bg-\[var\(--ink\)\],
-[data-theme="dark"] .from-\[var\(--ink\)\],
-[data-theme="dark"] .via-\[var\(--ink\)\],
-[data-theme="dark"] .to-\[var\(--ink\)\] {
-  --tw-gradient-from: var(--bg1) var(--tw-gradient-from-position);
-  --tw-gradient-to: var(--bg1) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-  background-color: var(--bg1) !important;
-}
-
-[data-theme="dark"] .bg-\[var\(--ink\)\]\/20,
-[data-theme="dark"] .bg-\[var\(--ink\)\]\/10 {
-  background-color: rgb(17 17 24 / 0.2) !important;
-}
-
+/* ── Overrides oscuros para elementos con clases Tailwind hardcoded ── */
 [data-theme="dark"] body {
   background-color: var(--bg);
   color: var(--text);
@@ -108,221 +86,12 @@
   background-color: var(--bg1);
 }
 
-/* ── Light mode: override white utilities that are invisible on light backgrounds ── */
-
-/* Text */
-[data-theme="light"] .text-white { color: var(--ink) !important; }
-[data-theme="light"] .text-white\/5 { color: rgba(26,26,36,0.05) !important; }
-[data-theme="light"] .text-white\/20 { color: rgba(26,26,36,0.15) !important; }
-[data-theme="light"] .text-white\/30 { color: rgba(26,26,36,0.25) !important; }
-[data-theme="light"] .text-white\/40 { color: var(--ink3) !important; }
-[data-theme="light"] .text-white\/50 { color: rgba(26,26,36,0.5) !important; }
-[data-theme="light"] .text-white\/60 { color: var(--ink2) !important; }
-[data-theme="light"] .text-white\/70 { color: rgba(26,26,36,0.7) !important; }
-[data-theme="light"] .text-white\/80 { color: rgba(26,26,36,0.85) !important; }
-[data-theme="light"] .text-white\/90 { color: rgba(26,26,36,0.9) !important; }
-
-/* Placeholder */
-[data-theme="light"] .placeholder-white\/20::placeholder { color: var(--ink3) !important; }
-
-/* Hover text */
-[data-theme="light"] .hover\:text-white:hover { color: var(--ink) !important; }
-
-/* Background */
-[data-theme="light"] .bg-white\/5,
-[data-theme="light"] .bg-white\/\[0\.03\],
-[data-theme="light"] .bg-white\/\[0\.04\],
-[data-theme="light"] .bg-white\/\[0\.06\],
-[data-theme="light"] .bg-white\/\[0\.07\] {
-  background-color: var(--bg2) !important;
-}
-[data-theme="light"] .bg-white\/10 { background-color: var(--bg1) !important; }
-[data-theme="light"] .bg-white\/15,
-[data-theme="light"] .bg-white\/20 { background-color: var(--bg1) !important; }
-[data-theme="light"] .bg-white\/50 { background-color: rgba(0,0,0,0.04) !important; }
-[data-theme="light"] .bg-white\/60,
-[data-theme="light"] .bg-white\/80,
-[data-theme="light"] .bg-white\/90 { background-color: rgba(0,0,0,0.06) !important; }
-
-/* Border */
-[data-theme="light"] .border-white\/5,
-[data-theme="light"] .border-white\/10 { border-color: var(--border) !important; }
-[data-theme="light"] .border-white\/20,
-[data-theme="light"] .border-white\/30,
-[data-theme="light"] .border-white\/40 { border-color: var(--border-hover) !important; }
-[data-theme="light"] .border-white\/50 { border-color: rgba(0,0,0,0.12) !important; }
-
-/* ── Dark surface exceptions ── */
-/* These containers stay dark in both themes, so white utilities are correct */
-
-/* Text: restore white in dark containers */
-[data-theme="light"] aside .text-white,
-[data-theme="light"] header .text-white,
-[data-theme="light"] nav .text-white,
-[data-theme="light"] .bg-\[var\(--ink\)\].text-white,
-[data-theme="light"] .bg-\[var\(--ink\)\] .text-white,
-[data-theme="light"] .bg-\[\#09090b\].text-white,
-[data-theme="light"] .bg-\[\#09090b\] .text-white,
-[data-theme="light"] .bg-\[\#18181b\].text-white,
-[data-theme="light"] .bg-\[\#18181b\] .text-white,
-[data-theme="light"] .bg-\[var\(--sidebar\)\].text-white,
-[data-theme="light"] .bg-\[var\(--sidebar\)\] .text-white {
-  color: white !important;
-}
-
-[data-theme="light"] aside .text-white\/20,
-[data-theme="light"] header .text-white\/20,
-[data-theme="light"] nav .text-white\/20,
-[data-theme="light"] .bg-\[var\(--ink\)\] .text-white\/20,
-[data-theme="light"] .bg-\[\#09090b\] .text-white\/20,
-[data-theme="light"] .bg-\[\#18181b\] .text-white\/20 {
-  color: rgb(255 255 255 / 0.2) !important;
-}
-
-[data-theme="light"] aside .text-white\/30,
-[data-theme="light"] header .text-white\/30,
-[data-theme="light"] nav .text-white\/30,
-[data-theme="light"] .bg-\[var\(--ink\)\] .text-white\/30,
-[data-theme="light"] .bg-\[\#09090b\] .text-white\/30,
-[data-theme="light"] .bg-\[\#18181b\] .text-white\/30 {
-  color: rgb(255 255 255 / 0.3) !important;
-}
-
-[data-theme="light"] aside .text-white\/40,
-[data-theme="light"] header .text-white\/40,
-[data-theme="light"] nav .text-white\/40,
-[data-theme="light"] .bg-\[var\(--ink\)\] .text-white\/40,
-[data-theme="light"] .bg-\[\#09090b\] .text-white\/40,
-[data-theme="light"] .bg-\[\#18181b\] .text-white\/40 {
-  color: rgb(255 255 255 / 0.4) !important;
-}
-
-[data-theme="light"] aside .text-white\/50,
-[data-theme="light"] header .text-white\/50,
-[data-theme="light"] nav .text-white\/50,
-[data-theme="light"] .bg-\[var\(--ink\)\] .text-white\/50,
-[data-theme="light"] .bg-\[\#09090b\] .text-white\/50,
-[data-theme="light"] .bg-\[\#18181b\] .text-white\/50 {
-  color: rgb(255 255 255 / 0.5) !important;
-}
-
-[data-theme="light"] aside .text-white\/60,
-[data-theme="light"] header .text-white\/60,
-[data-theme="light"] nav .text-white\/60,
-[data-theme="light"] .bg-\[var\(--ink\)\] .text-white\/60,
-[data-theme="light"] .bg-\[\#09090b\] .text-white\/60,
-[data-theme="light"] .bg-\[\#18181b\] .text-white\/60 {
-  color: rgb(255 255 255 / 0.6) !important;
-}
-
-[data-theme="light"] aside .text-white\/80,
-[data-theme="light"] header .text-white\/80,
-[data-theme="light"] nav .text-white\/80,
-[data-theme="light"] .bg-\[var\(--ink\)\] .text-white\/80,
-[data-theme="light"] .bg-\[\#09090b\] .text-white\/80,
-[data-theme="light"] .bg-\[\#18181b\] .text-white\/80 {
-  color: rgb(255 255 255 / 0.8) !important;
-}
-
-[data-theme="light"] aside .text-white\/90,
-[data-theme="light"] header .text-white\/90,
-[data-theme="light"] nav .text-white\/90,
-[data-theme="light"] .bg-\[var\(--ink\)\] .text-white\/90,
-[data-theme="light"] .bg-\[\#09090b\] .text-white\/90,
-[data-theme="light"] .bg-\[\#18181b\] .text-white\/90 {
-  color: rgb(255 255 255 / 0.9) !important;
-}
-
-/* Background: restore white opacity in dark containers */
-[data-theme="light"] aside .bg-white\/5,
-[data-theme="light"] header .bg-white\/5,
-[data-theme="light"] nav .bg-white\/5,
-[data-theme="light"] .bg-\[var\(--ink\)\] .bg-white\/5,
-[data-theme="light"] .bg-\[\#09090b\] .bg-white\/5,
-[data-theme="light"] .bg-\[\#18181b\] .bg-white\/5,
-[data-theme="light"] aside .bg-white\/\[0\.03\],
-[data-theme="light"] header .bg-white\/\[0\.03\],
-[data-theme="light"] nav .bg-white\/\[0\.03\],
-[data-theme="light"] .bg-\[var\(--ink\)\] .bg-white\/\[0\.03\],
-[data-theme="light"] aside .bg-white\/\[0\.04\],
-[data-theme="light"] header .bg-white\/\[0\.04\],
-[data-theme="light"] nav .bg-white\/\[0\.04\],
-[data-theme="light"] .bg-\[var\(--ink\)\] .bg-white\/\[0\.04\],
-[data-theme="light"] aside .bg-white\/\[0\.06\],
-[data-theme="light"] header .bg-white\/\[0\.06\],
-[data-theme="light"] nav .bg-white\/\[0\.06\],
-[data-theme="light"] .bg-\[var\(--ink\)\] .bg-white\/\[0\.06\],
-[data-theme="light"] aside .bg-white\/\[0\.07\],
-[data-theme="light"] header .bg-white\/\[0\.07\],
-[data-theme="light"] nav .bg-white\/\[0\.07\],
-[data-theme="light"] .bg-\[var\(--ink\)\] .bg-white\/\[0\.07\] {
-  background-color: rgb(255 255 255 / 0.05) !important;
-}
-
-[data-theme="light"] aside .bg-white\/10,
-[data-theme="light"] header .bg-white\/10,
-[data-theme="light"] nav .bg-white\/10,
-[data-theme="light"] .bg-\[var\(--ink\)\] .bg-white\/10,
-[data-theme="light"] .bg-\[\#09090b\] .bg-white\/10,
-[data-theme="light"] .bg-\[\#18181b\] .bg-white\/10 {
-  background-color: rgb(255 255 255 / 0.1) !important;
-}
-
-[data-theme="light"] aside .bg-white\/50,
-[data-theme="light"] header .bg-white\/50,
-[data-theme="light"] nav .bg-white\/50,
-[data-theme="light"] .bg-\[var\(--ink\)\] .bg-white\/50,
-[data-theme="light"] .bg-\[\#09090b\] .bg-white\/50,
-[data-theme="light"] .bg-\[\#18181b\] .bg-white\/50 {
-  background-color: rgb(255 255 255 / 0.5) !important;
-}
-
-/* Border: restore white opacity in dark containers */
-[data-theme="light"] aside .border-white\/5,
-[data-theme="light"] header .border-white\/5,
-[data-theme="light"] nav .border-white\/5,
-[data-theme="light"] .bg-\[var\(--ink\)\] .border-white\/5,
-[data-theme="light"] .bg-\[\#09090b\] .border-white\/5,
-[data-theme="light"] .bg-\[\#18181b\] .border-white\/5 {
-  border-color: rgb(255 255 255 / 0.05) !important;
-}
-
-[data-theme="light"] aside .border-white\/10,
-[data-theme="light"] header .border-white\/10,
-[data-theme="light"] nav .border-white\/10,
-[data-theme="light"] .bg-\[var\(--ink\)\] .border-white\/10,
-[data-theme="light"] .bg-\[\#09090b\] .border-white\/10,
-[data-theme="light"] .bg-\[\#18181b\] .border-white\/10 {
-  border-color: rgb(255 255 255 / 0.1) !important;
-}
-
-[data-theme="light"] aside .border-white\/20,
-[data-theme="light"] header .border-white\/20,
-[data-theme="light"] nav .border-white\/20,
-[data-theme="light"] .bg-\[var\(--ink\)\] .border-white\/20,
-[data-theme="light"] .bg-\[\#09090b\] .border-white\/20,
-[data-theme="light"] .bg-\[\#18181b\] .border-white\/20 {
-  border-color: rgb(255 255 255 / 0.2) !important;
-}
-
-/* Placeholder: restore white in dark containers */
-[data-theme="light"] aside .placeholder-white\/20::placeholder,
-[data-theme="light"] header .placeholder-white\/20::placeholder,
-[data-theme="light"] nav .placeholder-white\/20::placeholder,
-[data-theme="light"] .bg-\[var\(--ink\)\] .placeholder-white\/20::placeholder,
-[data-theme="light"] .bg-\[\#09090b\] .placeholder-white\/20::placeholder,
-[data-theme="light"] .bg-\[\#18181b\] .placeholder-white\/20::placeholder {
-  color: rgb(255 255 255 / 0.2) !important;
-}
-
-/* Hover text: restore white in dark containers */
-[data-theme="light"] aside .hover\:text-white:hover,
-[data-theme="light"] header .hover\:text-white:hover,
-[data-theme="light"] nav .hover\:text-white:hover,
-[data-theme="light"] .bg-\[var\(--ink\)\] .hover\:text-white:hover,
-[data-theme="light"] .bg-\[\#09090b\] .hover\:text-white:hover,
-[data-theme="light"] .bg-\[\#18181b\] .hover\:text-white:hover {
-  color: white !important;
+/* Superficies "premium" (bg-[var(--ink)] text-white): --ink está pensado como
+   color de texto (claro en dark, oscuro en light), pero se usa como fondo
+   invertido en muchos botones/cards. Forzar siempre un fondo oscuro para que
+   text-white encima sea legible en ambos temas. */
+.bg-\[var\(--ink\)\] {
+  background-color: #1a1a24 !important;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -355,7 +124,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  [data-theme="light"] .fp-card {
+  :where([data-theme="light"]) .fp-card {
     background: #ffffff;
     border: 1px solid var(--border);
   }

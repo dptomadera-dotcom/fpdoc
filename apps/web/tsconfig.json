@@ -25,6 +25,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@fpdoc/ai-models": [
+        "../../packages/ai-models"
       ]
     }
   },

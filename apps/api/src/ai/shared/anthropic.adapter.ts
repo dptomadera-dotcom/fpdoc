@@ -6,18 +6,18 @@ import {
   AiResponse,
 } from './model-provider.interface';
 
-const MODEL = 'claude-opus-4-6';
-
 @Injectable()
 export class AnthropicAdapter extends ModelProviderAdapter {
   private client: Anthropic;
+  private readonly model: string;
   private readonly logger = new Logger(AnthropicAdapter.name);
 
-  constructor() {
+  constructor(apiKey?: string, model?: string) {
     super();
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (apiKey) {
-      this.client = new Anthropic({ apiKey });
+    const key = apiKey ?? process.env.ANTHROPIC_API_KEY;
+    this.model = model ?? process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-7';
+    if (key) {
+      this.client = new Anthropic({ apiKey: key });
     }
   }
 
@@ -27,10 +27,10 @@ export class AnthropicAdapter extends ModelProviderAdapter {
     }
     const { system, messages, maxTokens = 16000 } = options;
 
-    this.logger.debug(`Calling ${MODEL} with ${messages.length} messages`);
+    this.logger.debug(`Calling ${this.model} with ${messages.length} messages`);
 
     const response = await this.client.messages.create({
-      model: MODEL,
+      model: this.model,
       max_tokens: maxTokens,
       system,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),

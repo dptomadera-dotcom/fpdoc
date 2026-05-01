@@ -7,7 +7,7 @@ export interface ChatMessage {
 }
 
 export interface LlmConfig {
-  provider: 'anthropic' | 'openai' | 'local';
+  provider: 'anthropic' | 'openai' | 'glm' | 'minimax' | 'local' | 'groq' | 'ollama-cloud';
   apiKey?: string;
   endpoint?: string;
   model?: string;
@@ -82,13 +82,10 @@ export const aiService = {
 
   testConnection: async (config: LlmConfig): Promise<{ ok: boolean; model?: string; error?: string }> => {
     try {
-      const response = await api.post('/ai/chat', {
-        messages: [{ role: 'user', content: 'Responde solo con: OK' }],
-        config,
-      });
-      return { ok: true, model: response.data.model };
+      const response = await api.post('/ai/test-connection', config);
+      return response.data;
     } catch (err: any) {
-      return { ok: false, error: err?.response?.data?.message ?? err.message };
+      return { ok: false, error: err?.response?.data?.error ?? err.message ?? 'Error desconocido' };
     }
   },
 

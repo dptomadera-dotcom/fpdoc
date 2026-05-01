@@ -49,7 +49,7 @@ export default function Home() {
   if (user) {
     const roleName = user.role === 'JEFATURA' ? 'Jefe de Dpto.' : user.role === 'PROFESOR' ? 'Docente' : 'Alumno/a';
     return (
-      <div className="min-h-screen bg-[var(--bg1)] text-white">
+      <div className="min-h-screen bg-[var(--bg1)] text-[var(--ink)]">
         <Navbar />
         <motion.div
           initial="hidden" animate="visible" variants={containerVariants}
@@ -59,12 +59,12 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-[var(--teal)] animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Workspace Activo • FPdoc 3.0</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--ink3)]">Workspace Activo • FPdoc 3.0</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold font-serif tracking-tighter text-white">
+              <h1 className="text-4xl md:text-6xl font-bold font-serif tracking-tighter text-[var(--ink)]">
                 Hola, <span className="text-[var(--teal)] underline decoration-wavy decoration-1 underline-offset-8 italic">{user.email?.split('@')[0]}</span>
               </h1>
-              <p className="text-white/40 mt-4 max-w-xl text-sm leading-relaxed">
+              <p className="text-[var(--ink3)] mt-4 max-w-xl text-sm leading-relaxed">
                 Tu centro neurálgico para la coordinación curricular y seguimiento de competencias transversales.
               </p>
             </div>
@@ -78,26 +78,26 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-8">
               <motion.div variants={itemVariants} className="flex items-center justify-between">
-                <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-white/60">
+                <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-[var(--ink2)]">
                   <Briefcase className="w-4 h-4 text-[var(--teal)]" />Actividad Reciente
                 </h2>
                 <Link href="/projects" className="text-[10px] font-bold text-[var(--teal)] hover:underline flex items-center gap-1">Ver todos <ChevronRight className="w-3 h-3" /></Link>
               </motion.div>
 
               {loading ? (
-                <div className="space-y-4">{[1,2].map(i => <div key={i} className="h-28 bg-white/50 border border-[#f0eee8] rounded-3xl animate-pulse" />)}</div>
+                <div className="space-y-4">{[1,2].map(i => <div key={i} className="h-28 bg-[var(--bg2)] border border-[var(--border)] rounded-3xl animate-pulse" />)}</div>
               ) : projects.length > 0 ? (
                 <motion.div variants={itemVariants} className="space-y-4">
                   {projects.slice(0, 3).map(project => (
-                    <div key={project.id} className="group bg-white/5 border border-white/5 rounded-[32px] p-6 hover:shadow-xl transition-all duration-500 flex items-center justify-between">
+                    <div key={project.id} className="group bg-[var(--bg2)] border border-[var(--border)] rounded-[32px] p-6 hover:shadow-xl transition-all duration-500 flex items-center justify-between">
                       <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-[var(--teal)] group-hover:scale-110 transition-transform">
+                        <div className="w-14 h-14 bg-[var(--bg1)] rounded-2xl flex items-center justify-center text-[var(--teal)] group-hover:scale-110 transition-transform">
                           <Sparkles className="w-6 h-6" />
                         </div>
                         <div>
-                          <h4 className="text-lg font-bold font-serif text-white">{project.name}</h4>
+                          <h4 className="text-lg font-bold font-serif text-[var(--ink)]">{project.name}</h4>
                           <div className="flex items-center gap-4 mt-1">
-                            <span className="text-[10px] font-black uppercase text-white/40">{project.status}</span>
+                            <span className="text-[10px] font-black uppercase text-[var(--ink3)]">{project.status}</span>
                             <span className="w-1 h-1 rounded-full bg-[var(--bg2)]" />
                             <span className="text-[10px] font-bold text-[var(--ink3)]">{project.progress}% Completado</span>
                           </div>
@@ -110,7 +110,7 @@ export default function Home() {
                   ))}
                 </motion.div>
               ) : (
-                <motion.div variants={itemVariants} className="bg-white border-2 border-dashed border-[#f0eee8] rounded-[40px] p-16 text-center">
+                <motion.div variants={itemVariants} className="bg-[var(--bg2)] border-2 border-dashed border-[var(--border)] rounded-[40px] p-16 text-center">
                   <div className="w-20 h-20 bg-[var(--bg1)] rounded-3xl flex items-center justify-center mx-auto mb-6 text-[var(--teal)]">
                     <Layers className="w-10 h-10" />
                   </div>
@@ -128,7 +128,7 @@ export default function Home() {
                   <h3 className="font-bold mb-1">Módulos Inteligentes</h3>
                   <p className="text-[10px] text-white/50 leading-relaxed">Tu currículo está siendo analizado por nuestro motor de IA para detectar brechas.</p>
                 </div>
-                <div className="fp-card bg-white border border-[#f0eee8]">
+                <div className="fp-card bg-[var(--bg2)] border border-[var(--border)]">
                   <BarChart3 className="w-8 h-8 text-[var(--teal)] mb-4" />
                   <h3 className="font-bold mb-1">Impacto Transversal</h3>
                   <p className="text-[10px] text-[var(--ink3)] leading-relaxed">Progreso medio de vinculación de competencias: 0% detectado en el ciclo.</p>
@@ -137,13 +137,13 @@ export default function Home() {
             </div>
 
             <div className="lg:col-span-4 space-y-8">
-              <motion.div variants={itemVariants} className="bg-white/50 backdrop-blur-xl border border-[#f0eee8] rounded-[40px] p-8">
+              <motion.div variants={itemVariants} className="bg-[var(--bg2)] backdrop-blur-xl border border-[var(--border)] rounded-[40px] p-8">
                 <h2 className="text-sm font-black uppercase tracking-widest mb-6 flex items-center gap-2">
                   <Shield className="w-4 h-4 text-[var(--teal)]" />Estado de Cuenta
                 </h2>
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center font-bold text-[var(--ink)]">
+                    <div className="w-12 h-12 bg-[var(--bg1)] rounded-2xl shadow-sm flex items-center justify-center font-bold text-[var(--ink)]">
                       {user.email?.[0].toUpperCase()}
                     </div>
                     <div>
@@ -151,7 +151,7 @@ export default function Home() {
                       <div className="text-[9px] font-black uppercase text-[var(--teal)] tracking-tighter">{roleName}</div>
                     </div>
                   </div>
-                  <div className="h-[1px] bg-[#f0eee8]" />
+                  <div className="h-[1px] bg-[var(--border)]" />
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-[var(--ink3)]">Espacio Cloud</span>

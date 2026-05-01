@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { loadLlmConfig, saveLlmConfig, aiService, LlmConfig } from '@/services/ai.service';
 import { applyTheme, getSavedTheme } from '@/components/theme-provider';
+import { MODELS_BY_PROVIDER, ACTIVE_MODELS, type ModelProvider } from '@fpdoc/ai-models';
 
 // ─────────────────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ export default function SettingsPage() {
   };
 
   // ── IA state ──
-  const [llmProvider, setLlmProvider] = useState<'anthropic' | 'openai' | 'local'>('anthropic');
+  const [llmProvider, setLlmProvider] = useState<ModelProvider>('anthropic');
   const [llmApiKey, setLlmApiKey]     = useState('');
   const [llmEndpoint, setLlmEndpoint] = useState('');
   const [llmModel, setLlmModel]       = useState('');
@@ -350,39 +351,37 @@ export default function SettingsPage() {
                     <BrainCircuit className="w-4 h-4 text-[var(--teal)]" /> Proveedor de IA
                   </h3>
 
-                  <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
                     {([
-                      { id: 'anthropic', label: 'Anthropic', sub: 'Claude Sonnet' },
-                      { id: 'openai',   label: 'OpenAI',    sub: 'GPT-4o / GPT-4o-mini' },
-                      { id: 'local',    label: 'Local',     sub: 'Ollama / LM Studio' },
-                    ] as const).map(p => (
+                      { id: 'anthropic' as ModelProvider, label: 'Anthropic', sub: 'Claude' },
+                      { id: 'openai' as ModelProvider,    label: 'OpenAI',    sub: 'GPT-4o' },
+                      { id: 'glm' as ModelProvider,       label: 'GLM',       sub: 'Zhipu AI' },
+                      { id: 'minimax' as ModelProvider,   label: 'MiniMax',   sub: 'Cloud' },
+                      { id: 'ollama' as ModelProvider,    label: 'Local',     sub: 'Ollama' },
+                      { id: 'groq' as ModelProvider,      label: 'Groq',      sub: 'Mixtral' },
+                      { id: 'ollama-cloud' as ModelProvider, label: 'Ollama Cloud', sub: 'Multi-modelo' },
+                    ]).map(p => (
                       <button
                         key={p.id}
                         onClick={() => { setLlmProvider(p.id); setTestStatus('idle'); }}
-                        className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                        className={`p-3 rounded-xl border transition-all text-left ${
                           llmProvider === p.id
                             ? 'border-[var(--teal)] bg-[var(--teal)]/5'
-                            : 'border-[#e5e3dc] hover:border-[var(--teal)]/40'
+                            : 'border-[var(--border)] hover:border-[var(--teal)]/40'
                         }`}
                       >
-                        <div className="text-xs font-black text-[var(--ink)] mb-0.5">{p.label}</div>
-                        <div className="text-[10px] text-[var(--ink3)]">{p.sub}</div>
+                        <div className="text-xs font-bold text-[var(--ink)]">{p.label}</div>
+                        <div className="text-[9px] text-[var(--ink3)]">{p.sub}</div>
                       </button>
                     ))}
                   </div>
 
-                  {/* API Key — Anthropic, OpenAI y Cloud */}
-                  {(llmProvider === 'anthropic' || llmProvider === 'openai') && (
+                  {/* API Key — Cloud providers (excepto local) */}
+                  {llmProvider !== 'ollama' && (
                     <div className="mb-4">
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1 flex items-center gap-1.5">
                         <Key className="w-3 h-3" />
-                        {llmProvider === 'anthropic'
-                          ? 'API Key de Anthropic'
-                          : llmModel === 'glm-5.1:cloud'
-                            ? 'API Key de GLM (Zhipu AI)'
-                            : llmModel === 'minimax-m2.7:cloud'
-                              ? 'API Key de MiniMax'
-                              : 'API Key de OpenAI'}
+                        API Key de {MODELS_BY_PROVIDER[llmProvider]?.[0]?.name ?? llmProvider}
                       </label>
                       <div className="relative">
                         <input
@@ -390,10 +389,11 @@ export default function SettingsPage() {
                           value={llmApiKey}
                           onChange={e => setLlmApiKey(e.target.value)}
                           placeholder={
-                            llmProvider === 'anthropic' ? 'sk-ant-api03-...'
-                              : llmModel === 'glm-5.1:cloud' ? 'zhipuai-...'
-                              : llmModel === 'minimax-m2.7:cloud' ? 'mm-...'
-                              : 'sk-proj-...'
+                            llmProvider === 'anthropic' ? 'sk-ant-...'
+                              : llmProvider === 'glm' ? 'zhipuai-...'
+                              : llmProvider === 'minimax' ? 'mm-...'
+                              : llmProvider === 'groq' ? 'gsk_...'
+                              : 'sk-...'
                           }
                           className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 pr-12 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
                         />
@@ -411,88 +411,50 @@ export default function SettingsPage() {
                     </div>
                   )}
 
-                  {/* Modelo — OpenAI / Cloud */}
-                  {llmProvider === 'openai' && (
+                  {/* Modelo selector — dinámico por proveedor */}
+                  {(llmProvider !== 'ollama' || true) && (
                     <div className="space-y-4 mb-4">
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Modelo</label>
                         <select
                           value={llmModel}
                           onChange={e => setLlmModel(e.target.value)}
-                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium"
+                          className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium"
                         >
-                          <optgroup label="OpenAI">
-                            <option value="">gpt-4o-mini (por defecto)</option>
-                            <option value="gpt-4o">gpt-4o</option>
-                            <option value="gpt-4o-mini">gpt-4o-mini</option>
-                            <option value="gpt-4-turbo">gpt-4-turbo</option>
-                          </optgroup>
-                          <optgroup label="Cloud (OpenAI-compatible)">
-                            <option value="glm-5.1:cloud">GLM-5.1 Cloud</option>
-                            <option value="minimax-m2.7:cloud">MiniMax-M2.7 Cloud</option>
-                          </optgroup>
+                          <option value="">Usar modelo por defecto</option>
+                          {MODELS_BY_PROVIDER[llmProvider]?.map(model => (
+                            <option key={model.id} value={model.id}>
+                              {model.name} ({model.maxTokens.toLocaleString()} tk)
+                            </option>
+                          ))}
                         </select>
                       </div>
-                      {(llmModel === 'glm-5.1:cloud' || llmModel === 'minimax-m2.7:cloud') && (
+                      {llmProvider === 'ollama' && (
                         <div>
-                          <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">URL del servidor (endpoint)</label>
+                          <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Nombre del modelo personalizado</label>
                           <input
                             type="text"
-                            value={llmEndpoint}
-                            onChange={e => setLlmEndpoint(e.target.value)}
-                            placeholder={llmModel === 'glm-5.1:cloud' ? 'https://open.bigmodel.cn/api/paas/v4' : 'https://api.minimax.chat/v1'}
-                            className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
+                            value={llmModelCustom}
+                            onChange={e => setLlmModelCustom(e.target.value)}
+                            placeholder="gemma:4b"
+                            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
                           />
-                          <p className="text-[10px] text-[var(--ink3)] mt-1 ml-1">
-                            Endpoint base de la API compatible con OpenAI del proveedor.
-                          </p>
                         </div>
                       )}
                     </div>
                   )}
 
-                  {/* Endpoint + Modelo — Local */}
-                  {llmProvider === 'local' && (
-                    <div className="space-y-4 mb-4">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">URL del servidor</label>
-                        <input
-                          type="text"
-                          value={llmEndpoint}
-                          onChange={e => setLlmEndpoint(e.target.value)}
-                          placeholder="http://localhost:11434"
-                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">Nombre del modelo</label>
-                        <select
-                          value={llmModel}
-                          onChange={e => setLlmModel(e.target.value)}
-                          className="w-full bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium"
-                        >
-                          <optgroup label="Gemma 4 (recomendados)">
-                            <option value="gemma4:e4b">Gemma 4 4B</option>
-                            <option value="gemma4:e2b">Gemma 4 2B</option>
-                          </optgroup>
-                          <optgroup label="Otros modelos populares">
-                            <option value="llama3.2">Llama 3.2</option>
-                            <option value="llama3.1">Llama 3.1</option>
-                            <option value="mistral">Mistral</option>
-                            <option value="phi3">Phi-3</option>
-                          </optgroup>
-                          <option value="__custom__">Otro (especificar manualmente)</option>
-                        </select>
-                        {llmModel === '__custom__' && (
-                          <input
-                            type="text"
-                            value={llmModelCustom}
-                            onChange={e => setLlmModelCustom(e.target.value)}
-                            placeholder="nombre-del-modelo"
-                            className="w-full mt-2 bg-[var(--bg)] border border-[#e5e3dc] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
-                          />
-                        )}
-                      </div>
+                  {/* Endpoint local — solo para Ollama */}
+                  {llmProvider === 'ollama' && (
+                    <div className="mb-4">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">URL del servidor Ollama</label>
+                      <input
+                        type="text"
+                        value={llmEndpoint}
+                        onChange={e => setLlmEndpoint(e.target.value)}
+                        placeholder="http://localhost:11434"
+                        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
+                      />
                     </div>
                   )}
 

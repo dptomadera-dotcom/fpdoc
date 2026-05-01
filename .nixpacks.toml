@@ -1,0 +1,3 @@
+[build]
+# Asegurar que se use Node.js 20 compatible con Prisma
+nodeVersion = "20"
