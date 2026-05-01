@@ -1,9 +1,43 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Patch } from '@nestjs/common';
+import { IsString, IsOptional, IsEnum, IsArray, IsDateString } from 'class-validator';
 import { ProjectsService } from './projects.service';
+import { CreateTaskDto } from './dto/create-task.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole, ProjectStatus } from '@prisma/client';
+
+class CreateProjectDto {
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsString()
+  cycleId: string;
+
+  @IsString()
+  year: string;
+
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+
+  @IsOptional()
+  @IsEnum(ProjectStatus)
+  status?: ProjectStatus;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  moduleIds?: string[];
+}
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,7 +58,7 @@ export class ProjectsController {
 
   @Post()
   @Roles(UserRole.ADMIN, UserRole.JEFATURA, UserRole.PROFESOR)
-  create(@Body() data: any) {
+  create(@Body() data: CreateProjectDto) {
     return this.projectsService.create(data);
   }
 
@@ -36,7 +70,7 @@ export class ProjectsController {
 
   @Post('phases/:phaseId/tasks')
   @Roles(UserRole.ADMIN, UserRole.JEFATURA, UserRole.PROFESOR)
-  addTask(@Param('phaseId') phaseId: string, @Body() data: any) {
+  addTask(@Param('phaseId') phaseId: string, @Body() data: CreateTaskDto) {
     return this.projectsService.addTask(phaseId, data);
   }
 }
