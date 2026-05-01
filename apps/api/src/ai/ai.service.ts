@@ -173,6 +173,7 @@ export class AiService {
       route?: string;
     },
     userId: string,
+    clientConfig?: LlmConfig,
   ): Promise<GeneratedPhase[]> {
     const curriculumCtx = await buildCurriculumContext(
       this.prisma,
@@ -207,10 +208,12 @@ Responde ÚNICAMENTE con un JSON válido (sin texto adicional) con este esquema:
 
 Usa los ceIds del contexto curricular cuando corresponda. Si no hay contexto, usa arrays vacíos para ceIds.`;
 
+    const provider = clientConfig?.provider ?? 'anthropic';
+    const adapter = this.resolveAdapter(provider, clientConfig);
     let model = 'claude-opus-4-6';
 
     try {
-      const aiResponse = await this.anthropic.ask({
+      const aiResponse = await adapter.ask({
         system: TEACHER_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: prompt }],
         maxTokens: 4096,
@@ -261,6 +264,7 @@ Usa los ceIds del contexto curricular cuando corresponda. Si no hay contexto, us
       entityId?: string;
     },
     userId: string,
+    clientConfig?: LlmConfig,
   ): Promise<string> {
     const teacherCtx = await buildTeacherContext(this.prisma, userId);
 
@@ -274,10 +278,12 @@ ${teacherCtx.projects
   .join('\n')}
 Grupos: ${teacherCtx.groups.length} grupos`;
 
+    const provider = clientConfig?.provider ?? 'anthropic';
+    const adapter = this.resolveAdapter(provider, clientConfig);
     let model = 'claude-opus-4-6';
 
     try {
-      const aiResponse = await this.anthropic.ask({
+      const aiResponse = await adapter.ask({
         system: `${TEACHER_SYSTEM_PROMPT}\n\n${contextBlock}`,
         messages: [{ role: 'user', content: params.message }],
         maxTokens: 2048,

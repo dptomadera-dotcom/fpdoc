@@ -36,10 +36,11 @@ export class AiController {
       raIds: string[];
       ceIds: string[];
       route?: string;
+      clientConfig?: LlmConfig;
     },
     @Request() req: any,
   ) {
-    return this.ai.suggestProjectStructure(data, req.user.userId);
+    return this.ai.suggestProjectStructure(data, req.user.userId, data.clientConfig);
   }
 
   @Post('teacher-assistant')
@@ -52,10 +53,11 @@ export class AiController {
       route?: string;
       entityType?: string;
       entityId?: string;
+      clientConfig?: LlmConfig;
     },
     @Request() req: any,
   ) {
-    return { response: await this.ai.askTeacherAssistant(data, req.user.userId) };
+    return { response: await this.ai.askTeacherAssistant(data, req.user.userId, data.clientConfig) };
   }
 
   @Post('test-connection')
