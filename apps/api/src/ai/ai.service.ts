@@ -12,6 +12,7 @@ import { AiInteractionLogService } from './shared/ai-interaction-log.service';
 import { buildCurriculumContext } from './shared/context/build-curriculum-context';
 import { buildTeacherContext } from './shared/context/build-teacher-context';
 import { DEFAULT_MODELS, getModel } from '@fpdoc/ai-models';
+import { AI_MAX_TOKENS } from './shared/ai.constants';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -92,7 +93,7 @@ export class AiService {
     const aiResponse = await adapter.ask({
       system: SYSTEM_PROMPT,
       messages,
-      maxTokens: 1024,
+      maxTokens: AI_MAX_TOKENS.GENERAL_CHAT,
     });
 
     return { content: aiResponse.text, model: aiResponse.model, provider };
@@ -210,13 +211,13 @@ Usa los ceIds del contexto curricular cuando corresponda. Si no hay contexto, us
 
     const provider = clientConfig?.provider ?? 'anthropic';
     const adapter = this.resolveAdapter(provider, clientConfig);
-    let model = 'claude-opus-4-6';
+    let model = DEFAULT_MODELS.anthropic;
 
     try {
       const aiResponse = await adapter.ask({
         system: TEACHER_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: prompt }],
-        maxTokens: 4096,
+        maxTokens: AI_MAX_TOKENS.SUGGEST,
       });
 
       model = aiResponse.model;
@@ -280,13 +281,13 @@ Grupos: ${teacherCtx.groups.length} grupos`;
 
     const provider = clientConfig?.provider ?? 'anthropic';
     const adapter = this.resolveAdapter(provider, clientConfig);
-    let model = 'claude-opus-4-6';
+    let model = DEFAULT_MODELS.anthropic;
 
     try {
       const aiResponse = await adapter.ask({
         system: `${TEACHER_SYSTEM_PROMPT}\n\n${contextBlock}`,
         messages: [{ role: 'user', content: params.message }],
-        maxTokens: 2048,
+        maxTokens: AI_MAX_TOKENS.TEACHER_CHAT,
       });
 
       model = aiResponse.model;

@@ -15,7 +15,7 @@ export class AnthropicAdapter extends ModelProviderAdapter {
   constructor(apiKey?: string, model?: string) {
     super();
     const key = apiKey ?? process.env.ANTHROPIC_API_KEY;
-    this.model = model ?? process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-7';
+    this.model = model ?? process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-5';
     if (key) {
       this.client = new Anthropic({ apiKey: key });
     }

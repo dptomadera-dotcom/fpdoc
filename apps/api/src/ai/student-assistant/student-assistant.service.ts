@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ModelProviderAdapter } from '../shared/model-provider.interface';
 import { AiInteractionLogService } from '../shared/ai-interaction-log.service';
 import { buildStudentContext } from '../shared/context/build-student-context';
+import { AI_MAX_TOKENS } from '../shared/ai.constants';
 
 const STUDENT_SYSTEM_PROMPT = `Eres un asistente de apoyo para estudiantes de Formación Profesional (FP) en España.
 Tu función es ayudar al alumnado a entender sus tareas, organizar su trabajo y orientar sus entregas.
@@ -44,7 +45,7 @@ export class StudentAssistantService {
       const aiResponse = await this.anthropic.ask({
         system: `${STUDENT_SYSTEM_PROMPT}\n\n${contextBlock}`,
         messages: [{ role: 'user', content: params.message }],
-        maxTokens: 1500,
+        maxTokens: AI_MAX_TOKENS.STUDENT_CHAT,
       });
 
       model = aiResponse.model;
@@ -94,7 +95,6 @@ export class StudentAssistantService {
       .join('\n');
 
     const taskLines = ctx.pendingTasks
-      .slice(0, 5)
       .map(
         (t) =>
           `- [${t.status}] "${t.title}" (Fase: ${t.phase}, Proyecto: ${t.project}${t.dueDate ? `, entrega: ${t.dueDate}` : ''})`,

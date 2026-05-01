@@ -1,0 +1,6 @@
+export const AI_MAX_TOKENS = {
+  SUGGEST: 4096,
+  TEACHER_CHAT: 2048,
+  STUDENT_CHAT: 1024,
+  GENERAL_CHAT: 2048,
+} as const;
