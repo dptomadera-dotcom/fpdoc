@@ -111,7 +111,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       <aside className={cn(
-        'w-[280px] flex flex-col bg-[var(--ink)] text-white h-screen overflow-hidden z-40',
+        'w-[280px] flex flex-col bg-[var(--sidebar)] text-white h-screen overflow-hidden z-40',
         'transition-transform duration-300 ease-in-out',
         'fixed top-0 left-0',
         'lg:sticky lg:translate-x-0',

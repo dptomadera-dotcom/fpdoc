@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "pnpm -r build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "ts-node prisma/seed.ts"
   },
@@ -21,12 +22,12 @@
   "devDependencies": {
     "@prisma/config": "^7.6.0",
     "@types/bcrypt": "^6.0.0",
-    "@types/node": "^25.5.0",
+    "@types/node": "^22.10.7",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "prisma": "7.6.0",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2"
+    "typescript": "^5.7.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
