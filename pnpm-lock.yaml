@@ -127,6 +127,9 @@ importers:
       '@nestjs/testing':
         specifier: ^11.0.1
         version: 11.1.17(@nestjs/common@11.1.17(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17)(@nestjs/platform-express@11.1.17)
+      '@prisma/config':
+        specifier: ^7.6.0
+        version: 7.6.0
       '@swc/cli':
         specifier: ^0.4.0
         version: 0.4.0(@swc/core@1.15.26)(chokidar@4.0.3)
@@ -275,6 +278,8 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+
+  packages/ai-models: {}
 
   packages/types:
     devDependencies:
