@@ -9,7 +9,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       // Usar Supabase JWT Secret para validar tokens de Supabase
-      secretOrKey: process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET || 'super-secret-industrial-key-2024',
+      secretOrKey: process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET,
     });
   }
 

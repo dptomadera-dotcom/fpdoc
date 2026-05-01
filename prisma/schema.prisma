@@ -667,6 +667,8 @@ model Evidence {
   Task            Task              @relation(fields: [taskId], references: [id])
   EvidenceComment EvidenceComment[]
 
+  @@index([taskId])
+  @@index([studentId])
   @@schema("public")
 }
 
@@ -678,6 +680,7 @@ model EvidenceComment {
   createdAt  DateTime @default(now())
   Evidence   Evidence @relation(fields: [evidenceId], references: [id])
 
+  @@index([evidenceId])
   @@schema("public")
 }
 
@@ -835,6 +838,8 @@ model ProjectPhase {
   DependsOn            ProjectPhase?     @relation("PhaseDependency", fields: [dependsOnPhaseId], references: [id])
   DependentPhases      ProjectPhase[]    @relation("PhaseDependency")
 
+  @@index([projectId])
+  @@index([responsibleTeacherId])
   @@schema("public")
 }
 
@@ -861,6 +866,7 @@ model Session {
   notes     String?
   Group     Group    @relation(fields: [groupId], references: [id])
 
+  @@index([groupId])
   @@schema("public")
 }
 
@@ -913,6 +919,8 @@ model Task {
   TaskDependency_TaskDependency_prerequisiteTaskIdToTask TaskDependency[]     @relation("TaskDependency_prerequisiteTaskIdToTask")
   TaskSafetyLink                                         TaskSafetyLink[]
 
+  @@index([phaseId])
+  @@index([assignedToId])
   @@schema("public")
 }
 

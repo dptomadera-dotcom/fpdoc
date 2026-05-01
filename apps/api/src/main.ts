@@ -21,8 +21,10 @@ console.log('DATABASE_URL cargada:', process.env.DATABASE_URL ? 'SÍ' : 'NO');
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { validateEnv } from './config/env.validation';
 
 async function bootstrap() {
+  validateEnv();
   const app = await NestFactory.create(AppModule);
 
   // Validación global de DTOs (necesario para @IsEmail, @IsEnum, @MinLength, etc.)
