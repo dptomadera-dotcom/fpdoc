@@ -140,14 +140,15 @@ Responde ÚNICAMENTE con un JSON válido con este esquema exacto:
           .filter((ra) => ctx.uncoveredRaIds.includes(ra.id))
           .map((ra) => ({ code: ra.code, description: ra.description })),
       };
-    } catch (err) {
-      this.logger.error('Error in curriculum review:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error('Error in curriculum review:', message);
       await this.log.log({
         userId,
         role: UserRole.PROFESOR,
         agentType: 'curriculum-review',
         prompt,
-        response: String(err),
+        response: message,
         model,
         route: params.route,
         status: 'error',
@@ -161,8 +162,9 @@ Responde ÚNICAMENTE con un JSON válido con este esquema exacto:
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON object found');
       return JSON.parse(jsonMatch[0]);
-    } catch (err) {
-      this.logger.warn('Failed to parse curriculum review JSON:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.warn('Failed to parse curriculum review JSON:', message);
       return {
         summary: text.slice(0, 300),
         gaps: [],

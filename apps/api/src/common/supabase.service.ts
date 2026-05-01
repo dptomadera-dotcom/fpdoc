@@ -1,8 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class SupabaseService implements OnModuleInit {
+  private readonly logger = new Logger(SupabaseService.name);
   private storageClient: SupabaseClient;
   private adminClient: SupabaseClient;
 
@@ -12,20 +13,20 @@ export class SupabaseService implements OnModuleInit {
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.warn('Supabase credentials missing. Storage will be mocked.');
+      this.logger.warn('Supabase credentials missing. Storage will be mocked.');
       return;
     }
 
     this.storageClient = createClient(supabaseUrl, supabaseAnonKey);
-    console.log('Supabase anon client initialized.');
+    this.logger.log('Supabase anon client initialized.');
 
     if (supabaseServiceKey) {
       this.adminClient = createClient(supabaseUrl, supabaseServiceKey, {
         auth: { autoRefreshToken: false, persistSession: false },
       });
-      console.log('Supabase admin (service_role) client initialized.');
+      this.logger.log('Supabase admin (service_role) client initialized.');
     } else {
-      console.warn('SUPABASE_SERVICE_ROLE_KEY missing – per-user LLM settings will not be available.');
+      this.logger.warn('SUPABASE_SERVICE_ROLE_KEY missing – per-user LLM settings will not be available.');
     }
   }
 
@@ -33,7 +34,7 @@ export class SupabaseService implements OnModuleInit {
 
   async uploadFile(bucketName: string, path: string, file: Buffer, contentType: string) {
     if (!this.storageClient) {
-      console.log(`[Mock Storage] Uploading ${path} to ${bucketName}`);
+      this.logger.log(`[Mock Storage] Uploading ${path} to ${bucketName}`);
       return `https://mock-supabase.co/storage/v1/object/public/${bucketName}/${path}`;
     }
 
@@ -67,7 +68,7 @@ export class SupabaseService implements OnModuleInit {
       .maybeSingle();
 
     if (error) {
-      console.error('Error reading user LLM settings:', error.message);
+      this.logger.error('Error reading user LLM settings:', error.message);
       return null;
     }
 

@@ -91,9 +91,10 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
             inputTokens: data.usage?.prompt_tokens ?? 0,
             outputTokens: data.usage?.completion_tokens ?? 0,
           };
-        } catch (err) {
-          this.logger.warn(`${endpoint} failed: ${String(err).substring(0, 50)}`);
-          lastError = String(err);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.logger.warn(`${endpoint} failed: ${message.substring(0, 50)}`);
+          lastError = message;
         }
       }
     }

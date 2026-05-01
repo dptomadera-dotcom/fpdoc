@@ -41,8 +41,9 @@ export class AiInteractionLogService {
           metadata: params.metadata ?? {},
         },
       });
-    } catch (err) {
-      this.logger.warn('Failed to log AI interaction (non-critical):', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.warn('Failed to log AI interaction (non-critical):', message);
     }
   }
 }

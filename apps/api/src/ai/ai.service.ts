@@ -241,14 +241,15 @@ Usa los ceIds del contexto curricular cuando corresponda. Si no hay contexto, us
       });
 
       return this.parsePhases(aiResponse.text);
-    } catch (err) {
-      this.logger.error('Error calling AI for project structure:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error('Error calling AI for project structure:', message);
       await this.log.log({
         userId,
         role: UserRole.PROFESOR,
         agentType: 'teacher-assistant',
         prompt,
-        response: String(err),
+        response: message,
         model,
         route: params.route,
         status: 'error',
@@ -310,14 +311,15 @@ Grupos: ${teacherCtx.groups.length} grupos`;
       });
 
       return aiResponse.text;
-    } catch (err) {
-      this.logger.error('Error in teacher assistant:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error('Error in teacher assistant:', message);
       await this.log.log({
         userId,
         role: UserRole.PROFESOR,
         agentType: 'teacher-assistant',
         prompt: params.message,
-        response: String(err),
+        response: message,
         model,
         route: params.route,
         status: 'error',
@@ -331,8 +333,9 @@ Grupos: ${teacherCtx.groups.length} grupos`;
       const jsonMatch = text.match(/\[[\s\S]*\]/);
       if (!jsonMatch) throw new Error('No JSON array found in response');
       return JSON.parse(jsonMatch[0]) as GeneratedPhase[];
-    } catch (err) {
-      this.logger.warn('Failed to parse AI response as JSON, returning empty:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.warn('Failed to parse AI response as JSON, returning empty:', message);
       return [];
     }
   }

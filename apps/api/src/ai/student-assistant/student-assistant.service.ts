@@ -69,14 +69,15 @@ export class StudentAssistantService {
       });
 
       return aiResponse.text;
-    } catch (err) {
-      this.logger.error('Error in student assistant:', err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error('Error in student assistant:', message);
       await this.log.log({
         userId,
         role: UserRole.ALUMNO,
         agentType: 'student-assistant',
         prompt: params.message,
-        response: String(err),
+        response: message,
         model,
         route: params.route,
         status: 'error',
