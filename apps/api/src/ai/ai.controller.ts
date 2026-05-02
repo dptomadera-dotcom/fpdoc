@@ -75,34 +75,29 @@ export class AiController {
   private async testOllamaCloud(config: LlmConfig) {
     if (!config.apiKey) return { ok: false, error: 'Falta API key' };
     const model = config.model || 'minimax-m2.7:cloud';
-    const endpoints = [
-      'https://api.ollama.com/v1/chat/completions',
-      'https://ollama.com/api/v1/chat/completions',
-    ];
-    const body = JSON.stringify({
-      model,
-      messages: [{ role: 'user', content: 'Responde solo: OK' }],
-      max_tokens: 16,
-      stream: false,
-    });
-    for (const url of endpoints) {
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${config.apiKey}`,
-          },
-          body,
-        });
-        if (!res.ok) continue;
-        const data = await res.json();
-        return { ok: true, model: data.model || model };
-      } catch (e: any) {
-        continue;
+    try {
+      const res = await fetch('https://ollama.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: 'Responde solo: OK' }],
+          max_tokens: 16,
+          stream: false,
+        }),
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        return { ok: false, error: `${res.status}: ${error.substring(0, 100)}` };
       }
+      const data = await res.json();
+      return { ok: true, model: data.model || model };
+    } catch (e: any) {
+      return { ok: false, error: `Ollama Cloud: ${e.message}` };
     }
-    return { ok: false, error: 'No se pudo conectar a Ollama Cloud' };
   }
 
   private async testLocalOllama(config: LlmConfig) {

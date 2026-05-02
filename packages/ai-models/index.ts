@@ -143,6 +143,14 @@ export const AI_MODELS_REGISTRY: Record<string, AiModel> = {
   // ═════════════════════════════════════════════════════════
   // OLLAMA CLOUD (suscripción ollama.com)
   // ═════════════════════════════════════════════════════════
+  'glm-5.1:cloud': {
+    id: 'glm-5.1:cloud',
+    name: 'GLM-5.1 (Ollama Cloud)',
+    provider: 'ollama-cloud',
+    family: 'cloud',
+    maxTokens: 198000,
+    supportedIn: ['chat', 'suggest']
+  },
   'minimax-m2.7:cloud': {
     id: 'minimax-m2.7:cloud',
     name: 'MiniMax-M2.7 (Ollama Cloud)',
@@ -151,36 +159,44 @@ export const AI_MODELS_REGISTRY: Record<string, AiModel> = {
     maxTokens: 8192,
     supportedIn: ['chat', 'suggest']
   },
-  'glm-5.1:cloud': {
-    id: 'glm-5.1:cloud',
-    name: 'GLM-5.1 (Ollama Cloud)',
+  'kimi-k2.6:cloud': {
+    id: 'kimi-k2.6:cloud',
+    name: 'Kimi K2.6 (Ollama Cloud)',
     provider: 'ollama-cloud',
     family: 'cloud',
-    maxTokens: 8192,
+    maxTokens: 131072,
     supportedIn: ['chat', 'suggest']
   },
-  'llama2-70b:cloud': {
-    id: 'llama2-70b:cloud',
-    name: 'Llama 2 70B (Ollama Cloud)',
+  'deepseek-v4-flash:cloud': {
+    id: 'deepseek-v4-flash:cloud',
+    name: 'DeepSeek V4 Flash (Ollama Cloud)',
     provider: 'ollama-cloud',
     family: 'cloud',
-    maxTokens: 4096,
+    maxTokens: 65536,
     supportedIn: ['chat', 'suggest']
   },
-  'mistral-8x7b:cloud': {
-    id: 'mistral-8x7b:cloud',
-    name: 'Mistral 8x7B (Ollama Cloud)',
+  'deepseek-v4-pro:cloud': {
+    id: 'deepseek-v4-pro:cloud',
+    name: 'DeepSeek V4 Pro (Ollama Cloud)',
+    provider: 'ollama-cloud',
+    family: 'cloud',
+    maxTokens: 1000000,
+    supportedIn: ['chat', 'suggest']
+  },
+  'gpt-oss:120b:cloud': {
+    id: 'gpt-oss:120b:cloud',
+    name: 'GPT-OSS 120B (Ollama Cloud)',
     provider: 'ollama-cloud',
     family: 'cloud',
     maxTokens: 32768,
     supportedIn: ['chat', 'suggest']
   },
-  'neural-chat:cloud': {
-    id: 'neural-chat:cloud',
-    name: 'Neural Chat (Ollama Cloud)',
+  'qwen3.5:cloud': {
+    id: 'qwen3.5:cloud',
+    name: 'Qwen 3.5 (Ollama Cloud)',
     provider: 'ollama-cloud',
     family: 'cloud',
-    maxTokens: 4096,
+    maxTokens: 32768,
     supportedIn: ['chat', 'suggest']
   }
 };
