@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { createHash, randomBytes } from 'crypto';
 import { UserRole } from '@prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -34,7 +35,7 @@ export class AuthService {
       },
     });
 
-    return this.generateToken(user.id, user.email, user.role);
+    return this.generateTokens(user.id, user.email, user.role);
   }
 
   async login(dto: LoginDto) {
@@ -51,7 +52,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    return this.generateToken(user.id, user.email, user.role);
+    return this.generateTokens(user.id, user.email, user.role);
   }
 
   async getProfile(userId: string) {
@@ -89,7 +90,7 @@ export class AuthService {
       });
     }
 
-    return this.generateToken(user.id, user.email, user.role);
+    return this.generateTokens(user.id, user.email, user.role);
   }
 
   async forgotPassword(email: string) {
@@ -97,11 +98,8 @@ export class AuthService {
       where: { email },
     });
 
-    // Siempre devolvemos éxito para evitar enumeración de usuarios
     if (user) {
       console.log(`[AUTH] Solicitud de recuperación de contraseña para: ${email}`);
-      // Aquí iría el envío de email con token. 
-      // Por ahora simulamos el éxito.
     }
 
     return {
@@ -109,11 +107,52 @@ export class AuthService {
     };
   }
 
-  private async generateToken(userId: string, email: string, role: string) {
+  async generateTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
+
+    const accessToken = await this.jwtService.signAsync(payload);
+
+    const rawToken = randomBytes(40).toString('hex');
+    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    await this.prisma.refreshToken.create({
+      data: { userId, tokenHash, expiresAt },
+    });
+
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: accessToken,
+      refresh_token: rawToken,
       user: { id: userId, email, role },
     };
+  }
+
+  async refreshTokens(rawToken: string) {
+    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+
+    const stored = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!stored || stored.expiresAt < new Date()) {
+      if (stored) {
+        await this.prisma.refreshToken.delete({ where: { id: stored.id } });
+      }
+      throw new UnauthorizedException('Refresh token inválido o expirado');
+    }
+
+    await this.prisma.refreshToken.delete({ where: { id: stored.id } });
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: stored.userId },
+      select: { id: true, email: true, role: true },
+    });
+    if (!user) throw new UnauthorizedException('Usuario no encontrado');
+
+    return this.generateTokens(user.id, user.email, user.role);
+  }
+
+  async revokeRefreshToken(userId: string) {
+    await this.prisma.refreshToken.deleteMany({ where: { userId } });
   }
 }

@@ -23,7 +23,6 @@ export const authService = {
 
     if (error) throw error;
 
-    // Obtener perfil de la tabla pública
     const { data: profile } = await supabase
       .from('User')
       .select('*')
@@ -41,10 +40,12 @@ export const authService = {
     };
 
     const token = data.session.access_token;
-    
+    const refreshToken = data.session.refresh_token;
+
     if (token) {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
+      if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
       Cookies.set('token', token, { expires: 7 });
       Cookies.set('user', JSON.stringify(userData), { expires: 7 });
     }
@@ -68,9 +69,6 @@ export const authService = {
     if (error) throw error;
     if (!data.user) throw new Error('No se pudo crear el usuario');
 
-    // Ahora la sincronización con la tabla pública User la hace el TRIGGER de Supabase
-    // Esto es mucho más robusto y evita errores de RLS/red en el cliente.
-    
     const finalUser = {
       id: data.user.id,
       email: data.user.email!,
@@ -81,10 +79,12 @@ export const authService = {
     };
 
     const token = data.session?.access_token || '';
+    const refreshToken = data.session?.refresh_token;
 
     if (token) {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(finalUser));
+      if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
       Cookies.set('token', token, { expires: 7 });
       Cookies.set('user', JSON.stringify(finalUser), { expires: 7 });
     }
@@ -95,16 +95,15 @@ export const authService = {
   logout: async () => {
     await supabase.auth.signOut();
     localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     Cookies.remove('token');
     Cookies.remove('user');
-    
-    // Redirección robusta para GitHub Pages
+
     const isProd = process.env.NODE_ENV === 'production';
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || (isProd ? '/fpdoc' : '');
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    
-    // Si estamos en un subdirectorio (GitHub Pages), nos aseguramos de que el path sea correcto
+
     window.location.href = `${origin}${basePath}/login/`;
   },
 
@@ -114,11 +113,9 @@ export const authService = {
       if (!userStr) return null;
       try {
         const user = JSON.parse(userStr);
-        // 🔥 REFUERZO DE SEGURIDAD: Override de correo institucional
         const userEmail = user?.email?.toLowerCase();
         const isDeptEmail = userEmail === 'dpto.madera@gmail.com';
         user.role = isDeptEmail ? 'JEFATURA' : (user?.role || 'ALUMNO');
-        // Persistimos el override para evitar desincronizaciones
         localStorage.setItem('user', JSON.stringify(user));
         return user;
       } catch {
@@ -153,13 +150,11 @@ export const authService = {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) throw new Error('No hay sesión activa de Supabase');
 
-    // Lógica de rol simplificada y robusta
     let finalRole = data.role || 'ALUMNO';
     if (session.user.email?.toLowerCase() === 'dpto.madera@gmail.com') {
       finalRole = 'JEFATURA';
     }
 
-    // Obtener onboardingCompleted del perfil si existe
     const { data: profile } = await supabase
       .from('User')
       .select('onboardingCompleted')
@@ -177,9 +172,59 @@ export const authService = {
 
     localStorage.setItem('token', session.access_token);
     localStorage.setItem('user', JSON.stringify(userData));
+    if (session.refresh_token) {
+      localStorage.setItem('refresh_token', session.refresh_token);
+    }
     Cookies.set('token', session.access_token, { expires: 7 });
     Cookies.set('user', JSON.stringify(userData), { expires: 7 });
 
     return { user: userData, token: session.access_token };
-  }
+  },
+
+  refreshTokens: async (): Promise<boolean> => {
+    try {
+      const storedRefreshToken = typeof window !== 'undefined'
+        ? localStorage.getItem('refresh_token')
+        : null;
+      if (!storedRefreshToken) return false;
+
+      const { data, error } = await supabase.auth.refreshSession({
+        refresh_token: storedRefreshToken,
+      });
+      if (error || !data.session) return false;
+
+      const newToken = data.session.access_token;
+      const newRefreshToken = data.session.refresh_token;
+
+      localStorage.setItem('token', newToken);
+      if (newRefreshToken) localStorage.setItem('refresh_token', newRefreshToken);
+      Cookies.set('token', newToken, { expires: 7 });
+
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  apiFetch: async (url: string, options?: RequestInit): Promise<Response> => {
+    const token = authService.getToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options?.headers as Record<string, string> || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+
+    let response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401) {
+      const refreshed = await authService.refreshTokens();
+      if (refreshed) {
+        const newToken = authService.getToken();
+        if (newToken) headers['Authorization'] = `Bearer ${newToken}`;
+        response = await fetch(url, { ...options, headers });
+      }
+    }
+
+    return response;
+  },
 };

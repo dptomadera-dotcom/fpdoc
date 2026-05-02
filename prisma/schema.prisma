@@ -666,8 +666,8 @@ model Evidence {
   Task            Task              @relation(fields: [taskId], references: [id])
   EvidenceComment EvidenceComment[]
 
-  @@index([taskId])
-  @@index([studentId])
+  @@index([taskId], map: "Evidence_taskId_idx")
+  @@index([studentId], map: "Evidence_studentId_idx")
   @@schema("public")
 }
 
@@ -679,7 +679,7 @@ model EvidenceComment {
   createdAt  DateTime @default(now())
   Evidence   Evidence @relation(fields: [evidenceId], references: [id])
 
-  @@index([evidenceId])
+  @@index([evidenceId], map: "EvidenceComment_evidenceId_idx")
   @@schema("public")
 }
 
@@ -837,8 +837,8 @@ model ProjectPhase {
   DependsOn            ProjectPhase?     @relation("PhaseDependency", fields: [dependsOnPhaseId], references: [id])
   DependentPhases      ProjectPhase[]    @relation("PhaseDependency")
 
-  @@index([projectId])
-  @@index([responsibleTeacherId])
+  @@index([projectId], map: "ProjectPhase_projectId_idx")
+  @@index([responsibleTeacherId], map: "ProjectPhase_responsibleTeacherId_idx")
   @@schema("public")
 }
 
@@ -865,7 +865,7 @@ model Session {
   notes     String?
   Group     Group    @relation(fields: [groupId], references: [id])
 
-  @@index([groupId])
+  @@index([groupId], map: "Session_groupId_idx")
   @@schema("public")
 }
 
@@ -918,8 +918,8 @@ model Task {
   TaskDependency_TaskDependency_prerequisiteTaskIdToTask TaskDependency[]     @relation("TaskDependency_prerequisiteTaskIdToTask")
   TaskSafetyLink                                         TaskSafetyLink[]
 
-  @@index([phaseId])
-  @@index([assignedToId])
+  @@index([phaseId], map: "Task_phaseId_idx")
+  @@index([assignedToId], map: "Task_assignedToId_idx")
   @@schema("public")
 }
 
@@ -998,8 +998,20 @@ model User {
   QuestionnaireResponse          QuestionnaireResponse[]
   AuditLog                       AuditLog[]                          @relation("AuditActor")
   ProjectPhase_responsible       ProjectPhase[]                      @relation("PhaseResponsibleTeacher")
-  UserLlmSettings                UserLlmSettings?
+  RefreshToken                   RefreshToken[]
 
+  @@schema("public")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
   @@schema("public")
 }
 
@@ -1633,20 +1645,5 @@ enum DeliveryMode {
   GROUP
   WHOLE_CLASS
 
-  @@schema("public")
-}
-
-model UserLlmSettings {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  provider  String   @default("anthropic")
-  model     String   @default("claude-opus-4-7")
-  apiKey    String?
-  baseUrl   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
   @@schema("public")
 }
