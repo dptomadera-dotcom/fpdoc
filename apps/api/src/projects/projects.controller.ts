@@ -1,11 +1,23 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Patch } from '@nestjs/common';
-import { IsString, IsOptional, IsEnum, IsArray, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsArray, IsDateString, IsNumber } from 'class-validator';
 import { ProjectsService } from './projects.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole, ProjectStatus } from '@prisma/client';
+
+class AddPhaseDto {
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsNumber()
+  order: number;
+}
 
 class CreateProjectDto {
   @IsString()
@@ -64,7 +76,7 @@ export class ProjectsController {
 
   @Post(':id/phases')
   @Roles(UserRole.ADMIN, UserRole.JEFATURA, UserRole.PROFESOR)
-  addPhase(@Param('id') id: string, @Body() data: { name: string; description?: string; order: number }) {
+  addPhase(@Param('id') id: string, @Body() data: AddPhaseDto) {
     return this.projectsService.addPhase(id, data);
   }
 

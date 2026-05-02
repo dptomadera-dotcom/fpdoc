@@ -6,12 +6,20 @@ import {
   Query,
   UseGuards
 } from '@nestjs/common';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsDateString } from 'class-validator';
 import { PlanningService } from './planning.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '@prisma/client';
+
+class MarkHolidayDto {
+  @IsDateString()
+  date: string;
+
+  @IsString()
+  label: string;
+}
 
 class CreateSessionDto {
   @IsString()
@@ -81,7 +89,7 @@ export class PlanningController {
 
   @Post('holidays')
   @Roles(UserRole.ADMIN, UserRole.JEFATURA)
-  async markHoliday(@Body() data: { date: string; label: string }) {
+  async markHoliday(@Body() data: MarkHolidayDto) {
     return this.planningService.markHoliday(
       new Date(data.date),
       data.label
