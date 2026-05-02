@@ -63,13 +63,128 @@ export class AiController {
   @Post('test-connection')
   @UseGuards(JwtAuthGuard)
   async testConnection(@Body() config: LlmConfig) {
-    if (config.provider === 'ollama-cloud-daemon') {
-      return await this.testOllamaCloudDaemon(config);
+    switch (config.provider) {
+      case 'openai':              return this.testOpenAi(config);
+      case 'anthropic':           return this.testAnthropic(config);
+      case 'groq':                return this.testGroq(config);
+      case 'glm':                 return this.testGlm(config);
+      case 'minimax':             return this.testMinimax(config);
+      case 'ollama-cloud-daemon': return this.testOllamaCloudDaemon(config);
+      case 'local':               return this.testLocalOllama(config);
+      default:
+        return { ok: false, error: `Proveedor no soportado: ${config.provider}` };
     }
-    if (config.provider === 'local') {
-      return await this.testLocalOllama(config);
+  }
+
+  private async testOpenAi(config: LlmConfig) {
+    if (!config.apiKey) return { ok: false, error: 'Falta API key' };
+    try {
+      const res = await fetch('https://api.openai.com/v1/models', {
+        headers: { Authorization: `Bearer ${config.apiKey}` },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as any;
+        return { ok: false, error: err?.error?.message ?? `${res.status}` };
+      }
+      return { ok: true, model: config.model || 'gpt-4o-mini' };
+    } catch (e: any) {
+      return { ok: false, error: `OpenAI: ${e.message}` };
     }
-    return { ok: false, error: `Proveedor no soportado: ${config.provider}` };
+  }
+
+  private async testAnthropic(config: LlmConfig) {
+    if (!config.apiKey) return { ok: false, error: 'Falta API key' };
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': config.apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: config.model || 'claude-haiku-4-5-20251001',
+          max_tokens: 1,
+          messages: [{ role: 'user', content: 'hi' }],
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as any;
+        return { ok: false, error: err?.error?.message ?? `${res.status}` };
+      }
+      const data = await res.json() as any;
+      return { ok: true, model: data.model || config.model };
+    } catch (e: any) {
+      return { ok: false, error: `Anthropic: ${e.message}` };
+    }
+  }
+
+  private async testGroq(config: LlmConfig) {
+    if (!config.apiKey) return { ok: false, error: 'Falta API key' };
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/models', {
+        headers: { Authorization: `Bearer ${config.apiKey}` },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as any;
+        return { ok: false, error: err?.error?.message ?? `${res.status}` };
+      }
+      return { ok: true, model: config.model || 'mixtral-8x7b-32768' };
+    } catch (e: any) {
+      return { ok: false, error: `Groq: ${e.message}` };
+    }
+  }
+
+  private async testGlm(config: LlmConfig) {
+    if (!config.apiKey) return { ok: false, error: 'Falta API key' };
+    try {
+      const res = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: config.model || 'glm-4-flash',
+          messages: [{ role: 'user', content: 'hi' }],
+          max_tokens: 1,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as any;
+        return { ok: false, error: err?.error?.message ?? `${res.status}` };
+      }
+      const data = await res.json() as any;
+      return { ok: true, model: data.model || config.model };
+    } catch (e: any) {
+      return { ok: false, error: `GLM: ${e.message}` };
+    }
+  }
+
+  private async testMinimax(config: LlmConfig) {
+    if (!config.apiKey) return { ok: false, error: 'Falta API key' };
+    try {
+      const res = await fetch('https://api.minimaxi.chat/v1/text/chatcompletion_v2', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: config.model || 'minimax-m2.7',
+          messages: [{ role: 'user', content: 'hi' }],
+          tokens_to_generate: 1,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as any;
+        return { ok: false, error: err?.error?.message ?? `${res.status}` };
+      }
+      const data = await res.json() as any;
+      return { ok: true, model: data.model || config.model };
+    } catch (e: any) {
+      return { ok: false, error: `MiniMax: ${e.message}` };
+    }
   }
 
   private async testOllamaCloudDaemon(config: LlmConfig) {
