@@ -77,7 +77,7 @@ export class AiController {
 
   private async testOllamaCloud(config: LlmConfig) {
     if (!config.apiKey) return { ok: false, error: 'Falta API key' };
-    const model = config.model || 'minimax-m2.7:cloud';
+    const model = (config.model || 'minimax-m2.7:cloud').replace(/:cloud$/, '');
     try {
       const res = await fetch('https://ollama.com/v1/chat/completions', {
         method: 'POST',
