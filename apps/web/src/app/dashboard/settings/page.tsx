@@ -10,7 +10,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { loadLlmConfig, saveLlmConfig, aiService, LlmConfig } from '@/services/ai.service';
 import { applyTheme, getSavedTheme } from '@/components/theme-provider';
-import { MODELS_BY_PROVIDER, ACTIVE_MODELS, type ModelProvider } from '@fpdoc/ai-models';
+import { getModelsByProvider, ACTIVE_MODELS, type ModelProvider } from '@fpdoc/ai-models';
 
 // ─────────────────────────────────────────────────────────────
 
@@ -355,13 +355,14 @@ export default function SettingsPage() {
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
                     {([
-                      { id: 'anthropic' as ModelProvider, label: 'Anthropic', sub: 'Claude' },
-                      { id: 'openai' as ModelProvider,    label: 'OpenAI',    sub: 'GPT-4o' },
-                      { id: 'glm' as ModelProvider,       label: 'GLM',       sub: 'Zhipu AI' },
-                      { id: 'minimax' as ModelProvider,   label: 'MiniMax',   sub: 'Cloud' },
-                      { id: 'ollama' as ModelProvider,    label: 'Local',     sub: 'Ollama' },
-                      { id: 'groq' as ModelProvider,      label: 'Groq',      sub: 'Mixtral' },
-                      { id: 'ollama-cloud' as ModelProvider, label: 'Ollama Cloud', sub: 'Multi-modelo' },
+                      { id: 'anthropic' as ModelProvider,         label: 'Anthropic',     sub: 'Claude' },
+                      { id: 'openai' as ModelProvider,            label: 'OpenAI',        sub: 'GPT-4o' },
+                      { id: 'glm' as ModelProvider,               label: 'GLM',           sub: 'Zhipu AI' },
+                      { id: 'minimax' as ModelProvider,           label: 'MiniMax',       sub: 'Cloud' },
+                      { id: 'ollama' as ModelProvider,            label: 'Local',         sub: 'Ollama' },
+                      { id: 'groq' as ModelProvider,              label: 'Groq',          sub: 'Mixtral' },
+                      { id: 'ollama-cloud' as ModelProvider,      label: 'Ollama Cloud',  sub: 'REST · API key' },
+                      { id: 'ollama-cloud-daemon' as ModelProvider, label: 'Ollama Daemon', sub: 'Cloud vía daemon' },
                     ]).map(p => (
                       <button
                         key={p.id}
@@ -378,12 +379,12 @@ export default function SettingsPage() {
                     ))}
                   </div>
 
-                  {/* API Key — Cloud providers (excepto local) */}
-                  {llmProvider !== 'ollama' && (
+                  {/* API Key — Cloud providers (excepto local y daemon) */}
+                  {llmProvider !== 'ollama' && llmProvider !== 'ollama-cloud-daemon' && (
                     <div className="mb-4">
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1 flex items-center gap-1.5">
                         <Key className="w-3 h-3" />
-                        API Key de {MODELS_BY_PROVIDER[llmProvider]?.[0]?.name ?? llmProvider}
+                        API Key de {getModelsByProvider(llmProvider)?.[0]?.name ?? llmProvider}
                       </label>
                       <div className="relative">
                         <input
@@ -424,7 +425,7 @@ export default function SettingsPage() {
                           className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all font-medium"
                         >
                           <option value="">Usar modelo por defecto</option>
-                          {MODELS_BY_PROVIDER[llmProvider]?.map(model => (
+                          {getModelsByProvider(llmProvider)?.map(model => (
                             <option key={model.id} value={model.id}>
                               {model.name} ({model.maxTokens.toLocaleString()} tk)
                             </option>
@@ -446,10 +447,12 @@ export default function SettingsPage() {
                     </div>
                   )}
 
-                  {/* Endpoint local — solo para Ollama */}
-                  {llmProvider === 'ollama' && (
+                  {/* Endpoint — Ollama local y daemon */}
+                  {(llmProvider === 'ollama' || llmProvider === 'ollama-cloud-daemon') && (
                     <div className="mb-4">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">URL del servidor Ollama</label>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--ink3)] mb-1.5 ml-1">
+                        URL del servidor Ollama{llmProvider === 'ollama-cloud-daemon' ? ' (daemon)' : ''}
+                      </label>
                       <input
                         type="text"
                         value={llmEndpoint}
@@ -457,6 +460,11 @@ export default function SettingsPage() {
                         placeholder="http://localhost:11434"
                         className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--teal2)] transition-all"
                       />
+                      {llmProvider === 'ollama-cloud-daemon' && (
+                        <p className="text-[10px] text-[var(--ink3)] mt-1 ml-1">
+                          Requiere Ollama instalado y <code className="font-mono">ollama signin</code> ejecutado en el servidor.
+                        </p>
+                      )}
                     </div>
                   )}
 
