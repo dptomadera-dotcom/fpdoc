@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/dashboard-layout';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import {
   Save, Building2, Bell, Shield, Palette, CheckCircle2,
   BrainCircuit, Key, Loader2, Wifi, WifiOff, Eye, EyeOff,
@@ -14,6 +15,7 @@ import { MODELS_BY_PROVIDER, ACTIVE_MODELS, type ModelProvider } from '@fpdoc/ai
 // ─────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
+  useAuthGuard();
   const [activeTab, setActiveTab] = useState('centro');
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);

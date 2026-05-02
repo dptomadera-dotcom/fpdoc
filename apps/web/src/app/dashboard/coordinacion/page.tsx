@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import {
   Users, Calendar, CheckCircle2, Clock,
@@ -47,6 +48,7 @@ const PRIORIDAD_META: Record<string, { color: string }> = {
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 export default function CoordinacionPage() {
+  useAuthGuard(['ADMIN', 'JEFATURA']);
   const [tareas, setTareas] = useState(TAREAS);
   const [tabReuniones, setTabReuniones] = useState<'proximas' | 'pasadas'>('proximas');
 

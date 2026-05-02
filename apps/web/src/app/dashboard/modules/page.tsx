@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { 
   Trophy, BookOpen, Clock, Target, 
@@ -58,6 +59,7 @@ const ModuleProgressCard = ({ module, index }: any) => (
 );
 
 export default function StudentModulesPage() {
+  useAuthGuard();
   const modules = [
     { id: 'SI', name: 'Sistemas Informáticos', progress: 65, achievedRAs: 3, totalRAs: 6 },
     { id: 'PR', name: 'Programación', progress: 42, achievedRAs: 2, totalRAs: 8 },

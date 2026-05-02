@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import {
   ShieldCheck, BookOpen, Target, BarChart3, Users,
   GraduationCap, Cpu, FileSearch, CheckCircle,
@@ -293,6 +294,7 @@ function DashboardJefe({ user }: { user: any }) {
 
 // ─── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────
 export default function DashboardPage() {
+  useAuthGuard();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

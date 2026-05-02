@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { 
   Network, Link2, Search, Info, 
@@ -28,6 +29,7 @@ const LINKS = [
 ];
 
 export default function TransversalPage() {
+  useAuthGuard();
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [hoveredLink, setHoveredLink] = useState<any>(null);
 

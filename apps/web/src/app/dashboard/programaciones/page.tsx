@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { authService } from '@/services/auth.service';
@@ -199,6 +200,7 @@ function ProgCard({ prog, canEdit }: { prog: Programacion; canEdit: boolean }) {
 
 // ─── PÁGINA PRINCIPAL ──────────────────────────────────────────────────────────
 export default function ProgramacionesPage() {
+  useAuthGuard();
   const [user, setUser] = useState<any>(null);
   const [programaciones] = useState<Programacion[]>(MOCK);
   const [selectedYear, setSelectedYear] = useState('2026-2027');

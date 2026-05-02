@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import {
   BookOpen, BrainCircuit, CheckCircle2, XCircle,
   AlertTriangle, ChevronDown, ChevronUp, Loader2,
@@ -267,6 +268,7 @@ function CurriculumReviewPanel() {
 }
 
 export default function CurriculumPage() {
+  useAuthGuard(['PROFESOR', 'ADMIN', 'JEFATURA']);
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 lg:p-0">

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import {
   FileText, Download, Clock, CheckCircle2,
@@ -38,6 +39,7 @@ const ReportCard = ({ title, desc, icon: Icon, color, onGenerate }: any) => (
 );
 
 export default function ReportsPage() {
+  useAuthGuard(['ADMIN', 'JEFATURA']);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 

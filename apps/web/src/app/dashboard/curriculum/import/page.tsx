@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import { extractionService, ExtractionResult, ExtractedOutcome } from '@/services/curriculum-extraction.service';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { Upload, FileText, CheckCircle, AlertTriangle, Save, Loader2, X } from 'lucide-react';
 
 export default function ImportCurriculum() {
+  useAuthGuard(['PROFESOR', 'ADMIN', 'JEFATURA']);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ExtractionResult | null>(null);

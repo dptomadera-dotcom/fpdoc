@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import {
   Cpu, Send, Bot, User,
   Zap, BrainCircuit, History,
@@ -37,6 +38,7 @@ const WELCOME: Record<string, string> = {
 };
 
 export default function AIAssistantPage() {
+  useAuthGuard();
   const role = getUserRole();
 
   const [messages, setMessages] = useState<Message[]>([

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { authService } from '@/services/auth.service';
+import { useAuthGuard } from '@/lib/use-auth-guard';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -374,6 +375,7 @@ function ProgramacionBlock({
 
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 export default function ProgramacionVivaPage() {
+  useAuthGuard(['PROFESOR', 'ADMIN', 'JEFATURA']);
   const [user, setUser] = useState<any>(null);
   const [openBlock, setOpenBlock] = useState<string | null>('datos-generales');
 

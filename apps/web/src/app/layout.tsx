@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import ThemeProvider from "@/components/theme-provider";
+import { QueryProvider } from "@/providers/query-provider";
 
 export const viewport = {
   themeColor: '#0d6e6e',
@@ -38,7 +39,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen">
         <ThemeProvider />
         <ServiceWorkerRegister />
-        {children}
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
