@@ -361,8 +361,7 @@ export default function SettingsPage() {
                       { id: 'minimax' as ModelProvider,           label: 'MiniMax',       sub: 'Cloud' },
                       { id: 'ollama' as ModelProvider,            label: 'Local',         sub: 'Ollama' },
                       { id: 'groq' as ModelProvider,              label: 'Groq',          sub: 'Mixtral' },
-                      { id: 'ollama-cloud' as ModelProvider,      label: 'Ollama Cloud',  sub: 'REST · API key' },
-                      { id: 'ollama-cloud-daemon' as ModelProvider, label: 'Ollama Daemon', sub: 'Cloud vía daemon' },
+                      { id: 'ollama-cloud-daemon' as ModelProvider, label: 'Ollama Cloud', sub: 'Daemon local' },
                     ]).map(p => (
                       <button
                         key={p.id}

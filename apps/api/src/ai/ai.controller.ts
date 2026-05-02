@@ -63,9 +63,6 @@ export class AiController {
   @Post('test-connection')
   @UseGuards(JwtAuthGuard)
   async testConnection(@Body() config: LlmConfig) {
-    if (config.provider === 'ollama-cloud') {
-      return await this.testOllamaCloud(config);
-    }
     if (config.provider === 'ollama-cloud-daemon') {
       return await this.testOllamaCloudDaemon(config);
     }
@@ -73,34 +70,6 @@ export class AiController {
       return await this.testLocalOllama(config);
     }
     return { ok: false, error: `Proveedor no soportado: ${config.provider}` };
-  }
-
-  private async testOllamaCloud(config: LlmConfig) {
-    if (!config.apiKey) return { ok: false, error: 'Falta API key' };
-    const model = (config.model || 'minimax-m2.7:cloud').replace(/:cloud$/, '');
-    try {
-      const res = await fetch('https://ollama.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: 'Responde solo: OK' }],
-          max_tokens: 16,
-          stream: false,
-        }),
-      });
-      if (!res.ok) {
-        const error = await res.text();
-        return { ok: false, error: `${res.status}: ${error.substring(0, 100)}` };
-      }
-      const data = await res.json();
-      return { ok: true, model: data.model || model };
-    } catch (e: any) {
-      return { ok: false, error: `Ollama Cloud: ${e.message}` };
-    }
   }
 
   private async testOllamaCloudDaemon(config: LlmConfig) {

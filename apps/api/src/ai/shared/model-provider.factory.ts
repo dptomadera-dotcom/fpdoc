@@ -5,7 +5,6 @@ import { OpenAiAdapter } from './openai.adapter';
 import { GlmAdapter } from './glm.adapter';
 import { MinimaxAdapter } from './minimax.adapter';
 import { OllamaAdapter } from './ollama.adapter';
-import { OllamaCloudAdapter } from './ollama-cloud.adapter';
 import { OllamaCloudDaemonAdapter } from './ollama-cloud-daemon.adapter';
 import { DEFAULT_MODELS } from '@fpdoc/ai-models';
 
@@ -26,8 +25,6 @@ export function createModelProviderAdapter(): ModelProviderAdapter {
       return new MinimaxAdapter();
     case 'ollama':
       return new OllamaAdapter();
-    case 'ollama-cloud':
-      return new OllamaCloudAdapter(undefined, model);
     case 'ollama-cloud-daemon':
       return new OllamaCloudDaemonAdapter(undefined, model);
     case 'anthropic':
