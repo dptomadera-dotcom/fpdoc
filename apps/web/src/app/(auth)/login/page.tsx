@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/services/auth.service';
+import { useAuthStore } from '@/store/auth.store';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -97,6 +98,7 @@ export default function LoginPage() {
         onboardingCompleted: true, // dev: saltar onboarding
       };
       authService.setUser(mockUser);
+      useAuthStore.getState().setUser(mockUser, '');
       router.push(getRedirectForRole(roleValue));
     } finally {
       setLoading(false);
@@ -108,7 +110,8 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      const { user } = await authService.login({ email, password });
+      const { user, token } = await authService.login({ email, password });
+      useAuthStore.getState().setUser(user, token ?? '');
       router.push(getSmartRedirect(user));
     } catch (err: any) {
       setError(extractErrorMessage(err));
@@ -154,15 +157,16 @@ export default function LoginPage() {
           const storedRole = sessionStorage.getItem('selectedRole');
           const finalRole = storedRole || 'ALUMNO';
           
-          const { user } = await authService.socialLogin({
+          const { user, token } = await authService.socialLogin({
             email: session.user.email!,
             role: finalRole,
             firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name?.split(' ')[0] || '',
             lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.full_name?.split(' ')[1] || '',
           });
-          
+
+          useAuthStore.getState().setUser(user, (token as string) ?? '');
           sessionStorage.removeItem('selectedRole');
-          
+
           if (mounted) {
             router.replace(getSmartRedirect(user));
           }

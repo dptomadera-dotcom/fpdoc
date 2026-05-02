@@ -1,12 +1,17 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useAuthStore } from '@/store/auth.store';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { motion } from 'framer-motion';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    useAuthStore.getState().syncFromService();
+  }, []);
 
   const handleClose  = useCallback(() => setSidebarOpen(false), []);
   const handleToggle = useCallback(() => setSidebarOpen(v => !v), []);

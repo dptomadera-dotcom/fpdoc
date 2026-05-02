@@ -24,6 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { authService } from '@/services/auth.service';
+import { useAuthStore } from '@/store/auth.store';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -87,6 +88,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   }, [pathname]);
 
   const handleLogout = async () => {
+    useAuthStore.getState().clearUser();
     await authService.logout();
   };
 
