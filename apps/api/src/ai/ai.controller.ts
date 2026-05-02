@@ -66,6 +66,9 @@ export class AiController {
     if (config.provider === 'ollama-cloud') {
       return await this.testOllamaCloud(config);
     }
+    if (config.provider === 'ollama-cloud-daemon') {
+      return await this.testOllamaCloudDaemon(config);
+    }
     if (config.provider === 'local') {
       return await this.testLocalOllama(config);
     }
@@ -97,6 +100,31 @@ export class AiController {
       return { ok: true, model: data.model || model };
     } catch (e: any) {
       return { ok: false, error: `Ollama Cloud: ${e.message}` };
+    }
+  }
+
+  private async testOllamaCloudDaemon(config: LlmConfig) {
+    const endpoint = config.endpoint || 'http://localhost:11434';
+    const model = config.model || 'kimi-k2.6:cloud';
+    try {
+      const res = await fetch(`${endpoint}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: 'Responde solo: OK' }],
+          stream: false,
+          options: { num_predict: 8 },
+        }),
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        return { ok: false, error: `${res.status}: ${error.substring(0, 100)}` };
+      }
+      const data = await res.json();
+      return { ok: true, model: data.model || model };
+    } catch (e: any) {
+      return { ok: false, error: `Ollama daemon: ${e.message}` };
     }
   }
 

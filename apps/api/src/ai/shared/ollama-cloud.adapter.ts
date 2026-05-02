@@ -29,6 +29,9 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
 
     this.logger.debug(`Calling Ollama Cloud ${this.model} with ${messages.length} messages`);
 
+    // The registry uses ':cloud' suffix to avoid naming conflicts; the REST API expects the plain id
+    const apiModel = this.model.replace(/:cloud$/, '');
+
     const response = await fetch('https://ollama.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -36,7 +39,7 @@ export class OllamaCloudAdapter extends ModelProviderAdapter {
         'Authorization': `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({
-        model: this.model,
+        model: apiModel,
         messages: [
           { role: 'system', content: system },
           ...messages.map(m => ({ role: m.role, content: m.content })),

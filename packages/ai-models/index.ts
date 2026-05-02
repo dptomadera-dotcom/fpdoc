@@ -3,7 +3,7 @@
  * Consumido por backend (resolveAdapter) y frontend (selector).
  */
 
-export type ModelProvider = 'anthropic' | 'openai' | 'glm' | 'minimax' | 'ollama' | 'groq' | 'ollama-cloud';
+export type ModelProvider = 'anthropic' | 'openai' | 'glm' | 'minimax' | 'ollama' | 'groq' | 'ollama-cloud' | 'ollama-cloud-daemon';
 
 export interface AiModel {
   id: string; // ej: 'claude-opus-4-7', 'gpt-4o', 'glm-5.1', etc
@@ -222,7 +222,9 @@ export const DEFAULT_MODELS: Record<ModelProvider, string> = {
   minimax: 'minimax-m2.7',
   ollama: 'gemma:4b',
   groq: 'mixtral-8x7b-32768',
-  'ollama-cloud': 'minimax-m2.7:cloud'
+  'ollama-cloud': 'minimax-m2.7:cloud',
+  // Daemon usa los mismos model IDs que ollama-cloud (el sufijo :cloud lo gestiona el daemon local)
+  'ollama-cloud-daemon': 'kimi-k2.6:cloud',
 };
 
 export function getModel(modelId: string): AiModel | undefined {
@@ -230,7 +232,9 @@ export function getModel(modelId: string): AiModel | undefined {
 }
 
 export function getModelsByProvider(provider: ModelProvider): AiModel[] {
-  return MODELS_BY_PROVIDER[provider] || [];
+  // ollama-cloud-daemon comparte el mismo catálogo de modelos que ollama-cloud
+  const key = provider === 'ollama-cloud-daemon' ? 'ollama-cloud' : provider;
+  return MODELS_BY_PROVIDER[key] || [];
 }
 
 export function getDefaultModel(provider: ModelProvider): AiModel | undefined {
